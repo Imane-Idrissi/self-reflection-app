@@ -99,7 +99,8 @@ Commit after each self-contained logical unit of work. Small, frequent commits. 
 - A test suite
 
 ### Rules
-- **Never push to remote without explicit user approval.**
+- **Auto-push after every commit.**
+- When the user creates or updates a phase MD, commit and push it immediately.
 - Never commit API keys, secrets, or `.env` files.
 - Never commit the SQLite database file (contains user capture data).
 - Always stage specific files — never use `git add .` or `git add -A`.
