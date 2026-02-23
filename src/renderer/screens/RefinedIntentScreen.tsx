@@ -46,7 +46,7 @@ export default function RefinedIntentScreen({
           </h1>
           <p className="text-body leading-[1.6] text-text-secondary">
             {editing
-              ? 'Make any changes you'd like, then submit.'
+              ? "Make any changes you'd like, then submit."
               : 'Does this capture what you want to focus on?'}
           </p>
         </div>
