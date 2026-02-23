@@ -1,5 +1,25 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import { getDatabase, closeDatabase } from './database/db';
+import { SessionRepository } from './database/session-repository';
+import { SessionService } from './services/session-service';
+import { AiService } from './services/ai-service';
+import { registerSessionHandlers } from './ipc/session-handlers';
+
+let sessionService: SessionService;
+
+function initServices() {
+  const db = getDatabase();
+  const sessionRepo = new SessionRepository(db);
+  sessionService = new SessionService(sessionRepo);
+
+  const apiKey = process.env.ANTHROPIC_API_KEY || '';
+  const aiService = new AiService(apiKey);
+
+  registerSessionHandlers(sessionService, aiService);
+
+  sessionService.cleanupAbandoned();
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -28,7 +48,10 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  initServices();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -40,4 +63,8 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on('before-quit', () => {
+  closeDatabase();
 });
