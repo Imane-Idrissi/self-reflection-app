@@ -40,6 +40,16 @@ function initSchema(database: Database.Database): void {
       created_at TEXT NOT NULL
     )
   `);
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS session_events (
+      event_id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (session_id) REFERENCES session(session_id)
+    )
+  `);
 }
 
 export function closeDatabase(): void {

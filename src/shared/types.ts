@@ -9,6 +9,13 @@ export interface Session {
   created_at: string;
 }
 
+export interface SessionEvent {
+  event_id: string;
+  session_id: string;
+  event_type: 'paused' | 'resumed';
+  created_at: string;
+}
+
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
