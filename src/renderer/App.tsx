@@ -7,6 +7,7 @@ import PermissionScreen from './screens/PermissionScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
 import ReportGeneratingScreen from './screens/ReportGeneratingScreen';
 import ReportScreen from './screens/ReportScreen';
+import ReportFailedScreen from './screens/ReportFailedScreen';
 import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
@@ -277,9 +278,27 @@ export default function App() {
       );
 
     case 'report-failed':
-      return null; // Placeholder — implemented in Task 7
+      return (
+        <ReportFailedScreen
+          sessionId={step.sessionId}
+          onRetry={async () => {
+            await window.api.reportRetry({ session_id: step.sessionId });
+            setStep({ type: 'report-generating', sessionId: step.sessionId, summary: step.summary });
+          }}
+          onSkip={() => {
+            setStep({ type: 'report-skipped', sessionId: step.sessionId, summary: step.summary });
+          }}
+        />
+      );
 
     case 'report-skipped':
-      return null; // Placeholder — implemented in Task 7
+      return (
+        <ReportScreen
+          sessionId={step.sessionId}
+          skipped
+          summary={step.summary}
+          onStartNew={handleStartNewSession}
+        />
+      );
   }
 }
