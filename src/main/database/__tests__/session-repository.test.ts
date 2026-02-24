@@ -109,4 +109,61 @@ describe('SessionRepository', () => {
       expect(deleted).toBe(0);
     });
   });
+
+  describe('endSession', () => {
+    it('sets status to ended with ended_at and ended_by', () => {
+      const session = repo.create('Test intent');
+      repo.updateStatus(session.session_id, 'active', new Date().toISOString());
+      repo.endSession(session.session_id, 'user');
+
+      const updated = repo.getById(session.session_id);
+      expect(updated!.status).toBe('ended');
+      expect(updated!.ended_at).toBeTruthy();
+      expect(updated!.ended_by).toBe('user');
+    });
+
+    it('sets ended_by to auto for auto-ended sessions', () => {
+      const session = repo.create('Test intent');
+      repo.updateStatus(session.session_id, 'active', new Date().toISOString());
+      repo.endSession(session.session_id, 'auto');
+
+      const updated = repo.getById(session.session_id);
+      expect(updated!.ended_by).toBe('auto');
+    });
+  });
+
+  describe('findByStatuses', () => {
+    it('returns sessions matching any of the given statuses', () => {
+      const s1 = repo.create('Intent 1');
+      repo.updateStatus(s1.session_id, 'active', new Date().toISOString());
+
+      const s2 = repo.create('Intent 2');
+      repo.updateStatus(s2.session_id, 'paused');
+
+      repo.create('Intent 3'); // stays 'created'
+
+      const found = repo.findByStatuses(['active', 'paused']);
+      expect(found).toHaveLength(2);
+      const statuses = found.map(s => s.status);
+      expect(statuses).toContain('active');
+      expect(statuses).toContain('paused');
+    });
+
+    it('returns empty array when no sessions match', () => {
+      repo.create('Intent 1');
+      const found = repo.findByStatuses(['active', 'paused']);
+      expect(found).toHaveLength(0);
+    });
+
+    it('returns all matching sessions', () => {
+      const s1 = repo.create('First');
+      repo.updateStatus(s1.session_id, 'active', new Date().toISOString());
+
+      const s2 = repo.create('Second');
+      repo.updateStatus(s2.session_id, 'active', new Date().toISOString());
+
+      const found = repo.findByStatuses(['active']);
+      expect(found).toHaveLength(2);
+    });
+  });
 });

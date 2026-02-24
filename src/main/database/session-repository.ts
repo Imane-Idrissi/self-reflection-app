@@ -45,6 +45,20 @@ export class SessionRepository {
     }
   }
 
+  endSession(sessionId: string, endedBy: 'user' | 'auto'): void {
+    const now = new Date().toISOString();
+    this.db.prepare(
+      'UPDATE session SET status = ?, ended_at = ?, ended_by = ? WHERE session_id = ?'
+    ).run('ended', now, endedBy, sessionId);
+  }
+
+  findByStatuses(statuses: Session['status'][]): Session[] {
+    const placeholders = statuses.map(() => '?').join(', ');
+    return this.db.prepare(
+      `SELECT * FROM session WHERE status IN (${placeholders}) ORDER BY created_at DESC`
+    ).all(...statuses) as Session[];
+  }
+
   deleteByStatus(status: Session['status']): number {
     const result = this.db.prepare('DELETE FROM session WHERE status = ?').run(status);
     return result.changes;
