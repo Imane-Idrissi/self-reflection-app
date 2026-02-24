@@ -1,13 +1,17 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, systemPreferences } from 'electron';
 import path from 'path';
+import activeWin from 'active-win';
 import { getDatabase, closeDatabase } from './database/db';
 import { SessionRepository } from './database/session-repository';
 import { SessionEventsRepository } from './database/session-events-repository';
+import { CaptureRepository } from './database/capture-repository';
 import { SessionService } from './services/session-service';
+import { CaptureService } from './services/capture-service';
 import { AiService } from './services/ai-service';
 import { registerSessionHandlers } from './ipc/session-handlers';
 
 let sessionService: SessionService;
+let captureService: CaptureService;
 let mainWindow: BrowserWindow | null = null;
 let autoEndInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -19,7 +23,19 @@ function initServices() {
   const db = getDatabase();
   const sessionRepo = new SessionRepository(db);
   const eventsRepo = new SessionEventsRepository(db);
-  sessionService = new SessionService(sessionRepo, eventsRepo);
+  const captureRepo = new CaptureRepository(db);
+
+  captureService = new CaptureService(
+    captureRepo,
+    async () => {
+      const result = await activeWin();
+      if (!result) return undefined;
+      return { title: result.title, owner: { name: result.owner.name } };
+    },
+    () => systemPreferences.isTrustedAccessibilityClient(false),
+  );
+
+  sessionService = new SessionService(sessionRepo, eventsRepo, captureRepo, captureService);
 
   const apiKey = process.env.ANTHROPIC_API_KEY || '';
   const aiService = new AiService(apiKey);
@@ -108,5 +124,6 @@ app.on('activate', () => {
 
 app.on('before-quit', () => {
   stopAutoEndTimer();
+  captureService?.stop();
   closeDatabase();
 });

@@ -1,5 +1,7 @@
 import { SessionRepository } from '../database/session-repository';
 import { SessionEventsRepository } from '../database/session-events-repository';
+import { CaptureRepository } from '../database/capture-repository';
+import { CaptureService } from './capture-service';
 import { Session, SessionEvent } from '../../shared/types';
 
 export interface SessionSummary {
@@ -13,10 +15,19 @@ export interface SessionSummary {
 export class SessionService {
   private repo: SessionRepository;
   private eventsRepo: SessionEventsRepository;
+  private captureRepo: CaptureRepository;
+  private captureService: CaptureService;
 
-  constructor(repo: SessionRepository, eventsRepo: SessionEventsRepository) {
+  constructor(
+    repo: SessionRepository,
+    eventsRepo: SessionEventsRepository,
+    captureRepo: CaptureRepository,
+    captureService: CaptureService,
+  ) {
     this.repo = repo;
     this.eventsRepo = eventsRepo;
+    this.captureRepo = captureRepo;
+    this.captureService = captureService;
   }
 
   createSession(intent: string): Session {
@@ -28,12 +39,19 @@ export class SessionService {
     this.repo.updateFinalIntent(sessionId, finalIntent);
   }
 
-  startSession(sessionId: string): void {
+  startSession(sessionId: string): { started: boolean; permissionDenied: boolean } {
     const session = this.getSessionOrThrow(sessionId);
     if (session.status !== 'created') {
       throw new Error(`Cannot start session in status: ${session.status}`);
     }
+
+    if (!this.captureService.checkPermission()) {
+      return { started: false, permissionDenied: true };
+    }
+
     this.repo.updateStatus(sessionId, 'active', new Date().toISOString());
+    this.captureService.start(sessionId);
+    return { started: true, permissionDenied: false };
   }
 
   pauseSession(sessionId: string): void {
@@ -41,6 +59,7 @@ export class SessionService {
     if (session.status !== 'active') {
       throw new Error(`Cannot pause session in status: ${session.status}`);
     }
+    this.captureService.stop();
     this.repo.updateStatus(sessionId, 'paused');
     this.eventsRepo.create(sessionId, 'paused');
   }
@@ -52,6 +71,7 @@ export class SessionService {
     }
     this.repo.updateStatus(sessionId, 'active');
     this.eventsRepo.create(sessionId, 'resumed');
+    this.captureService.start(sessionId);
   }
 
   endSession(sessionId: string, endedBy: 'user' | 'auto' = 'user'): SessionSummary {
@@ -59,6 +79,7 @@ export class SessionService {
     if (session.status !== 'active' && session.status !== 'paused') {
       throw new Error(`Cannot end session in status: ${session.status}`);
     }
+    this.captureService.stop();
     this.repo.endSession(sessionId, endedBy);
     return this.computeSummary(sessionId);
   }
@@ -76,6 +97,7 @@ export class SessionService {
   }
 
   checkStaleOnLaunch(): { session_id: string; summary: SessionSummary } | null {
+    this.captureService.stop();
     const staleSessions = this.repo.findByStatuses(['active', 'paused']);
     if (staleSessions.length === 0) return null;
 
@@ -121,7 +143,7 @@ export class SessionService {
       total_minutes: Math.round(totalMinutes * 10) / 10,
       active_minutes: Math.round(activeMinutes * 10) / 10,
       paused_minutes: Math.round(pausedMinutes * 10) / 10,
-      capture_count: 0,
+      capture_count: this.captureRepo.countBySessionId(sessionId),
       feeling_count: 0,
     };
   }

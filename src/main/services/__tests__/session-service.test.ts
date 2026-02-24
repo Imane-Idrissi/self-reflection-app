@@ -1,11 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import Database from 'better-sqlite3';
 import { SessionRepository } from '../../database/session-repository';
 import { SessionEventsRepository } from '../../database/session-events-repository';
+import { CaptureRepository } from '../../database/capture-repository';
+import { CaptureService } from '../capture-service';
 import { SessionService } from '../session-service';
 
 let db: Database.Database;
+let captureService: CaptureService;
 let service: SessionService;
+const mockGetActiveWindow = vi.fn();
+const mockCheckPermission = vi.fn();
 
 beforeEach(() => {
   db = new Database(':memory:');
@@ -31,13 +36,31 @@ beforeEach(() => {
       FOREIGN KEY (session_id) REFERENCES session(session_id)
     )
   `);
+  db.exec(`
+    CREATE TABLE capture (
+      capture_id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      window_title TEXT NOT NULL,
+      app_name TEXT NOT NULL,
+      captured_at TEXT NOT NULL,
+      FOREIGN KEY (session_id) REFERENCES session(session_id)
+    )
+  `);
   const repo = new SessionRepository(db);
   const eventsRepo = new SessionEventsRepository(db);
-  service = new SessionService(repo, eventsRepo);
+  const captureRepo = new CaptureRepository(db);
+
+  mockCheckPermission.mockReturnValue(true);
+  mockGetActiveWindow.mockResolvedValue(undefined);
+
+  captureService = new CaptureService(captureRepo, mockGetActiveWindow, mockCheckPermission);
+  service = new SessionService(repo, eventsRepo, captureRepo, captureService);
 });
 
 afterEach(() => {
+  captureService.stop();
   db.close();
+  vi.restoreAllMocks();
 });
 
 function createActiveSession(): string {
@@ -73,13 +96,45 @@ describe('SessionService', () => {
   });
 
   describe('startSession', () => {
-    it('sets status to active and started_at timestamp', () => {
+    it('sets status to active and started_at when permission granted', () => {
       const session = service.createSession('Focus time');
-      service.startSession(session.session_id);
+      const result = service.startSession(session.session_id);
+
+      expect(result.started).toBe(true);
+      expect(result.permissionDenied).toBe(false);
 
       const updated = service.getSession(session.session_id);
       expect(updated!.status).toBe('active');
       expect(updated!.started_at).toBeTruthy();
+    });
+
+    it('starts the capture service', () => {
+      const session = service.createSession('Focus time');
+      service.startSession(session.session_id);
+
+      expect(captureService.isRunning()).toBe(true);
+    });
+
+    it('returns permissionDenied when accessibility permission is denied', () => {
+      mockCheckPermission.mockReturnValue(false);
+
+      const session = service.createSession('Focus time');
+      const result = service.startSession(session.session_id);
+
+      expect(result.started).toBe(false);
+      expect(result.permissionDenied).toBe(true);
+
+      const updated = service.getSession(session.session_id);
+      expect(updated!.status).toBe('created');
+    });
+
+    it('does not start capture when permission denied', () => {
+      mockCheckPermission.mockReturnValue(false);
+
+      const session = service.createSession('Focus time');
+      service.startSession(session.session_id);
+
+      expect(captureService.isRunning()).toBe(false);
     });
 
     it('throws for nonexistent session', () => {
@@ -95,12 +150,15 @@ describe('SessionService', () => {
   });
 
   describe('pauseSession', () => {
-    it('transitions active session to paused', () => {
+    it('transitions active session to paused and stops capture', () => {
       const id = createActiveSession();
+      expect(captureService.isRunning()).toBe(true);
+
       service.pauseSession(id);
 
       const session = service.getSession(id);
       expect(session!.status).toBe('paused');
+      expect(captureService.isRunning()).toBe(false);
     });
 
     it('creates a paused event', () => {
@@ -129,13 +187,16 @@ describe('SessionService', () => {
   });
 
   describe('resumeSession', () => {
-    it('transitions paused session to active', () => {
+    it('transitions paused session to active and restarts capture', () => {
       const id = createActiveSession();
       service.pauseSession(id);
+      expect(captureService.isRunning()).toBe(false);
+
       service.resumeSession(id);
 
       const session = service.getSession(id);
       expect(session!.status).toBe('active');
+      expect(captureService.isRunning()).toBe(true);
     });
 
     it('creates a resumed event', () => {
@@ -160,14 +221,17 @@ describe('SessionService', () => {
   });
 
   describe('endSession', () => {
-    it('ends an active session with user as ended_by', () => {
+    it('ends an active session and stops capture', () => {
       const id = createActiveSession();
+      expect(captureService.isRunning()).toBe(true);
+
       service.endSession(id, 'user');
 
       const session = service.getSession(id);
       expect(session!.status).toBe('ended');
       expect(session!.ended_at).toBeTruthy();
       expect(session!.ended_by).toBe('user');
+      expect(captureService.isRunning()).toBe(false);
     });
 
     it('ends a paused session', () => {
@@ -179,16 +243,24 @@ describe('SessionService', () => {
       expect(session!.status).toBe('ended');
     });
 
-    it('returns a session summary', () => {
+    it('returns a session summary with real capture_count', () => {
       const id = createActiveSession();
+
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c1', ?, 'Window', 'App', ?)
+      `).run(id, new Date().toISOString());
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c2', ?, 'Window2', 'App2', ?)
+      `).run(id, new Date().toISOString());
+
       const summary = service.endSession(id, 'user');
 
       expect(summary).toHaveProperty('total_minutes');
       expect(summary).toHaveProperty('active_minutes');
       expect(summary).toHaveProperty('paused_minutes');
-      expect(summary).toHaveProperty('capture_count');
-      expect(summary).toHaveProperty('feeling_count');
-      expect(summary.capture_count).toBe(0);
+      expect(summary.capture_count).toBe(2);
       expect(summary.feeling_count).toBe(0);
     });
 
@@ -254,13 +326,16 @@ describe('SessionService', () => {
       expect(service.checkStaleOnLaunch()).toBeNull();
     });
 
-    it('auto-ends an active session', () => {
+    it('auto-ends an active session and stops capture', () => {
       const id = createActiveSession();
+      expect(captureService.isRunning()).toBe(true);
+
       const result = service.checkStaleOnLaunch();
 
       expect(result).not.toBeNull();
       expect(result!.session_id).toBe(id);
       expect(result!.summary).toHaveProperty('total_minutes');
+      expect(captureService.isRunning()).toBe(false);
 
       const session = service.getSession(id);
       expect(session!.status).toBe('ended');
@@ -321,22 +396,24 @@ describe('SessionService', () => {
   });
 
   describe('multiple pause/resume cycles', () => {
-    it('supports multiple pause and resume cycles', () => {
+    it('supports multiple pause and resume cycles with capture start/stop', () => {
       const id = createActiveSession();
+      expect(captureService.isRunning()).toBe(true);
 
       service.pauseSession(id);
-      expect(service.getSession(id)!.status).toBe('paused');
+      expect(captureService.isRunning()).toBe(false);
 
       service.resumeSession(id);
-      expect(service.getSession(id)!.status).toBe('active');
+      expect(captureService.isRunning()).toBe(true);
 
       service.pauseSession(id);
-      expect(service.getSession(id)!.status).toBe('paused');
+      expect(captureService.isRunning()).toBe(false);
 
       service.resumeSession(id);
-      expect(service.getSession(id)!.status).toBe('active');
+      expect(captureService.isRunning()).toBe(true);
 
-      const summary = service.endSession(id);
+      service.endSession(id);
+      expect(captureService.isRunning()).toBe(false);
       expect(service.getSession(id)!.status).toBe('ended');
 
       const events = db.prepare('SELECT * FROM session_events WHERE session_id = ?').all(id) as any[];
