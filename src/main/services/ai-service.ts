@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { Capture, Feeling, SessionEvent, ParsedReport } from '../../shared/types';
 
 export interface VaguenessResult {
   status: 'specific' | 'vague';
@@ -44,6 +45,24 @@ export class AiService {
     }
 
     return parseVaguenessResponse(text);
+  }
+
+  async generateReport(prompt: string): Promise<string> {
+    try {
+      const response = await this.client.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const block = response.content[0];
+      if (block.type !== 'text') {
+        throw new AiServiceError('Unexpected response format from AI');
+      }
+      return block.text;
+    } catch (error) {
+      if (error instanceof AiServiceError) throw error;
+      throw new AiServiceError('Failed to generate report', error);
+    }
   }
 
   async refineIntent(originalIntent: string, answers: string[]): Promise<RefinementResult> {
@@ -174,4 +193,243 @@ export function parseRefinementResponse(text: string): RefinementResult {
   }
 
   return { refined_intent: obj.refined_intent };
+}
+
+// --- Report generation helpers ---
+
+export interface CollapsedCapture {
+  window_title: string;
+  app_name: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+}
+
+export interface ReportPromptInput {
+  intent: string;
+  total_minutes: number;
+  active_minutes: number;
+  paused_minutes: number;
+  feeling_count: number;
+  collapsed_captures: CollapsedCapture[];
+  feelings: Feeling[];
+  events: SessionEvent[];
+}
+
+export function collapseCaptures(captures: Capture[]): CollapsedCapture[] {
+  if (captures.length === 0) return [];
+
+  const spans: CollapsedCapture[] = [];
+  let current = captures[0];
+  let startTime = current.captured_at;
+
+  for (let i = 1; i < captures.length; i++) {
+    const next = captures[i];
+    if (next.window_title === current.window_title && next.app_name === current.app_name) {
+      current = next;
+    } else {
+      spans.push({
+        window_title: current.window_title,
+        app_name: current.app_name,
+        start_time: startTime,
+        end_time: current.captured_at,
+        duration_minutes: (new Date(current.captured_at).getTime() - new Date(startTime).getTime()) / 60000,
+      });
+      current = next;
+      startTime = next.captured_at;
+    }
+  }
+
+  spans.push({
+    window_title: current.window_title,
+    app_name: current.app_name,
+    start_time: startTime,
+    end_time: current.captured_at,
+    duration_minutes: (new Date(current.captured_at).getTime() - new Date(startTime).getTime()) / 60000,
+  });
+
+  return spans;
+}
+
+export function buildReportPrompt(input: ReportPromptInput): string {
+  const timeline = buildTimeline(input.collapsed_captures, input.feelings, input.events);
+
+  return `You are an insightful behavioral analyst helping a user understand their work session. Your role is to identify patterns in how they spent their time, correlate their behavior with their emotional state, and provide honest but supportive feedback.
+
+Analyze this work session and produce a structured behavioral report.
+
+## Session Intent
+"${input.intent}"
+
+## Session Metadata
+- Total time: ${input.total_minutes.toFixed(1)} minutes
+- Active time: ${input.active_minutes.toFixed(1)} minutes
+- Paused time: ${input.paused_minutes.toFixed(1)} minutes
+- Feeling logs recorded: ${input.feeling_count}
+
+## Chronological Timeline
+${timeline || 'No activity data recorded.'}
+
+## Analysis Instructions
+
+1. **Identify behavioral patterns** — look for recurring behaviors, context switches, procrastination signals, focus periods, and correlations between feelings and actions.
+
+2. **Assign confidence levels** based on evidence strength:
+   - **high**: Multiple evidence points from different sources (captures + feelings), clear correlation with the intent.
+   - **medium**: Observable pattern in captures, but limited or no feeling data to confirm the user's internal state.
+   - **low**: Single observation or ambiguous evidence, possible but not certain.
+
+3. **Classify each pattern** as positive, negative, or neutral relative to the stated intent.
+
+4. **Generate suggestions** only for negative or neutral patterns. Suggestions should be specific enough to be actionable but general enough to apply beyond this single session. Do not suggest generic advice like "stay focused" — be specific about what behavior to change and how.
+
+5. **Tone**: Be honest but supportive. Acknowledge positive patterns, not just negative ones. Frame suggestions as helpful, not judgmental. The user is doing something vulnerable by reflecting on their behavior.
+
+## Output Format
+
+Respond with ONLY valid JSON in this exact format, no other text:
+
+{
+  "verdict": "One sentence summarizing how the session went relative to the intent",
+  "patterns": [
+    {
+      "name": "Short pattern name",
+      "confidence": "high | medium | low",
+      "type": "positive | negative | neutral",
+      "description": "Brief explanation of what was observed",
+      "evidence": [
+        {
+          "type": "capture | feeling",
+          "description": "Human-readable evidence description",
+          "start_time": "ISO 8601 timestamp",
+          "end_time": "ISO 8601 timestamp or null for feelings"
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "text": "Actionable suggestion text",
+      "addresses_pattern": "Name of the pattern this addresses"
+    }
+  ]
+}`;
+}
+
+function buildTimeline(
+  captures: CollapsedCapture[],
+  feelings: Feeling[],
+  events: SessionEvent[],
+): string {
+  type TimelineEntry = {
+    time: string;
+    sort: number;
+    text: string;
+  };
+
+  const entries: TimelineEntry[] = [];
+
+  for (const span of captures) {
+    const dur = span.duration_minutes < 1
+      ? '<1 min'
+      : `${Math.round(span.duration_minutes)} min`;
+    entries.push({
+      time: span.start_time,
+      sort: new Date(span.start_time).getTime(),
+      text: `${span.start_time} – ${span.end_time} (${dur}) | ${span.app_name} | ${span.window_title}`,
+    });
+  }
+
+  for (const feeling of feelings) {
+    entries.push({
+      time: feeling.created_at,
+      sort: new Date(feeling.created_at).getTime(),
+      text: `  ${feeling.created_at} [FEELING] "${feeling.text}"`,
+    });
+  }
+
+  for (const event of events) {
+    const label = event.event_type === 'paused' ? 'PAUSE' : 'RESUME';
+    entries.push({
+      time: event.created_at,
+      sort: new Date(event.created_at).getTime(),
+      text: `${event.created_at} [${label}]`,
+    });
+  }
+
+  entries.sort((a, b) => a.sort - b.sort);
+  return entries.map(e => e.text).join('\n');
+}
+
+export function parseReportResponse(text: string): ParsedReport {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new AiServiceError('Could not find JSON in AI response');
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch {
+    throw new AiServiceError('AI response is not valid JSON');
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    throw new AiServiceError('AI response is not a valid object');
+  }
+
+  const obj = parsed as Record<string, unknown>;
+
+  if (typeof obj.verdict !== 'string' || obj.verdict.length === 0) {
+    throw new AiServiceError('Report missing verdict');
+  }
+
+  if (!Array.isArray(obj.patterns)) {
+    throw new AiServiceError('Report missing patterns array');
+  }
+
+  if (!Array.isArray(obj.suggestions)) {
+    throw new AiServiceError('Report missing suggestions array');
+  }
+
+  for (const pattern of obj.patterns) {
+    if (!pattern || typeof pattern !== 'object') {
+      throw new AiServiceError('Invalid pattern in report');
+    }
+    const p = pattern as Record<string, unknown>;
+    if (typeof p.name !== 'string') {
+      throw new AiServiceError('Pattern missing name');
+    }
+    if (!['high', 'medium', 'low'].includes(p.confidence as string)) {
+      throw new AiServiceError('Pattern has invalid confidence level');
+    }
+    if (!['positive', 'negative', 'neutral'].includes(p.type as string)) {
+      throw new AiServiceError('Pattern has invalid type');
+    }
+    if (typeof p.description !== 'string') {
+      throw new AiServiceError('Pattern missing description');
+    }
+    if (!Array.isArray(p.evidence)) {
+      throw new AiServiceError('Pattern missing evidence array');
+    }
+  }
+
+  for (const suggestion of obj.suggestions) {
+    if (!suggestion || typeof suggestion !== 'object') {
+      throw new AiServiceError('Invalid suggestion in report');
+    }
+    const s = suggestion as Record<string, unknown>;
+    if (typeof s.text !== 'string') {
+      throw new AiServiceError('Suggestion missing text');
+    }
+    if (typeof s.addresses_pattern !== 'string') {
+      throw new AiServiceError('Suggestion missing addresses_pattern');
+    }
+  }
+
+  return {
+    verdict: obj.verdict,
+    patterns: obj.patterns as ParsedReport['patterns'],
+    suggestions: obj.suggestions as ParsedReport['suggestions'],
+  };
 }
