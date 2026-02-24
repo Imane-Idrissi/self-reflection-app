@@ -16,6 +16,14 @@ export interface SessionEvent {
   created_at: string;
 }
 
+export interface Capture {
+  capture_id: string;
+  session_id: string;
+  window_title: string;
+  app_name: string;
+  captured_at: string;
+}
+
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
