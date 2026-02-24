@@ -38,4 +38,10 @@ export class CaptureRepository {
     ).get(sessionId) as { count: number };
     return row.count;
   }
+
+  getBySessionIdInTimeRange(sessionId: string, startTime: string, endTime: string): Capture[] {
+    return this.db.prepare(
+      'SELECT * FROM capture WHERE session_id = ? AND captured_at >= ? AND captured_at <= ? ORDER BY captured_at ASC'
+    ).all(sessionId, startTime, endTime) as Capture[];
+  }
 }

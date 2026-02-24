@@ -71,6 +71,19 @@ function initSchema(database: Database.Database): void {
       FOREIGN KEY (session_id) REFERENCES session(session_id)
     )
   `);
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS reports (
+      report_id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      summary TEXT,
+      patterns TEXT,
+      suggestions TEXT,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (session_id) REFERENCES session(session_id)
+    )
+  `);
 }
 
 export function closeDatabase(): void {

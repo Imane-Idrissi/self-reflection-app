@@ -120,4 +120,44 @@ describe('CaptureRepository', () => {
       expect(repo.countBySessionId('test-session')).toBe(1);
     });
   });
+
+  describe('getBySessionIdInTimeRange', () => {
+    it('returns captures within the time range', () => {
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c1', 'test-session', 'Window A', 'App1', '2024-01-01T09:00:00.000Z')
+      `).run();
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c2', 'test-session', 'Window B', 'App2', '2024-01-01T09:30:00.000Z')
+      `).run();
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c3', 'test-session', 'Window C', 'App3', '2024-01-01T10:00:00.000Z')
+      `).run();
+
+      const captures = repo.getBySessionIdInTimeRange(
+        'test-session',
+        '2024-01-01T09:00:00.000Z',
+        '2024-01-01T09:30:00.000Z'
+      );
+      expect(captures).toHaveLength(2);
+      expect(captures[0].window_title).toBe('Window A');
+      expect(captures[1].window_title).toBe('Window B');
+    });
+
+    it('returns empty array when no captures in range', () => {
+      db.prepare(`
+        INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
+        VALUES ('c1', 'test-session', 'Window A', 'App1', '2024-01-01T09:00:00.000Z')
+      `).run();
+
+      const captures = repo.getBySessionIdInTimeRange(
+        'test-session',
+        '2024-01-01T10:00:00.000Z',
+        '2024-01-01T11:00:00.000Z'
+      );
+      expect(captures).toHaveLength(0);
+    });
+  });
 });

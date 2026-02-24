@@ -31,6 +31,42 @@ export interface Feeling {
   created_at: string;
 }
 
+export interface Report {
+  report_id: string;
+  session_id: string;
+  summary: string | null;
+  patterns: string | null;
+  suggestions: string | null;
+  status: 'generating' | 'ready' | 'failed';
+  created_at: string;
+}
+
+export interface ReportEvidence {
+  type: 'capture' | 'feeling';
+  description: string;
+  start_time: string;
+  end_time: string | null;
+}
+
+export interface ReportPattern {
+  name: string;
+  confidence: 'high' | 'medium' | 'low';
+  type: 'positive' | 'negative' | 'neutral';
+  description: string;
+  evidence: ReportEvidence[];
+}
+
+export interface ReportSuggestion {
+  text: string;
+  addresses_pattern: string;
+}
+
+export interface ParsedReport {
+  verdict: string;
+  patterns: ReportPattern[];
+  suggestions: ReportSuggestion[];
+}
+
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
@@ -128,6 +164,40 @@ export interface FeelingCreateResponse {
   error?: string;
 }
 
+export interface ReportGetRequest {
+  session_id: string;
+}
+
+export interface ReportGetResponse {
+  status: 'generating' | 'ready' | 'failed';
+  report?: ParsedReport;
+  session?: {
+    intent: string;
+    total_minutes: number;
+    active_minutes: number;
+    paused_minutes: number;
+  };
+}
+
+export interface ReportRetryRequest {
+  session_id: string;
+}
+
+export interface ReportRetryResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface CaptureGetInRangeRequest {
+  session_id: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface CaptureGetInRangeResponse {
+  captures: Capture[];
+}
+
 export interface ElectronAPI {
   sessionCreate: (req: SessionCreateRequest) => Promise<SessionCreateResponse>;
   sessionClarify: (req: SessionClarifyRequest) => Promise<SessionClarifyResponse>;
@@ -137,6 +207,9 @@ export interface ElectronAPI {
   sessionResume: (req: SessionResumeRequest) => Promise<SessionResumeResponse>;
   sessionEnd: (req: SessionEndRequest) => Promise<SessionEndResponse>;
   sessionCheckStale: () => Promise<SessionCheckStaleResponse>;
+  reportGet: (req: ReportGetRequest) => Promise<ReportGetResponse>;
+  reportRetry: (req: ReportRetryRequest) => Promise<ReportRetryResponse>;
+  captureGetInRange: (req: CaptureGetInRangeRequest) => Promise<CaptureGetInRangeResponse>;
   onAutoEndWarning: (callback: () => void) => void;
   onAutoEndTriggered: (callback: (summary: SessionSummary) => void) => void;
   onCaptureWarning: (callback: () => void) => void;
