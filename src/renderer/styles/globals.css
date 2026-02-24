@@ -121,3 +121,13 @@ h1, h2, h3, h4, h5, h6 {
 .no-drag {
   -webkit-app-region: no-drag;
 }
+
+/* Breathing pulse for active recording indicator */
+@keyframes recording-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50% { opacity: 0.7; transform: scale(1.15); box-shadow: 0 0 12px 4px rgba(99, 102, 241, 0.15); }
+}
+
+.recording-pulse {
+  animation: recording-pulse 2s ease-in-out infinite;
+}

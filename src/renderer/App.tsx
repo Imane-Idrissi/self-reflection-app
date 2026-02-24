@@ -3,12 +3,16 @@ import IntentScreen from './screens/IntentScreen';
 import ClarificationScreen from './screens/ClarificationScreen';
 import RefinedIntentScreen from './screens/RefinedIntentScreen';
 import StartRecordingScreen from './screens/StartRecordingScreen';
+import ActiveSessionScreen from './screens/ActiveSessionScreen';
+import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
   | { type: 'intent' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
-  | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string };
+  | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string }
+  | { type: 'active-session'; sessionId: string; finalIntent: string }
+  | { type: 'session-ended'; summary: SessionSummary };
 
 export default function App() {
   const [step, setStep] = useState<FlowStep>({ type: 'intent' });
@@ -116,7 +120,20 @@ export default function App() {
     if (step.type !== 'start-recording') return;
     if (step.sessionId) {
       await window.api.sessionStart({ session_id: step.sessionId });
+      setStep({
+        type: 'active-session',
+        sessionId: step.sessionId,
+        finalIntent: step.finalIntent,
+      });
     }
+  };
+
+  const handleSessionEnd = (summary: SessionSummary) => {
+    setStep({ type: 'session-ended', summary });
+  };
+
+  const handleStartNewSession = () => {
+    setStep({ type: 'intent' });
   };
 
   switch (step.type) {
@@ -152,5 +169,50 @@ export default function App() {
           apiError={step.apiError}
         />
       );
+
+    case 'active-session':
+      return (
+        <ActiveSessionScreen
+          sessionId={step.sessionId}
+          finalIntent={step.finalIntent}
+          onEnd={handleSessionEnd}
+          onAutoEndTriggered={handleSessionEnd}
+        />
+      );
+
+    case 'session-ended':
+      return (
+        <SessionEndedPlaceholder
+          summary={step.summary}
+          onStartNew={handleStartNewSession}
+        />
+      );
   }
+}
+
+function SessionEndedPlaceholder({
+  summary,
+  onStartNew,
+}: {
+  summary: SessionSummary;
+  onStartNew: () => void;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
+      <div className="w-full max-w-[520px] text-center">
+        <h1 className="font-heading text-h1 font-bold text-text-primary mb-md">
+          Session Complete
+        </h1>
+        <p className="text-body text-text-secondary mb-xl">
+          {Math.round(summary.total_minutes)} min total
+        </p>
+        <button
+          onClick={onStartNew}
+          className="rounded-md bg-primary-500 px-lg py-[12px] text-body font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600"
+        >
+          Start New Session
+        </button>
+      </div>
+    </div>
+  );
 }
