@@ -1,11 +1,22 @@
 import { SessionRepository } from '../database/session-repository';
-import { Session } from '../../shared/types';
+import { SessionEventsRepository } from '../database/session-events-repository';
+import { Session, SessionEvent } from '../../shared/types';
+
+export interface SessionSummary {
+  total_minutes: number;
+  active_minutes: number;
+  paused_minutes: number;
+  capture_count: number;
+  feeling_count: number;
+}
 
 export class SessionService {
   private repo: SessionRepository;
+  private eventsRepo: SessionEventsRepository;
 
-  constructor(repo: SessionRepository) {
+  constructor(repo: SessionRepository, eventsRepo: SessionEventsRepository) {
     this.repo = repo;
+    this.eventsRepo = eventsRepo;
   }
 
   createSession(intent: string): Session {
@@ -13,22 +24,70 @@ export class SessionService {
   }
 
   confirmIntent(sessionId: string, finalIntent: string): void {
-    const session = this.repo.getById(sessionId);
-    if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
-    }
+    const session = this.getSessionOrThrow(sessionId);
     this.repo.updateFinalIntent(sessionId, finalIntent);
   }
 
   startSession(sessionId: string): void {
-    const session = this.repo.getById(sessionId);
-    if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
-    }
+    const session = this.getSessionOrThrow(sessionId);
     if (session.status !== 'created') {
       throw new Error(`Cannot start session in status: ${session.status}`);
     }
     this.repo.updateStatus(sessionId, 'active', new Date().toISOString());
+  }
+
+  pauseSession(sessionId: string): void {
+    const session = this.getSessionOrThrow(sessionId);
+    if (session.status !== 'active') {
+      throw new Error(`Cannot pause session in status: ${session.status}`);
+    }
+    this.repo.updateStatus(sessionId, 'paused');
+    this.eventsRepo.create(sessionId, 'paused');
+  }
+
+  resumeSession(sessionId: string): void {
+    const session = this.getSessionOrThrow(sessionId);
+    if (session.status !== 'paused') {
+      throw new Error(`Cannot resume session in status: ${session.status}`);
+    }
+    this.repo.updateStatus(sessionId, 'active');
+    this.eventsRepo.create(sessionId, 'resumed');
+  }
+
+  endSession(sessionId: string, endedBy: 'user' | 'auto' = 'user'): SessionSummary {
+    const session = this.getSessionOrThrow(sessionId);
+    if (session.status !== 'active' && session.status !== 'paused') {
+      throw new Error(`Cannot end session in status: ${session.status}`);
+    }
+    this.repo.endSession(sessionId, endedBy);
+    return this.computeSummary(sessionId);
+  }
+
+  getActiveTimeMinutes(sessionId: string): number {
+    const session = this.getSessionOrThrow(sessionId);
+    if (!session.started_at) return 0;
+    const events = this.eventsRepo.getBySessionId(sessionId);
+    return this.calculateActiveMinutes(session, events);
+  }
+
+  hasActiveSession(): boolean {
+    const sessions = this.repo.findByStatuses(['active', 'paused']);
+    return sessions.length > 0;
+  }
+
+  checkStaleOnLaunch(): { session_id: string; summary: SessionSummary } | null {
+    const staleSessions = this.repo.findByStatuses(['active', 'paused']);
+    if (staleSessions.length === 0) return null;
+
+    let mostRecent: { session_id: string; summary: SessionSummary } | null = null;
+    for (const session of staleSessions) {
+      this.repo.endSession(session.session_id, 'auto');
+      const summary = this.computeSummary(session.session_id);
+      if (!mostRecent) {
+        mostRecent = { session_id: session.session_id, summary };
+      }
+    }
+    return mostRecent;
   }
 
   cleanupAbandoned(): number {
@@ -37,5 +96,59 @@ export class SessionService {
 
   getSession(sessionId: string): Session | undefined {
     return this.repo.getById(sessionId);
+  }
+
+  private getSessionOrThrow(sessionId: string): Session {
+    const session = this.repo.getById(sessionId);
+    if (!session) {
+      throw new Error(`Session not found: ${sessionId}`);
+    }
+    return session;
+  }
+
+  private computeSummary(sessionId: string): SessionSummary {
+    const session = this.getSessionOrThrow(sessionId);
+    const events = this.eventsRepo.getBySessionId(sessionId);
+
+    const totalMinutes = session.started_at
+      ? (new Date(session.ended_at || new Date().toISOString()).getTime() - new Date(session.started_at).getTime()) / 60000
+      : 0;
+
+    const activeMinutes = this.calculateActiveMinutes(session, events, session.ended_at || undefined);
+    const pausedMinutes = Math.max(0, totalMinutes - activeMinutes);
+
+    return {
+      total_minutes: Math.round(totalMinutes * 10) / 10,
+      active_minutes: Math.round(activeMinutes * 10) / 10,
+      paused_minutes: Math.round(pausedMinutes * 10) / 10,
+      capture_count: 0,
+      feeling_count: 0,
+    };
+  }
+
+  private calculateActiveMinutes(session: Session, events: SessionEvent[], endTime?: string): number {
+    if (!session.started_at) return 0;
+
+    let activeMs = 0;
+    let activeSpanStart = new Date(session.started_at).getTime();
+    let isActive = true;
+
+    for (const event of events) {
+      const eventTime = new Date(event.created_at).getTime();
+      if (event.event_type === 'paused' && isActive) {
+        activeMs += eventTime - activeSpanStart;
+        isActive = false;
+      } else if (event.event_type === 'resumed' && !isActive) {
+        activeSpanStart = eventTime;
+        isActive = true;
+      }
+    }
+
+    if (isActive) {
+      const end = endTime ? new Date(endTime).getTime() : Date.now();
+      activeMs += end - activeSpanStart;
+    }
+
+    return activeMs / 60000;
   }
 }
