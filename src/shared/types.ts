@@ -143,8 +143,23 @@ export interface ElectronAPI {
   onCaptureWarningCleared: (callback: () => void) => void;
 }
 
+export interface FloatingWindowState {
+  session_id: string;
+  status: 'active' | 'paused';
+}
+
+export interface FloatingAPI {
+  feelingCreate: (req: FeelingCreateRequest) => Promise<FeelingCreateResponse>;
+  getSessionState: () => Promise<FloatingWindowState>;
+  onSessionStateChange: (callback: (state: { status: 'active' | 'paused' | 'ended' }) => void) => void;
+  resize: (width: number, height: number) => void;
+  move: (deltaX: number, deltaY: number) => void;
+  dismissed: () => void;
+}
+
 declare global {
   interface Window {
     api: ElectronAPI;
+    floatingApi: FloatingAPI;
   }
 }

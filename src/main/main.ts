@@ -9,11 +9,13 @@ import { FeelingRepository } from './database/feeling-repository';
 import { SessionService } from './services/session-service';
 import { CaptureService } from './services/capture-service';
 import { AiService } from './services/ai-service';
+import { FloatingWindowManager } from './floating-window';
 import { registerSessionHandlers } from './ipc/session-handlers';
 import { hideTray } from './tray';
 
 let sessionService: SessionService;
 let captureService: CaptureService;
+let floatingWindowManager: FloatingWindowManager;
 let mainWindow: BrowserWindow | null = null;
 let autoEndInterval: ReturnType<typeof setInterval> | null = null;
 
@@ -47,8 +49,9 @@ function initServices() {
 
   const apiKey = process.env.ANTHROPIC_API_KEY || '';
   const aiService = new AiService(apiKey);
+  floatingWindowManager = new FloatingWindowManager();
 
-  registerSessionHandlers(sessionService, aiService);
+  registerSessionHandlers(sessionService, aiService, floatingWindowManager);
 
   sessionService.cleanupAbandoned();
 }
@@ -68,6 +71,7 @@ function startAutoEndTimer() {
     if (activeMinutes >= AUTO_END_LIMIT_MINUTES) {
       const summary = sessionService.endSession(session.session_id, 'auto');
       hideTray();
+      floatingWindowManager.destroy();
       mainWindow?.webContents.send('session:auto-end-triggered', summary);
     } else if (activeMinutes >= AUTO_END_WARNING_MINUTES) {
       mainWindow?.webContents.send('session:auto-end-warning');
@@ -134,6 +138,7 @@ app.on('activate', () => {
 app.on('before-quit', () => {
   stopAutoEndTimer();
   captureService?.stop();
+  floatingWindowManager?.destroy();
   hideTray();
   closeDatabase();
 });

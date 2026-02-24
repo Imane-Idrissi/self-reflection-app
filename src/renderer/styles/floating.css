@@ -1,0 +1,17 @@
+@import "./theme.css";
+
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  background: transparent;
+}

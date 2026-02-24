@@ -1,0 +1,84 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Backgrounds */
+  --color-bg-primary: #FAFAF8;
+  --color-bg-secondary: #F2F1ED;
+  --color-bg-elevated: #FFFFFF;
+
+  /* Primary (Indigo-Blue) */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
+
+  /* Text */
+  --color-text-primary: #1C1917;
+  --color-text-secondary: #57534E;
+  --color-text-tertiary: #A8A29E;
+  --color-text-inverse: #FAFAF8;
+
+  /* Semantic */
+  --color-positive: #16A34A;
+  --color-positive-bg: #F0FDF4;
+  --color-caution: #D97706;
+  --color-caution-bg: #FFFBEB;
+  --color-negative: #DC2626;
+  --color-negative-bg: #FEF2F2;
+  --color-info: #6366F1;
+  --color-info-bg: #EEF2FF;
+
+  /* Border */
+  --color-border: #E7E5E4;
+
+  /* Spacing (4px base) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.06);
+  --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.08);
+  --shadow-xl: 0 16px 48px rgba(28, 25, 23, 0.10);
+
+  /* Typography sizes */
+  --text-display: 36px;
+  --text-display--line-height: 1.2;
+  --text-h1: 28px;
+  --text-h1--line-height: 1.3;
+  --text-h2: 22px;
+  --text-h2--line-height: 1.35;
+  --text-h3: 18px;
+  --text-h3--line-height: 1.4;
+  --text-body: 15px;
+  --text-body--line-height: 1.6;
+  --text-small: 13px;
+  --text-small--line-height: 1.5;
+  --text-caption: 11px;
+  --text-caption--line-height: 1.4;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 200ms ease-out;
+}

@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { SessionService } from '../services/session-service';
 import { AiService, AiServiceError } from '../services/ai-service';
+import { FloatingWindowManager } from '../floating-window';
 import { showTray, hideTray } from '../tray';
 import type {
   SessionCreateRequest,
@@ -24,7 +25,8 @@ import type {
 
 export function registerSessionHandlers(
   sessionService: SessionService,
-  aiService: AiService
+  aiService: AiService,
+  floatingWindowManager: FloatingWindowManager
 ): void {
   ipcMain.handle('session:create', async (_event, req: SessionCreateRequest): Promise<SessionCreateResponse> => {
     const session = sessionService.createSession(req.intent);
@@ -98,6 +100,7 @@ export function registerSessionHandlers(
         return { success: false, error: 'permission_denied' };
       }
       showTray('recording');
+      floatingWindowManager.create(req.session_id, 'active');
       return { success: true };
     } catch (error) {
       return {
@@ -111,6 +114,7 @@ export function registerSessionHandlers(
     try {
       sessionService.pauseSession(req.session_id);
       showTray('paused');
+      floatingWindowManager.sendSessionState('paused');
       return { success: true };
     } catch (error) {
       return {
@@ -124,6 +128,7 @@ export function registerSessionHandlers(
     try {
       sessionService.resumeSession(req.session_id);
       showTray('recording');
+      floatingWindowManager.sendSessionState('active');
       return { success: true };
     } catch (error) {
       return {
@@ -137,6 +142,7 @@ export function registerSessionHandlers(
     try {
       const summary = sessionService.endSession(req.session_id, 'user');
       hideTray();
+      floatingWindowManager.destroy();
       return { success: true, summary };
     } catch (error) {
       return {
@@ -149,6 +155,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:check-stale', async (): Promise<SessionCheckStaleResponse> => {
     const result = sessionService.checkStaleOnLaunch();
     hideTray();
+    floatingWindowManager.destroy();
     if (!result) return {};
     return { ended_session: result };
   });
