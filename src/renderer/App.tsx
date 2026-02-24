@@ -3,6 +3,7 @@ import IntentScreen from './screens/IntentScreen';
 import ClarificationScreen from './screens/ClarificationScreen';
 import RefinedIntentScreen from './screens/RefinedIntentScreen';
 import StartRecordingScreen from './screens/StartRecordingScreen';
+import PermissionScreen from './screens/PermissionScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
 import SessionEndScreen from './screens/SessionEndScreen';
 import type { SessionSummary } from '../shared/types';
@@ -13,6 +14,7 @@ type FlowStep =
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
   | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string }
+  | { type: 'permission-denied'; sessionId: string; finalIntent: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
   | { type: 'session-ended'; summary: SessionSummary; wasAutoEnded?: boolean };
 
@@ -140,14 +142,44 @@ export default function App() {
 
   const handleStartRecording = async () => {
     if (step.type !== 'start-recording') return;
-    if (step.sessionId) {
-      await window.api.sessionStart({ session_id: step.sessionId });
+    if (!step.sessionId) return;
+
+    const response = await window.api.sessionStart({ session_id: step.sessionId });
+
+    if (response.error === 'permission_denied') {
+      setStep({
+        type: 'permission-denied',
+        sessionId: step.sessionId,
+        finalIntent: step.finalIntent,
+      });
+      return;
+    }
+
+    if (response.success) {
       setStep({
         type: 'active-session',
         sessionId: step.sessionId,
         finalIntent: step.finalIntent,
       });
     }
+  };
+
+  const handlePermissionGranted = () => {
+    if (step.type !== 'permission-denied') return;
+    setStep({
+      type: 'active-session',
+      sessionId: step.sessionId,
+      finalIntent: step.finalIntent,
+    });
+  };
+
+  const handlePermissionBack = () => {
+    if (step.type !== 'permission-denied') return;
+    setStep({
+      type: 'start-recording',
+      sessionId: step.sessionId,
+      finalIntent: step.finalIntent,
+    });
   };
 
   const handleSessionEnd = (summary: SessionSummary) => {
@@ -200,6 +232,15 @@ export default function App() {
           finalIntent={step.finalIntent}
           onStartRecording={handleStartRecording}
           apiError={step.apiError}
+        />
+      );
+
+    case 'permission-denied':
+      return (
+        <PermissionScreen
+          sessionId={step.sessionId}
+          onPermissionGranted={handlePermissionGranted}
+          onBack={handlePermissionBack}
         />
       );
 
