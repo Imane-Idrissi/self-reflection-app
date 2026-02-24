@@ -40,8 +40,12 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
-      <div className="w-full max-w-[520px]">
+    <div className="relative flex min-h-screen items-center justify-center bg-bg-primary px-md overflow-hidden">
+      <WaveTopLeft />
+      <WaveBottomRight />
+
+      <div className="relative z-10 w-full max-w-[520px]">
+        {!isChange && <StepIndicator step={1} />}
         <div className="text-center mb-xl">
           <div className="mx-auto mb-lg flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
             <KeyIcon />
@@ -131,6 +135,52 @@ function EyeOffIcon() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+    </svg>
+  );
+}
+
+function StepIndicator({ step }: { step: 1 | 2 }) {
+  return (
+    <div className="flex items-center justify-center gap-sm mb-xl">
+      <div className="flex items-center gap-xs">
+        <div className={`h-2 w-2 rounded-full ${step === 1 ? 'bg-primary-500' : 'bg-primary-200'}`} />
+        <span className={`text-small font-medium ${step === 1 ? 'text-primary-500' : 'text-text-tertiary'}`}>
+          Connect API
+        </span>
+      </div>
+      <div className="w-8 h-[1px] bg-border" />
+      <div className="flex items-center gap-xs">
+        <div className={`h-2 w-2 rounded-full ${step === 2 ? 'bg-primary-500' : 'bg-border'}`} />
+        <span className={`text-small font-medium ${step === 2 ? 'text-primary-500' : 'text-text-tertiary'}`}>
+          Set Intent
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function WaveTopLeft() {
+  return (
+    <svg
+      className="absolute top-0 left-0 w-[360px] h-[320px] text-primary-200"
+      viewBox="0 0 360 320"
+      fill="currentColor"
+      preserveAspectRatio="none"
+    >
+      <path d="M0 0h360c0 0-50 90-140 140S50 230 0 320V0z" />
+    </svg>
+  );
+}
+
+function WaveBottomRight() {
+  return (
+    <svg
+      className="absolute bottom-0 right-0 w-[360px] h-[320px] text-primary-200"
+      viewBox="0 0 360 320"
+      fill="currentColor"
+      preserveAspectRatio="none"
+    >
+      <path d="M360 320H0c0 0 50-90 140-140S310-10 360 0v320z" />
     </svg>
   );
 }

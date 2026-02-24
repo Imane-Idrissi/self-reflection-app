@@ -2,7 +2,7 @@
   "name": "self-reflection-app",
   "version": "0.1.0",
   "description": "A privacy-focused desktop app for behavioral self-reflection",
-  "main": "dist/main/main.js",
+  "main": "dist/main/main/main.js",
   "scripts": {
     "dev:main": "tsc -p tsconfig.main.json",
     "dev:renderer": "vite --port 5173",

@@ -29,17 +29,22 @@ export default function IntentScreen({ onSubmit, loading, onSettings }: IntentSc
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-bg-primary px-md">
+    <div className="relative flex min-h-screen items-center justify-center bg-bg-primary px-md overflow-hidden">
+      <WaveTopLeft />
+      <WaveBottomRight />
+
       {onSettings && (
         <button
           onClick={onSettings}
-          className="absolute top-lg right-lg p-sm rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-secondary transition-colors duration-[150ms]"
+          className="absolute top-lg right-lg z-10 p-sm rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-secondary transition-colors duration-[150ms]"
           title="Settings"
         >
           <GearIcon />
         </button>
       )}
-      <div className="w-full max-w-[520px]">
+
+      <div className="relative z-10 w-full max-w-[520px]">
+        <StepIndicator step={2} />
         <div className="text-center mb-xl">
           <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary mb-sm">
             What's your focus for this session?
@@ -56,7 +61,7 @@ export default function IntentScreen({ onSubmit, loading, onSettings }: IntentSc
             value={intent}
             onChange={(e) => setIntent(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="e.g., Finish the database schema migration for the users table"
+            placeholder="e.g., Finish my essay on climate change, outline the 3 main arguments, write the intro, and have a full draft ready to review"
             rows={4}
             className="w-full resize-none rounded-md border border-border bg-bg-elevated px-md py-[12px] text-body leading-[1.6] text-text-primary placeholder:text-text-tertiary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
           />
@@ -74,11 +79,57 @@ export default function IntentScreen({ onSubmit, loading, onSettings }: IntentSc
           )}
         </button>
 
-        <p className="mt-md text-center text-small leading-[1.5] text-text-tertiary">
-          Press <kbd className="font-mono text-caption">⌘ Enter</kbd> to submit
+        <p className="mt-md text-center text-small leading-[1.5] text-text-secondary">
+          Press <kbd className="font-mono text-caption text-text-primary">⌘ Enter</kbd> to submit
         </p>
       </div>
     </div>
+  );
+}
+
+function StepIndicator({ step }: { step: 1 | 2 }) {
+  return (
+    <div className="flex items-center justify-center gap-sm mb-xl">
+      <div className="flex items-center gap-xs">
+        <div className={`h-2 w-2 rounded-full ${step === 1 ? 'bg-primary-500' : 'bg-primary-200'}`} />
+        <span className={`text-small font-medium ${step === 1 ? 'text-primary-500' : 'text-text-tertiary'}`}>
+          Connect API
+        </span>
+      </div>
+      <div className="w-8 h-[1px] bg-border" />
+      <div className="flex items-center gap-xs">
+        <div className={`h-2 w-2 rounded-full ${step === 2 ? 'bg-primary-500' : 'bg-border'}`} />
+        <span className={`text-small font-medium ${step === 2 ? 'text-primary-500' : 'text-text-tertiary'}`}>
+          Set Intent
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function WaveTopLeft() {
+  return (
+    <svg
+      className="absolute top-0 left-0 w-[360px] h-[320px] text-primary-200"
+      viewBox="0 0 360 320"
+      fill="currentColor"
+      preserveAspectRatio="none"
+    >
+      <path d="M0 0h360c0 0-50 90-140 140S50 230 0 320V0z" />
+    </svg>
+  );
+}
+
+function WaveBottomRight() {
+  return (
+    <svg
+      className="absolute bottom-0 right-0 w-[360px] h-[320px] text-primary-200"
+      viewBox="0 0 360 320"
+      fill="currentColor"
+      preserveAspectRatio="none"
+    >
+      <path d="M360 320H0c0 0 50-90 140-140S310-10 360 0v320z" />
+    </svg>
   );
 }
 

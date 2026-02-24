@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import ApiKeySetupScreen from './screens/ApiKeySetupScreen';
-import IntentScreen from './screens/IntentScreen';
+import SetupWizard from './screens/SetupWizard';
 import ClarificationScreen from './screens/ClarificationScreen';
 import RefinedIntentScreen from './screens/RefinedIntentScreen';
-import StartRecordingScreen from './screens/StartRecordingScreen';
 import PermissionScreen from './screens/PermissionScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
 import ReportGeneratingScreen from './screens/ReportGeneratingScreen';
@@ -13,11 +12,10 @@ import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
   | { type: 'loading' }
-  | { type: 'api-key-setup'; isChange?: boolean }
-  | { type: 'intent' }
+  | { type: 'setup'; needsApiKey: boolean; startRecording?: { sessionId: string; finalIntent: string; apiError?: string } }
+  | { type: 'api-key-change' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
-  | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string }
   | { type: 'permission-denied'; sessionId: string; finalIntent: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
   | { type: 'report-generating'; sessionId: string; summary: SessionSummary }
@@ -45,17 +43,15 @@ export default function App() {
         // If check fails, continue
       }
 
+      let needsApiKey = true;
       try {
         const { hasKey } = await window.api.apikeyCheck();
-        if (!hasKey) {
-          setStep({ type: 'api-key-setup' });
-          return;
-        }
+        needsApiKey = !hasKey;
       } catch {
-        // If check fails, proceed to intent
+        // If check fails, assume key is needed
       }
 
-      setStep({ type: 'intent' });
+      setStep({ type: 'setup', needsApiKey });
     };
     initialize();
   }, []);
@@ -67,19 +63,25 @@ export default function App() {
 
       if (response.error) {
         setStep({
-          type: 'start-recording',
-          sessionId: response.session_id,
-          finalIntent: intent,
-          apiError: "We couldn't check your intent right now",
+          type: 'setup',
+          needsApiKey: false,
+          startRecording: {
+            sessionId: response.session_id,
+            finalIntent: intent,
+            apiError: "We couldn't check your intent right now",
+          },
         });
         return;
       }
 
       if (response.status === 'specific') {
         setStep({
-          type: 'start-recording',
-          sessionId: response.session_id,
-          finalIntent: response.final_intent!,
+          type: 'setup',
+          needsApiKey: false,
+          startRecording: {
+            sessionId: response.session_id,
+            finalIntent: response.final_intent!,
+          },
         });
       } else {
         setStep({
@@ -90,10 +92,13 @@ export default function App() {
       }
     } catch {
       setStep({
-        type: 'start-recording',
-        sessionId: '',
-        finalIntent: intent,
-        apiError: "We couldn't check your intent right now",
+        type: 'setup',
+        needsApiKey: false,
+        startRecording: {
+          sessionId: '',
+          finalIntent: intent,
+          apiError: "We couldn't check your intent right now",
+        },
       });
     } finally {
       setLoading(false);
@@ -111,10 +116,13 @@ export default function App() {
 
       if (response.error) {
         setStep({
-          type: 'start-recording',
-          sessionId: step.sessionId,
-          finalIntent: '',
-          apiError: "We couldn't refine your intent right now",
+          type: 'setup',
+          needsApiKey: false,
+          startRecording: {
+            sessionId: step.sessionId,
+            finalIntent: '',
+            apiError: "We couldn't refine your intent right now",
+          },
         });
         return;
       }
@@ -126,10 +134,13 @@ export default function App() {
       });
     } catch {
       setStep({
-        type: 'start-recording',
-        sessionId: step.sessionId,
-        finalIntent: '',
-        apiError: "We couldn't refine your intent right now",
+        type: 'setup',
+        needsApiKey: false,
+        startRecording: {
+          sessionId: step.sessionId,
+          finalIntent: '',
+          apiError: "We couldn't refine your intent right now",
+        },
       });
     } finally {
       setLoading(false);
@@ -137,7 +148,7 @@ export default function App() {
   };
 
   const handleClarificationBack = () => {
-    setStep({ type: 'intent' });
+    setStep({ type: 'setup', needsApiKey: false });
   };
 
   const handleConfirmIntent = async (finalIntent: string) => {
@@ -149,35 +160,39 @@ export default function App() {
         final_intent: finalIntent,
       });
       setStep({
-        type: 'start-recording',
-        sessionId: step.sessionId,
-        finalIntent,
+        type: 'setup',
+        needsApiKey: false,
+        startRecording: {
+          sessionId: step.sessionId,
+          finalIntent,
+        },
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStartRecording = async () => {
-    if (step.type !== 'start-recording') return;
-    if (!step.sessionId) return;
+  const handleStartRecording = async (sessionId: string) => {
+    if (!sessionId) return;
 
-    const response = await window.api.sessionStart({ session_id: step.sessionId });
+    const response = await window.api.sessionStart({ session_id: sessionId });
 
     if (response.error === 'permission_denied') {
+      const sr = step.type === 'setup' ? step.startRecording : undefined;
       setStep({
         type: 'permission-denied',
-        sessionId: step.sessionId,
-        finalIntent: step.finalIntent,
+        sessionId,
+        finalIntent: sr?.finalIntent || '',
       });
       return;
     }
 
     if (response.success) {
+      const sr = step.type === 'setup' ? step.startRecording : undefined;
       setStep({
         type: 'active-session',
-        sessionId: step.sessionId,
-        finalIntent: step.finalIntent,
+        sessionId,
+        finalIntent: sr?.finalIntent || '',
       });
     }
   };
@@ -194,9 +209,12 @@ export default function App() {
   const handlePermissionBack = () => {
     if (step.type !== 'permission-denied') return;
     setStep({
-      type: 'start-recording',
-      sessionId: step.sessionId,
-      finalIntent: step.finalIntent,
+      type: 'setup',
+      needsApiKey: false,
+      startRecording: {
+        sessionId: step.sessionId,
+        finalIntent: step.finalIntent,
+      },
     });
   };
 
@@ -209,7 +227,7 @@ export default function App() {
   };
 
   const handleStartNewSession = () => {
-    setStep({ type: 'intent' });
+    setStep({ type: 'setup', needsApiKey: false });
   };
 
   switch (step.type) {
@@ -220,21 +238,24 @@ export default function App() {
         </div>
       );
 
-    case 'api-key-setup':
+    case 'setup':
       return (
-        <ApiKeySetupScreen
-          isChange={step.isChange}
-          onComplete={() => setStep({ type: 'intent' })}
-          onCancel={step.isChange ? () => setStep({ type: 'intent' }) : undefined}
+        <SetupWizard
+          needsApiKey={step.needsApiKey}
+          startRecordingData={step.startRecording}
+          onIntentSubmit={handleIntentSubmit}
+          onStartRecording={handleStartRecording}
+          intentLoading={loading}
+          onSettings={() => setStep({ type: 'api-key-change' })}
         />
       );
 
-    case 'intent':
+    case 'api-key-change':
       return (
-        <IntentScreen
-          onSubmit={handleIntentSubmit}
-          loading={loading}
-          onSettings={() => setStep({ type: 'api-key-setup', isChange: true })}
+        <ApiKeySetupScreen
+          isChange
+          onComplete={() => setStep({ type: 'setup', needsApiKey: false })}
+          onCancel={() => setStep({ type: 'setup', needsApiKey: false })}
         />
       );
 
@@ -254,15 +275,6 @@ export default function App() {
           refinedIntent={step.refinedIntent}
           onConfirm={handleConfirmIntent}
           loading={loading}
-        />
-      );
-
-    case 'start-recording':
-      return (
-        <StartRecordingScreen
-          finalIntent={step.finalIntent}
-          onStartRecording={handleStartRecording}
-          apiError={step.apiError}
         />
       );
 

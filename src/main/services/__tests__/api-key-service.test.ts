@@ -9,13 +9,13 @@ const mockDecryptString = vi.fn((buf: Buffer) => {
   throw new Error('Decryption failed');
 });
 const mockIsEncryptionAvailable = vi.fn(() => true);
-const mockGetPath = vi.fn(() => '/tmp/test-userdata');
+const mockGetPath = vi.fn((_name: string) => '/tmp/test-userdata');
 
 vi.mock('electron', () => ({
-  app: { getPath: (...args: unknown[]) => mockGetPath(...args) },
+  app: { getPath: (name: string) => mockGetPath(name) },
   safeStorage: {
-    encryptString: (...args: unknown[]) => mockEncryptString(...args),
-    decryptString: (...args: unknown[]) => mockDecryptString(...args),
+    encryptString: (str: string) => mockEncryptString(str),
+    decryptString: (buf: Buffer) => mockDecryptString(buf),
     isEncryptionAvailable: () => mockIsEncryptionAvailable(),
   },
 }));
