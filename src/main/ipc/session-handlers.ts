@@ -10,6 +10,13 @@ import type {
   SessionConfirmIntentResponse,
   SessionStartRequest,
   SessionStartResponse,
+  SessionPauseRequest,
+  SessionPauseResponse,
+  SessionResumeRequest,
+  SessionResumeResponse,
+  SessionEndRequest,
+  SessionEndResponse,
+  SessionCheckStaleResponse,
 } from '../../shared/types';
 
 export function registerSessionHandlers(
@@ -91,5 +98,47 @@ export function registerSessionHandlers(
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
       };
     }
+  });
+
+  ipcMain.handle('session:pause', async (_event, req: SessionPauseRequest): Promise<SessionPauseResponse> => {
+    try {
+      sessionService.pauseSession(req.session_id);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  });
+
+  ipcMain.handle('session:resume', async (_event, req: SessionResumeRequest): Promise<SessionResumeResponse> => {
+    try {
+      sessionService.resumeSession(req.session_id);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  });
+
+  ipcMain.handle('session:end', async (_event, req: SessionEndRequest): Promise<SessionEndResponse> => {
+    try {
+      const summary = sessionService.endSession(req.session_id, 'user');
+      return { success: true, summary };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  });
+
+  ipcMain.handle('session:check-stale', async (): Promise<SessionCheckStaleResponse> => {
+    const result = sessionService.checkStaleOnLaunch();
+    if (!result) return {};
+    return { ended_session: result };
   });
 }

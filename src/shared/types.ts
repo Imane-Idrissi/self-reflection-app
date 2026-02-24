@@ -59,11 +59,60 @@ export interface SessionStartResponse {
   error?: string;
 }
 
+export interface SessionPauseRequest {
+  session_id: string;
+}
+
+export interface SessionPauseResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface SessionResumeRequest {
+  session_id: string;
+}
+
+export interface SessionResumeResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface SessionSummary {
+  total_minutes: number;
+  active_minutes: number;
+  paused_minutes: number;
+  capture_count: number;
+  feeling_count: number;
+}
+
+export interface SessionEndRequest {
+  session_id: string;
+}
+
+export interface SessionEndResponse {
+  success: boolean;
+  summary?: SessionSummary;
+  error?: string;
+}
+
+export interface SessionCheckStaleResponse {
+  ended_session?: {
+    session_id: string;
+    summary: SessionSummary;
+  };
+}
+
 export interface ElectronAPI {
   sessionCreate: (req: SessionCreateRequest) => Promise<SessionCreateResponse>;
   sessionClarify: (req: SessionClarifyRequest) => Promise<SessionClarifyResponse>;
   sessionConfirmIntent: (req: SessionConfirmIntentRequest) => Promise<SessionConfirmIntentResponse>;
   sessionStart: (req: SessionStartRequest) => Promise<SessionStartResponse>;
+  sessionPause: (req: SessionPauseRequest) => Promise<SessionPauseResponse>;
+  sessionResume: (req: SessionResumeRequest) => Promise<SessionResumeResponse>;
+  sessionEnd: (req: SessionEndRequest) => Promise<SessionEndResponse>;
+  sessionCheckStale: () => Promise<SessionCheckStaleResponse>;
+  onAutoEndWarning: (callback: () => void) => void;
+  onAutoEndTriggered: (callback: (summary: SessionSummary) => void) => void;
 }
 
 declare global {
