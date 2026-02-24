@@ -6,7 +6,7 @@ import StartRecordingScreen from './screens/StartRecordingScreen';
 import PermissionScreen from './screens/PermissionScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
 import ReportGeneratingScreen from './screens/ReportGeneratingScreen';
-// SessionEndScreen removed — replaced by report flow
+import ReportScreen from './screens/ReportScreen';
 import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
@@ -269,7 +269,12 @@ export default function App() {
       );
 
     case 'report-ready':
-      return null; // Placeholder — implemented in Task 6
+      return (
+        <ReportScreen
+          sessionId={step.sessionId}
+          onStartNew={handleStartNewSession}
+        />
+      );
 
     case 'report-failed':
       return null; // Placeholder — implemented in Task 7
