@@ -24,6 +24,13 @@ export interface Capture {
   captured_at: string;
 }
 
+export interface Feeling {
+  feeling_id: string;
+  session_id: string;
+  text: string;
+  created_at: string;
+}
+
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
@@ -108,6 +115,17 @@ export interface SessionCheckStaleResponse {
     session_id: string;
     summary: SessionSummary;
   };
+}
+
+export interface FeelingCreateRequest {
+  session_id: string;
+  text: string;
+}
+
+export interface FeelingCreateResponse {
+  success: boolean;
+  feeling_id?: string;
+  error?: string;
 }
 
 export interface ElectronAPI {
