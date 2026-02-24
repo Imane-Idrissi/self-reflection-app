@@ -50,4 +50,12 @@ contextBridge.exposeInMainWorld('api', {
   onAutoEndTriggered: (callback: (summary: SessionSummary) => void) => {
     ipcRenderer.on('session:auto-end-triggered', (_event, summary: SessionSummary) => callback(summary));
   },
+
+  onCaptureWarning: (callback: () => void) => {
+    ipcRenderer.on('capture:warning', () => callback());
+  },
+
+  onCaptureWarningCleared: (callback: () => void) => {
+    ipcRenderer.on('capture:warning-cleared', () => callback());
+  },
 });

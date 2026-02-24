@@ -121,6 +121,8 @@ export interface ElectronAPI {
   sessionCheckStale: () => Promise<SessionCheckStaleResponse>;
   onAutoEndWarning: (callback: () => void) => void;
   onAutoEndTriggered: (callback: (summary: SessionSummary) => void) => void;
+  onCaptureWarning: (callback: () => void) => void;
+  onCaptureWarningCleared: (callback: () => void) => void;
 }
 
 declare global {

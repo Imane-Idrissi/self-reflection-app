@@ -28,7 +28,8 @@ export default function ActiveSessionScreen({
   const [status, setStatus] = useState<'active' | 'paused'>('active');
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [showWarningBanner, setShowWarningBanner] = useState(false);
+  const [showAutoEndWarning, setShowAutoEndWarning] = useState(false);
+  const [showCaptureWarning, setShowCaptureWarning] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -57,11 +58,19 @@ export default function ActiveSessionScreen({
 
   useEffect(() => {
     window.api.onAutoEndWarning(() => {
-      setShowWarningBanner(true);
+      setShowAutoEndWarning(true);
     });
 
     window.api.onAutoEndTriggered((summary) => {
       onAutoEndTriggered(summary);
+    });
+
+    window.api.onCaptureWarning(() => {
+      setShowCaptureWarning(true);
+    });
+
+    window.api.onCaptureWarningCleared(() => {
+      setShowCaptureWarning(false);
     });
   }, [onAutoEndTriggered]);
 
@@ -127,10 +136,18 @@ export default function ActiveSessionScreen({
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
       <div className="w-full max-w-[520px]">
-        {showWarningBanner && (
+        {showAutoEndWarning && (
           <div className="rounded-lg border border-caution/30 bg-caution-bg px-lg py-md mb-lg">
             <p className="text-small leading-[1.5] text-text-secondary text-center">
               This session will auto-end in 30 minutes.
+            </p>
+          </div>
+        )}
+
+        {showCaptureWarning && (
+          <div className="rounded-lg border border-caution/30 bg-caution-bg px-lg py-md mb-lg">
+            <p className="text-small leading-[1.5] text-text-secondary text-center">
+              Having trouble reading your active window.
             </p>
           </div>
         )}

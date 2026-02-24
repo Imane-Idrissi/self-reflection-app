@@ -35,6 +35,11 @@ function initServices() {
     () => systemPreferences.isTrustedAccessibilityClient(false),
   );
 
+  captureService.setWarningCallbacks({
+    onWarning: () => mainWindow?.webContents.send('capture:warning'),
+    onWarningCleared: () => mainWindow?.webContents.send('capture:warning-cleared'),
+  });
+
   sessionService = new SessionService(sessionRepo, eventsRepo, captureRepo, captureService);
 
   const apiKey = process.env.ANTHROPIC_API_KEY || '';
