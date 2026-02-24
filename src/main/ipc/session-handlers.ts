@@ -164,10 +164,12 @@ export function registerSessionHandlers(
   });
 
   ipcMain.handle('session:check-stale', async (): Promise<SessionCheckStaleResponse> => {
+    reportService.markStaleAsFailedOnLaunch();
     const result = sessionService.checkStaleOnLaunch();
     hideTray();
     floatingWindowManager.destroy();
     if (!result) return {};
+    reportService.startGeneration(result.session_id);
     return { ended_session: result };
   });
 

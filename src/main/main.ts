@@ -79,7 +79,8 @@ function startAutoEndTimer() {
       const summary = sessionService.endSession(session.session_id, 'auto');
       hideTray();
       floatingWindowManager.destroy();
-      mainWindow?.webContents.send('session:auto-end-triggered', summary);
+      reportService.startGeneration(session.session_id);
+      mainWindow?.webContents.send('session:auto-end-triggered', summary, session.session_id);
     } else if (activeMinutes >= AUTO_END_WARNING_MINUTES) {
       mainWindow?.webContents.send('session:auto-end-warning');
     }

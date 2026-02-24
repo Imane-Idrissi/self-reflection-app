@@ -211,7 +211,7 @@ export interface ElectronAPI {
   reportRetry: (req: ReportRetryRequest) => Promise<ReportRetryResponse>;
   captureGetInRange: (req: CaptureGetInRangeRequest) => Promise<CaptureGetInRangeResponse>;
   onAutoEndWarning: (callback: () => void) => void;
-  onAutoEndTriggered: (callback: (summary: SessionSummary) => void) => void;
+  onAutoEndTriggered: (callback: (summary: SessionSummary, sessionId: string) => void) => void;
   onCaptureWarning: (callback: () => void) => void;
   onCaptureWarningCleared: (callback: () => void) => void;
 }
