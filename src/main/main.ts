@@ -9,12 +9,15 @@ import { FeelingRepository } from './database/feeling-repository';
 import { SessionService } from './services/session-service';
 import { CaptureService } from './services/capture-service';
 import { AiService } from './services/ai-service';
+import { ReportService } from './services/report-service';
+import { ReportRepository } from './database/report-repository';
 import { FloatingWindowManager } from './floating-window';
 import { registerSessionHandlers } from './ipc/session-handlers';
 import { hideTray } from './tray';
 
 let sessionService: SessionService;
 let captureService: CaptureService;
+let reportService: ReportService;
 let floatingWindowManager: FloatingWindowManager;
 let mainWindow: BrowserWindow | null = null;
 let autoEndInterval: ReturnType<typeof setInterval> | null = null;
@@ -51,9 +54,13 @@ function initServices() {
   const aiService = new AiService(apiKey);
   floatingWindowManager = new FloatingWindowManager();
 
-  registerSessionHandlers(sessionService, aiService, floatingWindowManager);
+  const reportRepo = new ReportRepository(db);
+  reportService = new ReportService(reportRepo, sessionRepo, captureRepo, feelingRepo, eventsRepo, aiService);
+
+  registerSessionHandlers(sessionService, aiService, floatingWindowManager, reportService, captureRepo);
 
   sessionService.cleanupAbandoned();
+  reportService.markStaleAsFailedOnLaunch();
 }
 
 function startAutoEndTimer() {

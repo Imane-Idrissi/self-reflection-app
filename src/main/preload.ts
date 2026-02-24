@@ -16,6 +16,12 @@ import type {
   SessionEndResponse,
   SessionCheckStaleResponse,
   SessionSummary,
+  ReportGetRequest,
+  ReportGetResponse,
+  ReportRetryRequest,
+  ReportRetryResponse,
+  CaptureGetInRangeRequest,
+  CaptureGetInRangeResponse,
 } from '../shared/types';
 
 contextBridge.exposeInMainWorld('api', {
@@ -42,6 +48,15 @@ contextBridge.exposeInMainWorld('api', {
 
   sessionCheckStale: (): Promise<SessionCheckStaleResponse> =>
     ipcRenderer.invoke('session:check-stale'),
+
+  reportGet: (req: ReportGetRequest): Promise<ReportGetResponse> =>
+    ipcRenderer.invoke('report:get', req),
+
+  reportRetry: (req: ReportRetryRequest): Promise<ReportRetryResponse> =>
+    ipcRenderer.invoke('report:retry', req),
+
+  captureGetInRange: (req: CaptureGetInRangeRequest): Promise<CaptureGetInRangeResponse> =>
+    ipcRenderer.invoke('capture:get-in-range', req),
 
   onAutoEndWarning: (callback: () => void) => {
     ipcRenderer.on('session:auto-end-warning', () => callback());

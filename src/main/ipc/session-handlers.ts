@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { SessionService } from '../services/session-service';
 import { AiService, AiServiceError } from '../services/ai-service';
+import { ReportService } from '../services/report-service';
 import { FloatingWindowManager } from '../floating-window';
 import { showTray, hideTray } from '../tray';
 import type {
@@ -21,12 +22,21 @@ import type {
   SessionCheckStaleResponse,
   FeelingCreateRequest,
   FeelingCreateResponse,
+  ReportGetRequest,
+  ReportGetResponse,
+  ReportRetryRequest,
+  ReportRetryResponse,
+  CaptureGetInRangeRequest,
+  CaptureGetInRangeResponse,
 } from '../../shared/types';
+import { CaptureRepository } from '../database/capture-repository';
 
 export function registerSessionHandlers(
   sessionService: SessionService,
   aiService: AiService,
-  floatingWindowManager: FloatingWindowManager
+  floatingWindowManager: FloatingWindowManager,
+  reportService: ReportService,
+  captureRepo: CaptureRepository,
 ): void {
   ipcMain.handle('session:create', async (_event, req: SessionCreateRequest): Promise<SessionCreateResponse> => {
     const session = sessionService.createSession(req.intent);
@@ -143,6 +153,7 @@ export function registerSessionHandlers(
       const summary = sessionService.endSession(req.session_id, 'user');
       hideTray();
       floatingWindowManager.destroy();
+      reportService.startGeneration(req.session_id);
       return { success: true, summary };
     } catch (error) {
       return {
@@ -170,5 +181,26 @@ export function registerSessionHandlers(
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
       };
     }
+  });
+
+  ipcMain.handle('report:get', async (_event, req: ReportGetRequest): Promise<ReportGetResponse> => {
+    return reportService.getReport(req.session_id);
+  });
+
+  ipcMain.handle('report:retry', async (_event, req: ReportRetryRequest): Promise<ReportRetryResponse> => {
+    try {
+      reportService.retryGeneration(req.session_id);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  });
+
+  ipcMain.handle('capture:get-in-range', async (_event, req: CaptureGetInRangeRequest): Promise<CaptureGetInRangeResponse> => {
+    const captures = captureRepo.getBySessionIdInTimeRange(req.session_id, req.start_time, req.end_time);
+    return { captures };
   });
 }
