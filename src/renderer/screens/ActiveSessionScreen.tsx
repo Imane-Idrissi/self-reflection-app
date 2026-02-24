@@ -9,14 +9,14 @@ interface ActiveSessionScreenProps {
     paused_minutes: number;
     capture_count: number;
     feeling_count: number;
-  }) => void;
+  }, sessionId: string) => void;
   onAutoEndTriggered: (summary: {
     total_minutes: number;
     active_minutes: number;
     paused_minutes: number;
     capture_count: number;
     feeling_count: number;
-  }) => void;
+  }, sessionId: string) => void;
 }
 
 export default function ActiveSessionScreen({
@@ -62,7 +62,7 @@ export default function ActiveSessionScreen({
     });
 
     window.api.onAutoEndTriggered((summary) => {
-      onAutoEndTriggered(summary);
+      onAutoEndTriggered(summary, sessionId);
     });
 
     window.api.onCaptureWarning(() => {
@@ -107,7 +107,7 @@ export default function ActiveSessionScreen({
     try {
       const response = await window.api.sessionEnd({ session_id: sessionId });
       if (response.success && response.summary) {
-        onEnd(response.summary);
+        onEnd(response.summary, sessionId);
       }
     } finally {
       setLoading(false);

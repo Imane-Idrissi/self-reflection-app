@@ -5,7 +5,8 @@ import RefinedIntentScreen from './screens/RefinedIntentScreen';
 import StartRecordingScreen from './screens/StartRecordingScreen';
 import PermissionScreen from './screens/PermissionScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
-import SessionEndScreen from './screens/SessionEndScreen';
+import ReportGeneratingScreen from './screens/ReportGeneratingScreen';
+// SessionEndScreen removed — replaced by report flow
 import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
@@ -16,7 +17,10 @@ type FlowStep =
   | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string }
   | { type: 'permission-denied'; sessionId: string; finalIntent: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
-  | { type: 'session-ended'; summary: SessionSummary; wasAutoEnded?: boolean };
+  | { type: 'report-generating'; sessionId: string; summary: SessionSummary }
+  | { type: 'report-ready'; sessionId: string }
+  | { type: 'report-failed'; sessionId: string; summary: SessionSummary }
+  | { type: 'report-skipped'; sessionId: string; summary: SessionSummary };
 
 export default function App() {
   const [step, setStep] = useState<FlowStep>({ type: 'loading' });
@@ -28,9 +32,9 @@ export default function App() {
         const result = await window.api.sessionCheckStale();
         if (result.ended_session) {
           setStep({
-            type: 'session-ended',
+            type: 'report-generating',
+            sessionId: result.ended_session.session_id,
             summary: result.ended_session.summary,
-            wasAutoEnded: true,
           });
           return;
         }
@@ -182,12 +186,12 @@ export default function App() {
     });
   };
 
-  const handleSessionEnd = (summary: SessionSummary) => {
-    setStep({ type: 'session-ended', summary });
+  const handleSessionEnd = (summary: SessionSummary, sessionId: string) => {
+    setStep({ type: 'report-generating', sessionId, summary });
   };
 
-  const handleAutoEnd = (summary: SessionSummary) => {
-    setStep({ type: 'session-ended', summary, wasAutoEnded: true });
+  const handleAutoEnd = (summary: SessionSummary, sessionId: string) => {
+    setStep({ type: 'report-generating', sessionId, summary });
   };
 
   const handleStartNewSession = () => {
@@ -254,13 +258,23 @@ export default function App() {
         />
       );
 
-    case 'session-ended':
+    case 'report-generating':
       return (
-        <SessionEndScreen
+        <ReportGeneratingScreen
+          sessionId={step.sessionId}
           summary={step.summary}
-          wasAutoEnded={step.wasAutoEnded}
-          onStartNew={handleStartNewSession}
+          onReady={() => setStep({ type: 'report-ready', sessionId: step.sessionId })}
+          onFailed={() => setStep({ type: 'report-failed', sessionId: step.sessionId, summary: step.summary })}
         />
       );
+
+    case 'report-ready':
+      return null; // Placeholder — implemented in Task 6
+
+    case 'report-failed':
+      return null; // Placeholder — implemented in Task 7
+
+    case 'report-skipped':
+      return null; // Placeholder — implemented in Task 7
   }
 }
