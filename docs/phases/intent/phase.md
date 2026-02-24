@@ -1,7 +1,5 @@
 # Phase: Intent
 
-> **Note:** No inspiration folder for this phase — the UI is simple enough (centered layout, text fields, buttons) that the design system covers it.
-
 ## Goal
 
 Allow the user to set a clear intent for their session. The intent is the foundation for all AI analysis — without it, the AI can only describe behavior, not evaluate it.
