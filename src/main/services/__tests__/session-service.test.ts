@@ -3,6 +3,7 @@ import Database from 'better-sqlite3';
 import { SessionRepository } from '../../database/session-repository';
 import { SessionEventsRepository } from '../../database/session-events-repository';
 import { CaptureRepository } from '../../database/capture-repository';
+import { FeelingRepository } from '../../database/feeling-repository';
 import { CaptureService } from '../capture-service';
 import { SessionService } from '../session-service';
 
@@ -46,15 +47,25 @@ beforeEach(() => {
       FOREIGN KEY (session_id) REFERENCES session(session_id)
     )
   `);
+  db.exec(`
+    CREATE TABLE feeling (
+      feeling_id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      text TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (session_id) REFERENCES session(session_id)
+    )
+  `);
   const repo = new SessionRepository(db);
   const eventsRepo = new SessionEventsRepository(db);
   const captureRepo = new CaptureRepository(db);
+  const feelingRepo = new FeelingRepository(db);
 
   mockCheckPermission.mockReturnValue(true);
   mockGetActiveWindow.mockResolvedValue(undefined);
 
   captureService = new CaptureService(captureRepo, mockGetActiveWindow, mockCheckPermission);
-  service = new SessionService(repo, eventsRepo, captureRepo, captureService);
+  service = new SessionService(repo, eventsRepo, captureRepo, feelingRepo, captureService);
 });
 
 afterEach(() => {
@@ -243,7 +254,7 @@ describe('SessionService', () => {
       expect(session!.status).toBe('ended');
     });
 
-    it('returns a session summary with real capture_count', () => {
+    it('returns a session summary with real capture and feeling counts', () => {
       const id = createActiveSession();
 
       db.prepare(`
@@ -255,13 +266,16 @@ describe('SessionService', () => {
         VALUES ('c2', ?, 'Window2', 'App2', ?)
       `).run(id, new Date().toISOString());
 
+      service.createFeeling(id, 'Feeling great');
+      service.createFeeling(id, 'A bit tired now');
+
       const summary = service.endSession(id, 'user');
 
       expect(summary).toHaveProperty('total_minutes');
       expect(summary).toHaveProperty('active_minutes');
       expect(summary).toHaveProperty('paused_minutes');
       expect(summary.capture_count).toBe(2);
-      expect(summary.feeling_count).toBe(0);
+      expect(summary.feeling_count).toBe(2);
     });
 
     it('throws if session is not active or paused', () => {
@@ -392,6 +406,58 @@ describe('SessionService', () => {
 
     it('returns 0 when nothing to clean up', () => {
       expect(service.cleanupAbandoned()).toBe(0);
+    });
+  });
+
+  describe('createFeeling', () => {
+    it('creates a feeling for an active session', () => {
+      const id = createActiveSession();
+      const feeling = service.createFeeling(id, 'Feeling focused');
+
+      expect(feeling.feeling_id).toBeTruthy();
+      expect(feeling.session_id).toBe(id);
+      expect(feeling.text).toBe('Feeling focused');
+      expect(feeling.created_at).toBeTruthy();
+    });
+
+    it('creates a feeling for a paused session', () => {
+      const id = createActiveSession();
+      service.pauseSession(id);
+
+      const feeling = service.createFeeling(id, 'Taking a break, feeling okay');
+      expect(feeling.session_id).toBe(id);
+      expect(feeling.text).toBe('Taking a break, feeling okay');
+    });
+
+    it('trims whitespace from text', () => {
+      const id = createActiveSession();
+      const feeling = service.createFeeling(id, '  Feeling good  ');
+      expect(feeling.text).toBe('Feeling good');
+    });
+
+    it('throws for empty text', () => {
+      const id = createActiveSession();
+      expect(() => service.createFeeling(id, '')).toThrow('Feeling text cannot be empty');
+    });
+
+    it('throws for whitespace-only text', () => {
+      const id = createActiveSession();
+      expect(() => service.createFeeling(id, '   ')).toThrow('Feeling text cannot be empty');
+    });
+
+    it('throws for ended session', () => {
+      const id = createActiveSession();
+      service.endSession(id);
+      expect(() => service.createFeeling(id, 'Too late')).toThrow('Cannot log feeling for session in status: ended');
+    });
+
+    it('throws for created session', () => {
+      const session = service.createSession('Test');
+      expect(() => service.createFeeling(session.session_id, 'Too early')).toThrow('Cannot log feeling for session in status: created');
+    });
+
+    it('throws for nonexistent session', () => {
+      expect(() => service.createFeeling('bad-id', 'Hello')).toThrow('Session not found');
     });
   });
 

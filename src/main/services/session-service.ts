@@ -1,8 +1,9 @@
 import { SessionRepository } from '../database/session-repository';
 import { SessionEventsRepository } from '../database/session-events-repository';
 import { CaptureRepository } from '../database/capture-repository';
+import { FeelingRepository } from '../database/feeling-repository';
 import { CaptureService } from './capture-service';
-import { Session, SessionEvent } from '../../shared/types';
+import { Session, SessionEvent, Feeling } from '../../shared/types';
 
 export interface SessionSummary {
   total_minutes: number;
@@ -16,17 +17,20 @@ export class SessionService {
   private repo: SessionRepository;
   private eventsRepo: SessionEventsRepository;
   private captureRepo: CaptureRepository;
+  private feelingRepo: FeelingRepository;
   private captureService: CaptureService;
 
   constructor(
     repo: SessionRepository,
     eventsRepo: SessionEventsRepository,
     captureRepo: CaptureRepository,
+    feelingRepo: FeelingRepository,
     captureService: CaptureService,
   ) {
     this.repo = repo;
     this.eventsRepo = eventsRepo;
     this.captureRepo = captureRepo;
+    this.feelingRepo = feelingRepo;
     this.captureService = captureService;
   }
 
@@ -116,6 +120,20 @@ export class SessionService {
     return this.repo.deleteByStatus('created');
   }
 
+  createFeeling(sessionId: string, text: string): Feeling {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      throw new Error('Feeling text cannot be empty');
+    }
+
+    const session = this.getSessionOrThrow(sessionId);
+    if (session.status !== 'active' && session.status !== 'paused') {
+      throw new Error(`Cannot log feeling for session in status: ${session.status}`);
+    }
+
+    return this.feelingRepo.create(sessionId, trimmed);
+  }
+
   getSession(sessionId: string): Session | undefined {
     return this.repo.getById(sessionId);
   }
@@ -144,7 +162,7 @@ export class SessionService {
       active_minutes: Math.round(activeMinutes * 10) / 10,
       paused_minutes: Math.round(pausedMinutes * 10) / 10,
       capture_count: this.captureRepo.countBySessionId(sessionId),
-      feeling_count: 0,
+      feeling_count: this.feelingRepo.countBySessionId(sessionId),
     };
   }
 

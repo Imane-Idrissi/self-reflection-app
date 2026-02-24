@@ -5,6 +5,7 @@ import { getDatabase, closeDatabase } from './database/db';
 import { SessionRepository } from './database/session-repository';
 import { SessionEventsRepository } from './database/session-events-repository';
 import { CaptureRepository } from './database/capture-repository';
+import { FeelingRepository } from './database/feeling-repository';
 import { SessionService } from './services/session-service';
 import { CaptureService } from './services/capture-service';
 import { AiService } from './services/ai-service';
@@ -25,6 +26,7 @@ function initServices() {
   const sessionRepo = new SessionRepository(db);
   const eventsRepo = new SessionEventsRepository(db);
   const captureRepo = new CaptureRepository(db);
+  const feelingRepo = new FeelingRepository(db);
 
   captureService = new CaptureService(
     captureRepo,
@@ -41,7 +43,7 @@ function initServices() {
     onWarningCleared: () => mainWindow?.webContents.send('capture:warning-cleared'),
   });
 
-  sessionService = new SessionService(sessionRepo, eventsRepo, captureRepo, captureService);
+  sessionService = new SessionService(sessionRepo, eventsRepo, captureRepo, feelingRepo, captureService);
 
   const apiKey = process.env.ANTHROPIC_API_KEY || '';
   const aiService = new AiService(apiKey);

@@ -18,6 +18,8 @@ import type {
   SessionEndRequest,
   SessionEndResponse,
   SessionCheckStaleResponse,
+  FeelingCreateRequest,
+  FeelingCreateResponse,
 } from '../../shared/types';
 
 export function registerSessionHandlers(
@@ -149,5 +151,17 @@ export function registerSessionHandlers(
     hideTray();
     if (!result) return {};
     return { ended_session: result };
+  });
+
+  ipcMain.handle('feeling:create', async (_event, req: FeelingCreateRequest): Promise<FeelingCreateResponse> => {
+    try {
+      const feeling = sessionService.createFeeling(req.session_id, req.text);
+      return { success: true, feeling_id: feeling.feeling_id };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
   });
 }
