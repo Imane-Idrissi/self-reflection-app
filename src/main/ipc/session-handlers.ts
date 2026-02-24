@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { SessionService } from '../services/session-service';
 import { AiService, AiServiceError } from '../services/ai-service';
+import { showTray, hideTray } from '../tray';
 import type {
   SessionCreateRequest,
   SessionCreateResponse,
@@ -94,6 +95,7 @@ export function registerSessionHandlers(
       if (result.permissionDenied) {
         return { success: false, error: 'permission_denied' };
       }
+      showTray('recording');
       return { success: true };
     } catch (error) {
       return {
@@ -106,6 +108,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:pause', async (_event, req: SessionPauseRequest): Promise<SessionPauseResponse> => {
     try {
       sessionService.pauseSession(req.session_id);
+      showTray('paused');
       return { success: true };
     } catch (error) {
       return {
@@ -118,6 +121,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:resume', async (_event, req: SessionResumeRequest): Promise<SessionResumeResponse> => {
     try {
       sessionService.resumeSession(req.session_id);
+      showTray('recording');
       return { success: true };
     } catch (error) {
       return {
@@ -130,6 +134,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:end', async (_event, req: SessionEndRequest): Promise<SessionEndResponse> => {
     try {
       const summary = sessionService.endSession(req.session_id, 'user');
+      hideTray();
       return { success: true, summary };
     } catch (error) {
       return {
@@ -141,6 +146,7 @@ export function registerSessionHandlers(
 
   ipcMain.handle('session:check-stale', async (): Promise<SessionCheckStaleResponse> => {
     const result = sessionService.checkStaleOnLaunch();
+    hideTray();
     if (!result) return {};
     return { ended_session: result };
   });
