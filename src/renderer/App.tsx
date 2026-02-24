@@ -1,22 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import IntentScreen from './screens/IntentScreen';
 import ClarificationScreen from './screens/ClarificationScreen';
 import RefinedIntentScreen from './screens/RefinedIntentScreen';
 import StartRecordingScreen from './screens/StartRecordingScreen';
 import ActiveSessionScreen from './screens/ActiveSessionScreen';
+import SessionEndScreen from './screens/SessionEndScreen';
 import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
+  | { type: 'loading' }
   | { type: 'intent' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
   | { type: 'start-recording'; sessionId: string; finalIntent: string; apiError?: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
-  | { type: 'session-ended'; summary: SessionSummary };
+  | { type: 'session-ended'; summary: SessionSummary; wasAutoEnded?: boolean };
 
 export default function App() {
-  const [step, setStep] = useState<FlowStep>({ type: 'intent' });
+  const [step, setStep] = useState<FlowStep>({ type: 'loading' });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const checkStale = async () => {
+      try {
+        const result = await window.api.sessionCheckStale();
+        if (result.ended_session) {
+          setStep({
+            type: 'session-ended',
+            summary: result.ended_session.summary,
+            wasAutoEnded: true,
+          });
+          return;
+        }
+      } catch {
+        // If check fails, just proceed to intent
+      }
+      setStep({ type: 'intent' });
+    };
+    checkStale();
+  }, []);
 
   const handleIntentSubmit = async (intent: string) => {
     setLoading(true);
@@ -132,11 +154,22 @@ export default function App() {
     setStep({ type: 'session-ended', summary });
   };
 
+  const handleAutoEnd = (summary: SessionSummary) => {
+    setStep({ type: 'session-ended', summary, wasAutoEnded: true });
+  };
+
   const handleStartNewSession = () => {
     setStep({ type: 'intent' });
   };
 
   switch (step.type) {
+    case 'loading':
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-bg-primary">
+          <div className="h-4 w-4 rounded-full bg-primary-500 animate-pulse" />
+        </div>
+      );
+
     case 'intent':
       return (
         <IntentScreen onSubmit={handleIntentSubmit} loading={loading} />
@@ -176,43 +209,17 @@ export default function App() {
           sessionId={step.sessionId}
           finalIntent={step.finalIntent}
           onEnd={handleSessionEnd}
-          onAutoEndTriggered={handleSessionEnd}
+          onAutoEndTriggered={handleAutoEnd}
         />
       );
 
     case 'session-ended':
       return (
-        <SessionEndedPlaceholder
+        <SessionEndScreen
           summary={step.summary}
+          wasAutoEnded={step.wasAutoEnded}
           onStartNew={handleStartNewSession}
         />
       );
   }
-}
-
-function SessionEndedPlaceholder({
-  summary,
-  onStartNew,
-}: {
-  summary: SessionSummary;
-  onStartNew: () => void;
-}) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
-      <div className="w-full max-w-[520px] text-center">
-        <h1 className="font-heading text-h1 font-bold text-text-primary mb-md">
-          Session Complete
-        </h1>
-        <p className="text-body text-text-secondary mb-xl">
-          {Math.round(summary.total_minutes)} min total
-        </p>
-        <button
-          onClick={onStartNew}
-          className="rounded-md bg-primary-500 px-lg py-[12px] text-body font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600"
-        >
-          Start New Session
-        </button>
-      </div>
-    </div>
-  );
 }
