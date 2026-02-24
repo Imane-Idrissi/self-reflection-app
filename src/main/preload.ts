@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type {
+  ApiKeyCheckResponse,
+  ApiKeySaveRequest,
+  ApiKeySaveResponse,
   SessionCreateRequest,
   SessionCreateResponse,
   SessionClarifyRequest,
@@ -25,6 +28,12 @@ import type {
 } from '../shared/types';
 
 contextBridge.exposeInMainWorld('api', {
+  apikeyCheck: (): Promise<ApiKeyCheckResponse> =>
+    ipcRenderer.invoke('apikey:check'),
+
+  apikeySave: (req: ApiKeySaveRequest): Promise<ApiKeySaveResponse> =>
+    ipcRenderer.invoke('apikey:save', req),
+
   sessionCreate: (req: SessionCreateRequest): Promise<SessionCreateResponse> =>
     ipcRenderer.invoke('session:create', req),
 

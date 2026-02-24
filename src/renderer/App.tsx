@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ApiKeySetupScreen from './screens/ApiKeySetupScreen';
 import IntentScreen from './screens/IntentScreen';
 import ClarificationScreen from './screens/ClarificationScreen';
 import RefinedIntentScreen from './screens/RefinedIntentScreen';
@@ -12,6 +13,7 @@ import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
   | { type: 'loading' }
+  | { type: 'api-key-setup'; isChange?: boolean }
   | { type: 'intent' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
@@ -28,7 +30,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const checkStale = async () => {
+    const initialize = async () => {
       try {
         const result = await window.api.sessionCheckStale();
         if (result.ended_session) {
@@ -40,11 +42,22 @@ export default function App() {
           return;
         }
       } catch {
-        // If check fails, just proceed to intent
+        // If check fails, continue
       }
+
+      try {
+        const { hasKey } = await window.api.apikeyCheck();
+        if (!hasKey) {
+          setStep({ type: 'api-key-setup' });
+          return;
+        }
+      } catch {
+        // If check fails, proceed to intent
+      }
+
       setStep({ type: 'intent' });
     };
-    checkStale();
+    initialize();
   }, []);
 
   const handleIntentSubmit = async (intent: string) => {
@@ -207,9 +220,22 @@ export default function App() {
         </div>
       );
 
+    case 'api-key-setup':
+      return (
+        <ApiKeySetupScreen
+          isChange={step.isChange}
+          onComplete={() => setStep({ type: 'intent' })}
+          onCancel={step.isChange ? () => setStep({ type: 'intent' }) : undefined}
+        />
+      );
+
     case 'intent':
       return (
-        <IntentScreen onSubmit={handleIntentSubmit} loading={loading} />
+        <IntentScreen
+          onSubmit={handleIntentSubmit}
+          loading={loading}
+          onSettings={() => setStep({ type: 'api-key-setup', isChange: true })}
+        />
       );
 
     case 'clarification':

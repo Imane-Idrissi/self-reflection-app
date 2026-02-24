@@ -67,6 +67,21 @@ export interface ParsedReport {
   suggestions: ReportSuggestion[];
 }
 
+// API Key types
+
+export interface ApiKeyCheckResponse {
+  hasKey: boolean;
+}
+
+export interface ApiKeySaveRequest {
+  key: string;
+}
+
+export interface ApiKeySaveResponse {
+  success: boolean;
+  error?: string;
+}
+
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
@@ -199,6 +214,8 @@ export interface CaptureGetInRangeResponse {
 }
 
 export interface ElectronAPI {
+  apikeyCheck: () => Promise<ApiKeyCheckResponse>;
+  apikeySave: (req: ApiKeySaveRequest) => Promise<ApiKeySaveResponse>;
   sessionCreate: (req: SessionCreateRequest) => Promise<SessionCreateResponse>;
   sessionClarify: (req: SessionClarifyRequest) => Promise<SessionClarifyResponse>;
   sessionConfirmIntent: (req: SessionConfirmIntentRequest) => Promise<SessionConfirmIntentResponse>;

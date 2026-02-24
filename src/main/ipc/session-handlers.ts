@@ -33,13 +33,24 @@ import { CaptureRepository } from '../database/capture-repository';
 
 export function registerSessionHandlers(
   sessionService: SessionService,
-  aiService: AiService,
+  getAiService: () => AiService | null,
   floatingWindowManager: FloatingWindowManager,
   reportService: ReportService,
   captureRepo: CaptureRepository,
 ): void {
   ipcMain.handle('session:create', async (_event, req: SessionCreateRequest): Promise<SessionCreateResponse> => {
     const session = sessionService.createSession(req.intent);
+    const aiService = getAiService();
+
+    if (!aiService) {
+      sessionService.confirmIntent(session.session_id, req.intent);
+      return {
+        session_id: session.session_id,
+        status: 'specific',
+        final_intent: req.intent,
+        error: 'No API key configured',
+      };
+    }
 
     try {
       const result = await aiService.checkVagueness(req.intent);
@@ -74,6 +85,11 @@ export function registerSessionHandlers(
 
   ipcMain.handle('session:clarify', async (_event, req: SessionClarifyRequest): Promise<SessionClarifyResponse> => {
     try {
+      const aiService = getAiService();
+      if (!aiService) {
+        return { refined_intent: '', error: 'No API key configured' };
+      }
+
       const session = sessionService.getSession(req.session_id);
       if (!session) {
         return { refined_intent: '', error: 'Session not found' };

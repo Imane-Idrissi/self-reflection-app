@@ -3,7 +3,7 @@ import { SessionRepository } from '../database/session-repository';
 import { CaptureRepository } from '../database/capture-repository';
 import { FeelingRepository } from '../database/feeling-repository';
 import { SessionEventsRepository } from '../database/session-events-repository';
-import { AiService, AiServiceError, collapseCaptures, buildReportPrompt, parseReportResponse } from './ai-service';
+import { AiService, collapseCaptures, buildReportPrompt, parseReportResponse } from './ai-service';
 import type { ReportGetResponse, SessionEvent } from '../../shared/types';
 
 export class ReportService {
@@ -13,7 +13,7 @@ export class ReportService {
     private captureRepo: CaptureRepository,
     private feelingRepo: FeelingRepository,
     private eventsRepo: SessionEventsRepository,
-    private aiService: AiService,
+    private getAiService: () => AiService | null,
   ) {}
 
   startGeneration(sessionId: string): void {
@@ -90,6 +90,13 @@ export class ReportService {
   private generateInBackground(sessionId: string, reportId: string): void {
     (async () => {
       try {
+        const aiService = this.getAiService();
+        if (!aiService) {
+          console.error('Report generation failed: no API key configured');
+          this.reportRepo.updateToFailed(reportId);
+          return;
+        }
+
         const session = this.sessionRepo.getById(sessionId);
         if (!session) {
           this.reportRepo.updateToFailed(reportId);
@@ -119,7 +126,7 @@ export class ReportService {
           events,
         });
 
-        const responseText = await this.aiService.generateReport(prompt);
+        const responseText = await aiService.generateReport(prompt);
         const parsed = parseReportResponse(responseText);
 
         this.reportRepo.updateToReady(

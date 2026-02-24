@@ -121,7 +121,7 @@ beforeEach(() => {
   aiService = new AiService('test-key');
 
   reportService = new ReportService(
-    reportRepo, sessionRepo, captureRepo, feelingRepo, eventsRepo, aiService,
+    reportRepo, sessionRepo, captureRepo, feelingRepo, eventsRepo, () => aiService,
   );
 });
 

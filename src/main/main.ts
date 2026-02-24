@@ -8,11 +8,12 @@ import { CaptureRepository } from './database/capture-repository';
 import { FeelingRepository } from './database/feeling-repository';
 import { SessionService } from './services/session-service';
 import { CaptureService } from './services/capture-service';
-import { AiService } from './services/ai-service';
+import { ApiKeyService } from './services/api-key-service';
 import { ReportService } from './services/report-service';
 import { ReportRepository } from './database/report-repository';
 import { FloatingWindowManager } from './floating-window';
 import { registerSessionHandlers } from './ipc/session-handlers';
+import { registerApiKeyHandlers } from './ipc/apikey-handlers';
 import { hideTray } from './tray';
 
 let sessionService: SessionService;
@@ -50,14 +51,17 @@ function initServices() {
 
   sessionService = new SessionService(sessionRepo, eventsRepo, captureRepo, feelingRepo, captureService);
 
-  const apiKey = process.env.ANTHROPIC_API_KEY || '';
-  const aiService = new AiService(apiKey);
+  const apiKeyService = new ApiKeyService();
   floatingWindowManager = new FloatingWindowManager();
 
   const reportRepo = new ReportRepository(db);
-  reportService = new ReportService(reportRepo, sessionRepo, captureRepo, feelingRepo, eventsRepo, aiService);
+  reportService = new ReportService(
+    reportRepo, sessionRepo, captureRepo, feelingRepo, eventsRepo,
+    () => apiKeyService.getAiService(),
+  );
 
-  registerSessionHandlers(sessionService, aiService, floatingWindowManager, reportService, captureRepo);
+  registerApiKeyHandlers(apiKeyService);
+  registerSessionHandlers(sessionService, () => apiKeyService.getAiService(), floatingWindowManager, reportService, captureRepo);
 
   sessionService.cleanupAbandoned();
   reportService.markStaleAsFailedOnLaunch();
