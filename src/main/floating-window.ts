@@ -76,20 +76,22 @@ export class FloatingWindowManager {
   private registerHandlers(): void {
     ipcMain.handle('floating:get-state', () => this.state);
 
-    ipcMain.on('floating:resize', (_event, { width, height }: { width: number; height: number }) => {
+    ipcMain.on('floating:resize', (_event, { width, height, growDirection }: { width: number; height: number; growDirection?: 'up' | 'down' }) => {
       if (!this.win) return;
 
       const [currentX, currentY] = this.win.getPosition();
       const [currentW, currentH] = this.win.getSize();
 
-      const currentBottom = currentY + currentH;
-      const currentRight = currentX + currentW;
-
-      const newX = currentRight - width;
-      const newY = currentBottom - height;
-
-      this.win.setSize(width, height);
-      this.win.setPosition(newX, newY);
+      if (growDirection === 'down') {
+        const newX = currentX + currentW - width;
+        this.win.setSize(width, height);
+        this.win.setPosition(newX, currentY);
+      } else {
+        const currentBottom = currentY + currentH;
+        const currentRight = currentX + currentW;
+        this.win.setSize(width, height);
+        this.win.setPosition(currentRight - width, currentBottom - height);
+      }
     });
 
     ipcMain.on('floating:move', (_event, { deltaX, deltaY }: { deltaX: number; deltaY: number }) => {

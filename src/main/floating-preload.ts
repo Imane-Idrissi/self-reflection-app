@@ -16,8 +16,8 @@ contextBridge.exposeInMainWorld('floatingApi', {
     ipcRenderer.on('floating:session-state-changed', (_event, state) => callback(state));
   },
 
-  resize: (width: number, height: number) => {
-    ipcRenderer.send('floating:resize', { width, height });
+  resize: (width: number, height: number, growDirection: 'up' | 'down' = 'up') => {
+    ipcRenderer.send('floating:resize', { width, height, growDirection });
   },
 
   move: (deltaX: number, deltaY: number) => {

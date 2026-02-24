@@ -152,7 +152,7 @@ export interface FloatingAPI {
   feelingCreate: (req: FeelingCreateRequest) => Promise<FeelingCreateResponse>;
   getSessionState: () => Promise<FloatingWindowState>;
   onSessionStateChange: (callback: (state: { status: 'active' | 'paused' | 'ended' }) => void) => void;
-  resize: (width: number, height: number) => void;
+  resize: (width: number, height: number, growDirection?: 'up' | 'down') => void;
   move: (deltaX: number, deltaY: number) => void;
   dismissed: () => void;
 }

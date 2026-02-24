@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 type ViewState = 'idle' | 'expanded' | 'confirming';
+type CardDirection = 'above' | 'below';
 
 const BUTTON_SIZE = 48;
 const CARD_WIDTH = 320;
 const CARD_PADDING = 20;
 const CONFIRMATION_DURATION = 1500;
 const DRAG_THRESHOLD = 5;
+const CARD_HEIGHT_ESTIMATE = 200;
 
 export default function FloatingApp() {
   const [sessionId, setSessionId] = useState('');
@@ -14,6 +16,7 @@ export default function FloatingApp() {
   const [viewState, setViewState] = useState<ViewState>('idle');
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [cardDirection, setCardDirection] = useState<CardDirection>('above');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,6 +37,10 @@ export default function FloatingApp() {
 
     window.floatingApi.onSessionStateChange((state) => {
       if (state.status === 'ended') {
+        if (confirmTimerRef.current) {
+          clearTimeout(confirmTimerRef.current);
+          confirmTimerRef.current = null;
+        }
         setText('');
         setViewState('idle');
         return;
@@ -42,12 +49,14 @@ export default function FloatingApp() {
     });
   }, []);
 
+  const growDirection = cardDirection === 'above' ? 'up' : 'down';
+
   // Resize the window when view state changes
   useEffect(() => {
     if (viewState === 'idle') {
-      window.floatingApi.resize(BUTTON_SIZE + CARD_PADDING, BUTTON_SIZE + CARD_PADDING);
+      window.floatingApi.resize(BUTTON_SIZE + CARD_PADDING, BUTTON_SIZE + CARD_PADDING, growDirection);
     }
-  }, [viewState]);
+  }, [viewState, growDirection]);
 
   // Resize for expanded/confirming states after render
   useEffect(() => {
@@ -57,15 +66,19 @@ export default function FloatingApp() {
           const rect = containerRef.current.getBoundingClientRect();
           const width = CARD_WIDTH + CARD_PADDING * 2;
           const height = Math.ceil(rect.height) + CARD_PADDING;
-          window.floatingApi.resize(width, height);
+          window.floatingApi.resize(width, height, growDirection);
         }
       });
     }
-  }, [viewState, text]);
+  }, [viewState, text, growDirection]);
+
+  const computeCardDirection = useCallback((): CardDirection => {
+    const windowY = window.screenY;
+    return windowY < CARD_HEIGHT_ESTIMATE + 50 ? 'below' : 'above';
+  }, []);
 
   const handleButtonClick = useCallback(() => {
     if (hasDraggedRef.current) return;
-
     if (viewState === 'confirming') return;
 
     if (viewState === 'expanded') {
@@ -73,9 +86,10 @@ export default function FloatingApp() {
       return;
     }
 
+    setCardDirection(computeCardDirection());
     setViewState('expanded');
     setTimeout(() => textareaRef.current?.focus(), 50);
-  }, [viewState]);
+  }, [viewState, computeCardDirection]);
 
   const dismiss = useCallback(() => {
     setText('');
@@ -109,11 +123,11 @@ export default function FloatingApp() {
   }, [text, sessionId, submitting]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape' && viewState === 'expanded') {
       e.preventDefault();
       dismiss();
     }
-  }, [dismiss]);
+  }, [dismiss, viewState]);
 
   const handleClickOutside = useCallback((e: React.MouseEvent) => {
     if (viewState === 'expanded' && containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -147,8 +161,6 @@ export default function FloatingApp() {
       isDraggingRef.current = false;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-
-      // Reset drag flag after a tick so click handler can check it
       setTimeout(() => { hasDraggedRef.current = false; }, 0);
     };
 
@@ -174,92 +186,95 @@ export default function FloatingApp() {
   const isPaused = sessionStatus === 'paused';
   const canSubmit = text.trim().length > 0 && !submitting;
 
+  const card = (viewState === 'expanded' || viewState === 'confirming') ? (
+    viewState === 'expanded' ? (
+      <div
+        className="rounded-lg bg-bg-elevated shadow-xl"
+        style={{ width: CARD_WIDTH }}
+      >
+        <div className="p-md">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleTextChange}
+            placeholder="How are you feeling?"
+            rows={2}
+            className="w-full resize-none rounded-md border border-border bg-bg-elevated px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
+            style={{ minHeight: 48, maxHeight: 120 }}
+          />
+          <div className="flex justify-end mt-sm">
+            <button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className="rounded-md bg-primary-500 px-md py-xs text-small font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Saving...' : 'Log feeling'}
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div
+        className="flex items-center justify-center rounded-lg bg-bg-elevated shadow-xl"
+        style={{ width: CARD_WIDTH, height: 56 }}
+      >
+        <div className="flex items-center gap-sm">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="9" fill="#16A34A" />
+            <path d="M5.5 9L8 11.5L12.5 6.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-small font-medium text-text-secondary">Feeling logged</span>
+        </div>
+      </div>
+    )
+  ) : null;
+
+  const button = (
+    <button
+      onMouseDown={handleMouseDown}
+      onClick={handleButtonClick}
+      className="flex items-center justify-center rounded-full shadow-xl transition-all duration-[150ms] ease-out"
+      style={{
+        width: BUTTON_SIZE,
+        height: BUTTON_SIZE,
+        background: isPaused ? '#A8A29E' : '#6366F1',
+        opacity: isPaused ? 0.5 : 1,
+        cursor: viewState === 'confirming' ? 'default' : 'pointer',
+        border: 'none',
+        flexShrink: 0,
+      }}
+    >
+      {viewState === 'expanded' ? (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path
+            d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      )}
+    </button>
+  );
+
+  const justifyClass = cardDirection === 'above' ? 'justify-end' : 'justify-start';
+
   return (
     <div
-      className="flex flex-col items-end justify-end w-full h-full"
+      className={`flex flex-col items-end ${justifyClass} w-full h-full`}
       onClick={handleClickOutside}
       onKeyDown={handleKeyDown}
     >
       <div ref={containerRef} className="flex flex-col items-end gap-sm">
-        {/* Expanded card */}
-        {viewState === 'expanded' && (
-          <div
-            className="rounded-lg bg-bg-elevated shadow-xl"
-            style={{ width: CARD_WIDTH }}
-          >
-            <div className="p-md">
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={handleTextChange}
-                placeholder="How are you feeling?"
-                rows={2}
-                className="w-full resize-none rounded-md border border-border bg-bg-elevated px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
-                style={{ minHeight: 48, maxHeight: 120 }}
-              />
-              <div className="flex justify-end mt-sm">
-                <button
-                  onClick={handleSubmit}
-                  disabled={!canSubmit}
-                  className="rounded-md bg-primary-500 px-md py-xs text-small font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {submitting ? 'Saving...' : 'Log feeling'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Confirmation */}
-        {viewState === 'confirming' && (
-          <div
-            className="flex items-center justify-center rounded-lg bg-bg-elevated shadow-xl"
-            style={{ width: CARD_WIDTH, height: 56 }}
-          >
-            <div className="flex items-center gap-sm">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <circle cx="9" cy="9" r="9" fill="#16A34A" />
-                <path d="M5.5 9L8 11.5L12.5 6.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="text-small font-medium text-text-secondary">Feeling logged</span>
-            </div>
-          </div>
-        )}
-
-        {/* Floating button */}
-        <button
-          onMouseDown={handleMouseDown}
-          onClick={handleButtonClick}
-          className="flex items-center justify-center rounded-full shadow-xl transition-all duration-[150ms] ease-out"
-          style={{
-            width: BUTTON_SIZE,
-            height: BUTTON_SIZE,
-            background: isPaused ? '#A8A29E' : '#6366F1',
-            opacity: isPaused ? 0.5 : 1,
-            cursor: viewState === 'confirming' ? 'default' : 'pointer',
-            border: 'none',
-            flexShrink: 0,
-          }}
-        >
-          {viewState === 'expanded' ? (
-            // X icon when expanded
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          ) : (
-            // Pen icon when idle/confirming
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          )}
-        </button>
+        {cardDirection === 'above' && card}
+        {button}
+        {cardDirection === 'below' && card}
       </div>
     </div>
   );
