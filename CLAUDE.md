@@ -12,8 +12,6 @@ Each document has a specific purpose. Read intentionally, not everything every t
 - **When:** At the start of every session. This is the ONLY mandatory read every time.
 - **Why:** It's the source of truth for what to build — scope, logic, decisions, acceptance criteria.
 - **Rule:** Never implement outside its scope. If there are gaps or ambiguity in the phase MD, ask the user BEFORE writing any code.
-- Each phase folder also contains an `inspiration/` subfolder with UI screenshots from Dribbble or other sources. Use these as visual direction when building the UI — match the style, layout, and feel.
-- Note: `inspiration/` folders are not tracked by git — they are local reference material only, excluded to avoid bloating the repo with binary images.
 
 ### `docs/PRODUCT.md` (Product Decisions)
 - **When:** When you need to understand WHY a feature exists, or when the phase MD references product behavior that needs broader context.
@@ -28,7 +26,11 @@ Each document has a specific purpose. Read intentionally, not everything every t
 ### `docs/design-system.md` (Design System)
 - **When:** When building any UI. This is the constraint all phases must follow.
 - **Why:** Ensures visual coherence across the entire app — colors, typography, spacing, overall feel.
-- Created in Phase 1 based on `docs/inspiration/` (global UI references). Phase-level inspiration folders are for layout and component ideas only — they must work within this design system.
+
+### `docs/inspiration/` (Global UI Inspiration)
+- **When:** Before building any UI for any phase. Check this folder to match the user's preferred style and feel.
+- **Why:** Contains UI screenshots the user likes. Use these as visual direction across all phases — match the vibe, layout patterns, and aesthetic.
+- Not tracked by git — local reference material only.
 
 ### `docs/GAPS.md` (Open Questions)
 - **When:** After reading the current phase MD, before starting implementation. Check if any listed gaps for that phase are still unresolved.
@@ -52,7 +54,7 @@ Each document has a specific purpose. Read intentionally, not everything every t
 ## Workflow
 
 ### Phased approach
-- The project is built in phases. Each phase lives in `docs/phases/<phase-name>/` with a `phase.md` and an `inspiration/` folder.
+- The project is built in phases. Each phase lives in `docs/phases/<phase-name>/` with a `phase.md`.
 - **Always read the current phase MD before doing any work.** It contains the scope, logic, decisions, and acceptance criteria.
 - Never work outside the current phase's scope.
 - Each phase ships with polished UI (design as we go, not functional-first).
