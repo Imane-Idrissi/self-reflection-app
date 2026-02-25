@@ -59,7 +59,7 @@ export default function DashboardScreen({
                 <h2 className="font-heading text-display font-bold leading-[1.2] text-text-primary mb-sm">
                   Welcome
                 </h2>
-                <p className="text-body leading-[1.6] text-text-secondary max-w-[420px] mx-auto">
+                <p className="text-body leading-[1.6] text-text-primary max-w-[420px] mx-auto">
                   Track your focus sessions, understand your work habits, and
                   get personalized insights after every session.
                 </p>
