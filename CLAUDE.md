@@ -46,7 +46,7 @@ Each document has a specific purpose. Read intentionally, not everything every t
 - **Styling:** Tailwind CSS + shadcn/ui
 - **UI components:** 21st.dev MCP for polished components
 - **Database:** SQLite (via better-sqlite3) — all data stored locally
-- **AI provider:** Claude API (Anthropic)
+- **AI provider:** Google Gemini API
 - **AI billing model:** BYOK (Bring Your Own Key) — users enter their own API key, stored locally
 
 ---
