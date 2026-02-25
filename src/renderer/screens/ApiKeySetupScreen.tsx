@@ -19,15 +19,23 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
     setSaving(true);
     setError('');
 
+    const trimmed = key.trim();
+    if (!trimmed.startsWith('AIza')) {
+      setError('API keys start with "AIza". Please check your key and try again.');
+      setSaving(false);
+      return;
+    }
+
     try {
-      const result = await window.api.apikeySave({ key: key.trim() });
+      const result = await window.api.apikeySave({ key: trimmed });
       if (result.success) {
         onComplete();
       } else {
         setError(result.error || 'Failed to save API key');
       }
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      console.error('API key save failed:', err);
+      setError('Something went wrong. Please try again later.');
     } finally {
       setSaving(false);
     }
@@ -51,7 +59,7 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
             <KeyIcon />
           </div>
           <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary mb-sm">
-            {isChange ? 'Update API Key' : 'Connect to Claude'}
+            {isChange ? 'Update API Key' : 'Connect to Gemini'}
           </h1>
           <p className="text-body leading-[1.6] text-text-secondary">
             Your key is encrypted and stored locally — it never leaves your device.
@@ -65,7 +73,7 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
               value={key}
               onChange={(e) => { setKey(e.target.value); setError(''); }}
               onKeyDown={handleKeyDown}
-              placeholder="sk-ant-..."
+              placeholder="AIza..."
               autoFocus
               className="w-full rounded-md border border-border bg-bg-elevated px-md py-[12px] pr-[48px] text-body font-mono leading-[1.6] text-text-primary placeholder:text-text-tertiary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
             />
@@ -85,10 +93,10 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
           <p className="mt-sm text-small leading-[1.5] text-text-tertiary">
             Get your API key from{' '}
             <button
-              onClick={() => window.open('https://console.anthropic.com/settings/keys')}
+              onClick={() => window.open('https://aistudio.google.com/apikey')}
               className="text-primary-500 hover:text-primary-600 underline underline-offset-2 transition-colors duration-[150ms]"
             >
-              console.anthropic.com
+              aistudio.google.com
             </button>
           </p>
         </div>
