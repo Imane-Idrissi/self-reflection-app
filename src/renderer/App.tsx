@@ -262,6 +262,7 @@ export default function App() {
           onStartRecording={handleStartRecording}
           intentLoading={loading}
           onSettings={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
+          onBack={goToDashboard}
         />
       );
 
