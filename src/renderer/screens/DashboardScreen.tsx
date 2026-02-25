@@ -95,6 +95,11 @@ export default function DashboardScreen({
 
             {!loading && sessions.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-bg-elevated px-lg py-xl text-center">
+                <div className="mx-auto mb-sm flex h-10 w-10 items-center justify-center rounded-full bg-bg-secondary">
+                  <svg className="h-5 w-5 text-text-tertiary" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
                 <p className="text-body leading-[1.6] text-text-secondary">
                   Your sessions will appear here
                 </p>
