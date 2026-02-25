@@ -189,7 +189,7 @@ export default function FloatingApp() {
   const card = (viewState === 'expanded' || viewState === 'confirming') ? (
     viewState === 'expanded' ? (
       <div
-        className="rounded-lg bg-bg-elevated shadow-xl"
+        className="rounded-lg border border-border bg-bg-elevated shadow-xl"
         style={{ width: CARD_WIDTH }}
       >
         <div className="p-md">
@@ -215,7 +215,7 @@ export default function FloatingApp() {
       </div>
     ) : (
       <div
-        className="flex items-center justify-center rounded-lg bg-bg-elevated shadow-xl"
+        className="flex items-center justify-center rounded-lg border border-border bg-positive-bg shadow-xl"
         style={{ width: CARD_WIDTH, height: 56 }}
       >
         <div className="flex items-center gap-sm">
