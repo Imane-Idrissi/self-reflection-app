@@ -25,11 +25,11 @@ import { ApiKeyService } from '../api-key-service';
 const encPath = path.join('/tmp/test-userdata', 'api-key.enc');
 
 describe('ApiKeyService', () => {
-  const originalEnv = process.env.ANTHROPIC_API_KEY;
+  const originalEnv = process.env.GEMINI_API_KEY;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.GEMINI_API_KEY;
     mockIsEncryptionAvailable.mockReturnValue(true);
     fs.mkdirSync('/tmp/test-userdata', { recursive: true });
     if (fs.existsSync(encPath)) fs.unlinkSync(encPath);
@@ -37,9 +37,9 @@ describe('ApiKeyService', () => {
 
   afterEach(() => {
     if (originalEnv !== undefined) {
-      process.env.ANTHROPIC_API_KEY = originalEnv;
+      process.env.GEMINI_API_KEY = originalEnv;
     } else {
-      delete process.env.ANTHROPIC_API_KEY;
+      delete process.env.GEMINI_API_KEY;
     }
     if (fs.existsSync(encPath)) fs.unlinkSync(encPath);
   });
@@ -83,7 +83,7 @@ describe('ApiKeyService', () => {
   });
 
   it('env var takes priority over stored key', () => {
-    process.env.ANTHROPIC_API_KEY = 'sk-env-key';
+    process.env.GEMINI_API_KEY = 'sk-env-key';
 
     // Also have a file
     const encrypted = Buffer.from('encrypted:sk-file-key');

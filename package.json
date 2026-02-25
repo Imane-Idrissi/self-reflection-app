@@ -20,7 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
+    "@google/generative-ai": "^0.24.1",
     "active-win": "^8.2.1",
     "better-sqlite3": "^12.6.2",
     "react": "^19.2.4",

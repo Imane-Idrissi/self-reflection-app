@@ -1,7 +1,7 @@
 import { app, safeStorage } from 'electron';
 import fs from 'fs';
 import path from 'path';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AiService } from './ai-service';
 
 export interface KeyValidationResult {
@@ -28,21 +28,17 @@ export class ApiKeyService {
 
   async validateKey(key: string): Promise<KeyValidationResult> {
     try {
-      const client = new Anthropic({ apiKey: key });
-      await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1,
-        messages: [{ role: 'user', content: 'hi' }],
-      });
+      const model = new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.0-flash' });
+      await model.generateContent('hi');
       return { valid: true };
     } catch (error: unknown) {
-      if (error instanceof Anthropic.AuthenticationError) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('API_KEY_INVALID') || message.includes('401')) {
         return { valid: false, error: 'Invalid API key. Please check your key and try again.' };
       }
-      if (error instanceof Anthropic.PermissionDeniedError) {
-        return { valid: false, error: 'This API key does not have permission. Check your Anthropic dashboard.' };
+      if (message.includes('403') || message.includes('PERMISSION_DENIED')) {
+        return { valid: false, error: 'This API key does not have permission. Check your Google AI Studio dashboard.' };
       }
-      // Network errors or other transient issues — accept optimistically
       return { valid: true };
     }
   }
@@ -64,7 +60,7 @@ export class ApiKeyService {
   }
 
   private loadStoredKey(): void {
-    const envKey = process.env.ANTHROPIC_API_KEY;
+    const envKey = process.env.GEMINI_API_KEY;
     if (envKey) {
       this.aiService = new AiService(envKey);
       return;

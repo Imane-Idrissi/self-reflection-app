@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
 import type { Capture, Feeling, SessionEvent, ParsedReport } from '../../shared/types';
 
 export interface VaguenessResult {
@@ -18,10 +18,10 @@ export class AiServiceError extends Error {
 }
 
 export class AiService {
-  private client: Anthropic;
+  private model: GenerativeModel;
 
   constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey });
+    this.model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: 'gemini-2.0-flash' });
   }
 
   async checkVagueness(intent: string): Promise<VaguenessResult> {
@@ -29,16 +29,8 @@ export class AiService {
 
     let text: string;
     try {
-      const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      const block = response.content[0];
-      if (block.type !== 'text') {
-        throw new AiServiceError('Unexpected response format from AI');
-      }
-      text = block.text;
+      const result = await this.model.generateContent(prompt);
+      text = result.response.text();
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to check intent vagueness', error);
@@ -49,16 +41,8 @@ export class AiService {
 
   async generateReport(prompt: string): Promise<string> {
     try {
-      const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      const block = response.content[0];
-      if (block.type !== 'text') {
-        throw new AiServiceError('Unexpected response format from AI');
-      }
-      return block.text;
+      const result = await this.model.generateContent(prompt);
+      return result.response.text();
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to generate report', error);
@@ -70,16 +54,8 @@ export class AiService {
 
     let text: string;
     try {
-      const response = await this.client.messages.create({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      });
-      const block = response.content[0];
-      if (block.type !== 'text') {
-        throw new AiServiceError('Unexpected response format from AI');
-      }
-      text = block.text;
+      const result = await this.model.generateContent(prompt);
+      text = result.response.text();
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to refine intent', error);
