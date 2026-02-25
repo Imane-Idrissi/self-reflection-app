@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 interface SetupWizardProps {
   needsApiKey: boolean;
   startRecordingData?: { sessionId: string; finalIntent: string; apiError?: string };
-  onIntentSubmit: (intent: string) => Promise<void>;
+  onIntentSubmit: (name: string, intent: string) => Promise<void>;
   onStartRecording: (sessionId: string) => Promise<void>;
   intentLoading: boolean;
   onSettings?: () => void;
@@ -200,19 +200,20 @@ function ApiKeyStep({ onDone }: { onDone: () => void }) {
   );
 }
 
-function IntentStep({ onSubmit, loading }: { onSubmit: (intent: string) => Promise<void>; loading: boolean }) {
+function IntentStep({ onSubmit, loading }: { onSubmit: (name: string, intent: string) => Promise<void>; loading: boolean }) {
+  const [name, setName] = useState('');
   const [intent, setIntent] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    textareaRef.current?.focus();
+    nameRef.current?.focus();
   }, []);
 
-  const canSubmit = intent.trim().length > 0 && !loading;
+  const canSubmit = name.trim().length > 0 && intent.trim().length > 0 && !loading;
 
   const handleSubmit = () => {
     if (canSubmit) {
-      onSubmit(intent.trim());
+      onSubmit(name.trim(), intent.trim());
     }
   };
 
@@ -234,16 +235,39 @@ function IntentStep({ onSubmit, loading }: { onSubmit: (intent: string) => Promi
         </p>
       </div>
 
-      <div className="mb-lg">
-        <textarea
-          ref={textareaRef}
-          value={intent}
-          onChange={(e) => setIntent(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="e.g., Finish my essay on climate change, outline the 3 main arguments, write the intro, and have a full draft ready to review"
-          rows={4}
-          className="w-full resize-none rounded-md border border-border bg-bg-elevated px-md py-[12px] text-body leading-[1.6] text-text-primary placeholder:text-text-secondary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
-        />
+      <div className="mb-lg space-y-md">
+        <div>
+          <label className="block text-small font-medium text-text-secondary mb-xs">
+            Session name
+          </label>
+          <input
+            ref={nameRef}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && name.trim().length > 0) {
+                e.preventDefault();
+              }
+            }}
+            placeholder="e.g., Essay Draft"
+            className="w-full rounded-md border border-border bg-bg-elevated px-md py-[12px] text-body leading-[1.6] text-text-primary placeholder:text-text-secondary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-small font-medium text-text-secondary mb-xs">
+            Intent
+          </label>
+          <textarea
+            value={intent}
+            onChange={(e) => setIntent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g., Finish my essay on climate change, outline the 3 main arguments, write the intro, and have a full draft ready to review"
+            rows={4}
+            className="w-full resize-none rounded-md border border-border bg-bg-elevated px-md py-[12px] text-body leading-[1.6] text-text-primary placeholder:text-text-secondary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
+          />
+        </div>
       </div>
 
       <button

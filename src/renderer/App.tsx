@@ -56,10 +56,10 @@ export default function App() {
     initialize();
   }, []);
 
-  const handleIntentSubmit = async (intent: string) => {
+  const handleIntentSubmit = async (name: string, intent: string) => {
     setLoading(true);
     try {
-      const response = await window.api.sessionCreate({ intent });
+      const response = await window.api.sessionCreate({ name, intent });
 
       if (response.error) {
         setStep({
