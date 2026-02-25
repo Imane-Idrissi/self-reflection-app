@@ -34,12 +34,12 @@ export default function SetupWizard({
       {onBack && (
         <button
           onClick={onBack}
-          className="absolute top-lg left-lg z-10 flex items-center gap-xs rounded-md px-sm py-sm text-small text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors duration-[150ms]"
+          className="absolute top-lg left-lg z-10 flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          Dashboard
         </button>
       )}
 
