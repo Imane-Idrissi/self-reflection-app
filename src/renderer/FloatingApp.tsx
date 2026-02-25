@@ -4,6 +4,8 @@ type ViewState = 'idle' | 'expanded' | 'confirming';
 type CardDirection = 'above' | 'below';
 
 const BUTTON_SIZE = 48;
+const IDLE_PILL_WIDTH = 250;
+const IDLE_PILL_HEIGHT = 44;
 const CARD_WIDTH = 320;
 const CARD_PADDING = 20;
 const CONFIRMATION_DURATION = 1500;
@@ -54,7 +56,7 @@ export default function FloatingApp() {
   // Resize the window when view state changes
   useEffect(() => {
     if (viewState === 'idle') {
-      window.floatingApi.resize(BUTTON_SIZE + CARD_PADDING, BUTTON_SIZE + CARD_PADDING, growDirection);
+      window.floatingApi.resize(IDLE_PILL_WIDTH + CARD_PADDING, IDLE_PILL_HEIGHT + CARD_PADDING, growDirection);
     }
   }, [viewState, growDirection]);
 
@@ -189,8 +191,8 @@ export default function FloatingApp() {
   const card = (viewState === 'expanded' || viewState === 'confirming') ? (
     viewState === 'expanded' ? (
       <div
-        className="rounded-lg border border-border bg-bg-elevated shadow-xl"
-        style={{ width: CARD_WIDTH }}
+        className="rounded-lg"
+        style={{ width: CARD_WIDTH, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset' }}
       >
         <div className="p-md">
           <textarea
@@ -199,8 +201,8 @@ export default function FloatingApp() {
             onChange={handleTextChange}
             placeholder="How are you feeling?"
             rows={2}
-            className="w-full resize-none rounded-md border border-border bg-bg-elevated px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
-            style={{ minHeight: 48, maxHeight: 120 }}
+            className="w-full resize-none rounded-md border border-white/60 px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
+            style={{ minHeight: 48, maxHeight: 120, background: 'rgba(255,255,255,0.6)' }}
           />
           <div className="flex justify-end mt-sm">
             <button
@@ -215,8 +217,8 @@ export default function FloatingApp() {
       </div>
     ) : (
       <div
-        className="flex items-center justify-center rounded-lg border border-border bg-positive-bg shadow-xl"
-        style={{ width: CARD_WIDTH, height: 56 }}
+        className="flex items-center justify-center rounded-lg"
+        style={{ width: CARD_WIDTH, height: 56, background: 'rgba(240,253,244,0.82)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset' }}
       >
         <div className="flex items-center gap-sm">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -229,9 +231,41 @@ export default function FloatingApp() {
     )
   ) : null;
 
-  const button = (
+  const button = viewState === 'idle' ? (
     <button
       onMouseDown={handleMouseDown}
+      onClick={handleButtonClick}
+      className="flex items-center gap-sm rounded-full px-md transition-all duration-[150ms] ease-out"
+      style={{
+        width: IDLE_PILL_WIDTH,
+        height: IDLE_PILL_HEIGHT,
+        background: 'rgba(255,255,255,0.78)',
+        border: '1px solid rgba(0,0,0,0.12)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.5) inset',
+        opacity: isPaused ? 0.5 : 1,
+        cursor: 'pointer',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        className="flex items-center justify-center rounded-full"
+        style={{ width: 28, height: 28, background: isPaused ? '#A8A29E' : '#6366F1', flexShrink: 0 }}
+      >
+        <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+          <path
+            d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
+            stroke="white"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </div>
+      <span className="text-small font-medium text-text-primary">How are you feeling?</span>
+    </button>
+  ) : (
+    <button
       onClick={handleButtonClick}
       className="flex items-center justify-center rounded-full shadow-xl transition-all duration-[150ms] ease-out"
       style={{
@@ -244,22 +278,9 @@ export default function FloatingApp() {
         flexShrink: 0,
       }}
     >
-      {viewState === 'expanded' ? (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      ) : (
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path
-            d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-      )}
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
     </button>
   );
 
