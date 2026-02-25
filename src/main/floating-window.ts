@@ -6,7 +6,8 @@ export interface FloatingState {
   status: 'active' | 'paused';
 }
 
-const BUTTON_WINDOW_SIZE = 72;
+const INITIAL_WIDTH = 270;
+const INITIAL_HEIGHT = 64;
 const MARGIN = 24;
 
 export class FloatingWindowManager {
@@ -26,10 +27,10 @@ export class FloatingWindowManager {
     const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
     this.win = new BrowserWindow({
-      width: BUTTON_WINDOW_SIZE,
-      height: BUTTON_WINDOW_SIZE,
-      x: screenWidth - BUTTON_WINDOW_SIZE - MARGIN,
-      y: screenHeight - BUTTON_WINDOW_SIZE - MARGIN,
+      width: INITIAL_WIDTH,
+      height: INITIAL_HEIGHT,
+      x: screenWidth - INITIAL_WIDTH - MARGIN,
+      y: Math.round((screenHeight - INITIAL_HEIGHT) / 2),
       frame: false,
       transparent: true,
       alwaysOnTop: true,
