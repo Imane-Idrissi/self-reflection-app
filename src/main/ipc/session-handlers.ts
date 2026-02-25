@@ -28,6 +28,8 @@ import type {
   ReportRetryResponse,
   CaptureGetInRangeRequest,
   CaptureGetInRangeResponse,
+  DashboardGetSessionsRequest,
+  DashboardSession,
 } from '../../shared/types';
 import { CaptureRepository } from '../database/capture-repository';
 
@@ -220,5 +222,22 @@ export function registerSessionHandlers(
   ipcMain.handle('capture:get-in-range', async (_event, req: CaptureGetInRangeRequest): Promise<CaptureGetInRangeResponse> => {
     const captures = captureRepo.getBySessionIdInTimeRange(req.session_id, req.start_time, req.end_time);
     return { captures };
+  });
+
+  ipcMain.handle('dashboard:get-sessions', async (_event, req: DashboardGetSessionsRequest): Promise<DashboardSession[]> => {
+    const limit = req.limit ?? 10;
+    const sessions = sessionService.getCompletedSessions(limit);
+    return sessions.map((s) => {
+      const startMs = s.started_at ? new Date(s.started_at).getTime() : new Date(s.created_at).getTime();
+      const endMs = s.ended_at ? new Date(s.ended_at).getTime() : startMs;
+      return {
+        session_id: s.session_id,
+        name: s.name,
+        started_at: s.started_at || s.created_at,
+        ended_at: s.ended_at || s.created_at,
+        duration_minutes: Math.round((endMs - startMs) / 60000),
+        has_report: reportService.hasReport(s.session_id),
+      };
+    });
   });
 }

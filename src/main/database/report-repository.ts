@@ -34,6 +34,13 @@ export class ReportRepository {
     ).get(sessionId) as Report | undefined;
   }
 
+  hasReportForSession(sessionId: string): boolean {
+    const row = this.db.prepare(
+      "SELECT 1 FROM reports WHERE session_id = ? AND status = 'ready' LIMIT 1"
+    ).get(sessionId);
+    return !!row;
+  }
+
   updateToReady(reportId: string, summary: string, patterns: string, suggestions: string): void {
     this.db.prepare(
       'UPDATE reports SET status = ?, summary = ?, patterns = ?, suggestions = ? WHERE report_id = ?'

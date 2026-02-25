@@ -215,6 +215,19 @@ export interface CaptureGetInRangeResponse {
   captures: Capture[];
 }
 
+export interface DashboardSession {
+  session_id: string;
+  name: string;
+  started_at: string;
+  ended_at: string;
+  duration_minutes: number;
+  has_report: boolean;
+}
+
+export interface DashboardGetSessionsRequest {
+  limit?: number;
+}
+
 export interface ElectronAPI {
   apikeyCheck: () => Promise<ApiKeyCheckResponse>;
   apikeySave: (req: ApiKeySaveRequest) => Promise<ApiKeySaveResponse>;
@@ -229,6 +242,7 @@ export interface ElectronAPI {
   reportGet: (req: ReportGetRequest) => Promise<ReportGetResponse>;
   reportRetry: (req: ReportRetryRequest) => Promise<ReportRetryResponse>;
   captureGetInRange: (req: CaptureGetInRangeRequest) => Promise<CaptureGetInRangeResponse>;
+  dashboardGetSessions: (req: DashboardGetSessionsRequest) => Promise<DashboardSession[]>;
   onAutoEndWarning: (callback: () => void) => void;
   onAutoEndTriggered: (callback: (summary: SessionSummary, sessionId: string) => void) => void;
   onCaptureWarning: (callback: () => void) => void;

@@ -25,6 +25,8 @@ import type {
   ReportRetryResponse,
   CaptureGetInRangeRequest,
   CaptureGetInRangeResponse,
+  DashboardGetSessionsRequest,
+  DashboardSession,
 } from '../shared/types';
 
 contextBridge.exposeInMainWorld('api', {
@@ -66,6 +68,9 @@ contextBridge.exposeInMainWorld('api', {
 
   captureGetInRange: (req: CaptureGetInRangeRequest): Promise<CaptureGetInRangeResponse> =>
     ipcRenderer.invoke('capture:get-in-range', req),
+
+  dashboardGetSessions: (req: DashboardGetSessionsRequest): Promise<DashboardSession[]> =>
+    ipcRenderer.invoke('dashboard:get-sessions', req),
 
   onAutoEndWarning: (callback: () => void) => {
     ipcRenderer.on('session:auto-end-warning', () => callback());

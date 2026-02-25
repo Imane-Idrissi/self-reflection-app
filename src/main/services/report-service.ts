@@ -83,6 +83,10 @@ export class ReportService {
     this.generateInBackground(sessionId, report.report_id);
   }
 
+  hasReport(sessionId: string): boolean {
+    return this.reportRepo.hasReportForSession(sessionId);
+  }
+
   markStaleAsFailedOnLaunch(): number {
     return this.reportRepo.markStaleAsFailedOnLaunch();
   }

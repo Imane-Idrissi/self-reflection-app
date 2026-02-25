@@ -60,6 +60,12 @@ export class SessionRepository {
     ).all(...statuses) as Session[];
   }
 
+  findCompleted(limit: number): Session[] {
+    return this.db.prepare(
+      'SELECT * FROM session WHERE status = ? ORDER BY ended_at DESC LIMIT ?'
+    ).all('ended', limit) as Session[];
+  }
+
   deleteByStatus(status: Session['status']): number {
     const result = this.db.prepare('DELETE FROM session WHERE status = ?').run(status);
     return result.changes;
