@@ -386,7 +386,7 @@ function StartRecordingStep({
 function WaveTopLeft() {
   return (
     <svg
-      className="absolute top-0 left-0 w-[360px] h-[320px] text-primary-200"
+      className="pointer-events-none absolute top-0 left-0 w-[360px] h-[320px] text-primary-200"
       viewBox="0 0 360 320"
       fill="currentColor"
       preserveAspectRatio="none"
@@ -399,7 +399,7 @@ function WaveTopLeft() {
 function WaveBottomRight() {
   return (
     <svg
-      className="absolute bottom-0 right-0 w-[360px] h-[320px] text-primary-200"
+      className="pointer-events-none absolute bottom-0 right-0 w-[360px] h-[320px] text-primary-200"
       viewBox="0 0 360 320"
       fill="currentColor"
       preserveAspectRatio="none"
