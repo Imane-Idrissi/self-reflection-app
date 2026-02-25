@@ -55,11 +55,7 @@ export default function DashboardScreen({
           <div className="text-center mb-2xl pt-md">
             {isNewUser ? (
               <>
-                <div className="mx-auto mb-lg flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
-                  <svg className="h-7 w-7 text-primary-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                  </svg>
-                </div>
+                <span className="mb-md text-[48px] leading-none" role="img" aria-label="Waving hand">👋</span>
                 <h2 className="font-heading text-display font-bold leading-[1.2] text-text-primary mb-sm">
                   Welcome
                 </h2>
@@ -76,7 +72,7 @@ export default function DashboardScreen({
 
             <button
               onClick={onStartSession}
-              className="mt-xl w-full max-w-[320px] flex items-center justify-center rounded-md bg-primary-500 px-xl py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+              className="mt-xl mx-auto w-full max-w-[320px] flex items-center justify-center rounded-md bg-primary-500 px-xl py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
             >
               Start New Session
             </button>
@@ -98,8 +94,8 @@ export default function DashboardScreen({
             )}
 
             {!loading && sessions.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border px-lg py-xl text-center">
-                <p className="text-small leading-[1.5] text-text-tertiary">
+              <div className="rounded-lg border border-dashed border-border bg-bg-elevated px-lg py-xl text-center">
+                <p className="text-body leading-[1.6] text-text-secondary">
                   Your sessions will appear here
                 </p>
               </div>
