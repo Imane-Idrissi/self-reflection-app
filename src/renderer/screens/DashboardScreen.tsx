@@ -36,16 +36,60 @@ export default function DashboardScreen({
       <WaveTopLeft />
       <WaveBottomRight />
 
-      <Header onSettings={onSettings} />
+      <header className="relative z-10 flex items-center justify-between px-xl py-md">
+        <h1 className="font-heading text-h3 font-semibold leading-[1.4] text-text-primary">
+          Self Reflection
+        </h1>
+        <button
+          onClick={onSettings}
+          className="flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
+        >
+          <KeyIcon />
+          API Key
+        </button>
+      </header>
 
-      <main className="relative z-10 flex-1 px-xl py-2xl">
-        <div className="mx-auto max-w-[520px]">
-          <WelcomeSection isNewUser={isNewUser} onStartSession={onStartSession} />
+      <main className="relative z-10 flex-1 flex flex-col items-center px-md py-xl">
+        <div className="w-full max-w-[520px]">
+          {/* Hero */}
+          <div className="text-center mb-2xl pt-md">
+            {isNewUser ? (
+              <>
+                <div className="mx-auto mb-lg flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
+                  <svg className="h-7 w-7 text-primary-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                  </svg>
+                </div>
+                <h2 className="font-heading text-display font-bold leading-[1.2] text-text-primary mb-sm">
+                  Welcome
+                </h2>
+                <p className="text-body leading-[1.6] text-text-secondary max-w-[420px] mx-auto">
+                  Track your focus sessions, understand your work habits, and
+                  get personalized insights after every session.
+                </p>
+              </>
+            ) : (
+              <h2 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary">
+                Welcome back
+              </h2>
+            )}
 
-          <section className="mt-2xl">
-            <h2 className="font-heading text-h3 font-semibold leading-[1.4] text-text-primary mb-md">
-              Recent Sessions
-            </h2>
+            <button
+              onClick={onStartSession}
+              className="mt-xl w-full max-w-[320px] flex items-center justify-center rounded-md bg-primary-500 px-xl py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+            >
+              Start New Session
+            </button>
+          </div>
+
+          {/* Sessions */}
+          <section>
+            <div className="flex items-center gap-sm mb-md">
+              <div className="h-[2px] w-4 rounded-full bg-primary-500" />
+              <h2 className="font-heading text-small font-semibold uppercase tracking-wide text-text-secondary">
+                Recent Sessions
+              </h2>
+            </div>
 
             {loading && (
               <div className="flex justify-center py-2xl">
@@ -54,7 +98,11 @@ export default function DashboardScreen({
             )}
 
             {!loading && sessions.length === 0 && (
-              <EmptyState />
+              <div className="rounded-lg border border-dashed border-border px-lg py-xl text-center">
+                <p className="text-small leading-[1.5] text-text-tertiary">
+                  Your sessions will appear here
+                </p>
+              </div>
             )}
 
             {!loading && sessions.length > 0 && (
@@ -75,52 +123,6 @@ export default function DashboardScreen({
   );
 }
 
-function Header({ onSettings }: { onSettings: () => void }) {
-  return (
-    <header className="relative z-10 flex items-center justify-between px-xl py-md">
-      <h1 className="font-heading text-h3 font-semibold leading-[1.4] text-text-primary">
-        Self Reflection
-      </h1>
-      <button
-        onClick={onSettings}
-        className="flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:bg-bg-secondary hover:text-text-primary"
-      >
-        <KeyIcon />
-        API Key
-      </button>
-    </header>
-  );
-}
-
-function WelcomeSection({ isNewUser, onStartSession }: { isNewUser: boolean; onStartSession: () => void }) {
-  return (
-    <div className="text-center">
-      {isNewUser ? (
-        <>
-          <h2 className="font-heading text-display font-bold leading-[1.2] text-text-primary mb-sm">
-            Welcome
-          </h2>
-          <p className="text-body leading-[1.6] text-text-secondary max-w-[460px] mx-auto mb-xl">
-            Track your focus sessions, understand your work habits, and get
-            personalized insights after every session.
-          </p>
-        </>
-      ) : (
-        <h2 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary mb-xl">
-          Welcome back
-        </h2>
-      )}
-
-      <button
-        onClick={onStartSession}
-        className="inline-flex items-center justify-center rounded-md bg-primary-500 px-xl py-[12px] text-body font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700"
-      >
-        Start New Session
-      </button>
-    </div>
-  );
-}
-
 function SessionCard({ session, onClick }: { session: DashboardSession; onClick: () => void }) {
   const date = formatDate(session.started_at);
   const duration = formatDuration(session.duration_minutes);
@@ -128,8 +130,9 @@ function SessionCard({ session, onClick }: { session: DashboardSession; onClick:
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-md rounded-lg border border-border bg-bg-elevated px-lg py-md shadow-sm text-left transition-all duration-[150ms] ease-out hover:shadow-md hover:border-primary-200"
+      className="group w-full flex items-center gap-md rounded-lg border border-border bg-bg-elevated px-lg py-md shadow-sm text-left transition-all duration-[150ms] ease-out hover:shadow-md hover:border-primary-200"
     >
+      <div className="h-8 w-1 rounded-full bg-primary-200 transition-colors duration-[150ms] group-hover:bg-primary-500" />
       <div className="flex-1 min-w-0">
         <p className="text-body font-medium leading-[1.6] text-text-primary truncate">
           {session.name}
@@ -141,22 +144,10 @@ function SessionCard({ session, onClick }: { session: DashboardSession; onClick:
       <span className="text-small font-medium leading-[1.5] text-text-secondary whitespace-nowrap">
         {duration}
       </span>
+      <svg className="h-4 w-4 text-text-tertiary transition-colors duration-[150ms] group-hover:text-primary-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
     </button>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="rounded-lg border border-border bg-bg-elevated px-lg py-2xl text-center shadow-sm">
-      <div className="mx-auto mb-md flex h-12 w-12 items-center justify-center rounded-full bg-bg-secondary">
-        <svg className="h-6 w-6 text-text-tertiary" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <p className="text-body leading-[1.6] text-text-secondary">
-        Your sessions will appear here
-      </p>
-    </div>
   );
 }
 

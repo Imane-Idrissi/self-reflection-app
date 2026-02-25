@@ -1,6 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap");
 @import "tailwindcss";
 
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 @theme {
   /* Fonts */
   --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
