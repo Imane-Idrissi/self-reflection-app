@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import DashboardScreen from './screens/DashboardScreen';
 import ApiKeySetupScreen from './screens/ApiKeySetupScreen';
 import SetupWizard from './screens/SetupWizard';
 import ClarificationScreen from './screens/ClarificationScreen';
@@ -12,8 +13,9 @@ import type { SessionSummary } from '../shared/types';
 
 type FlowStep =
   | { type: 'loading' }
+  | { type: 'dashboard' }
   | { type: 'setup'; needsApiKey: boolean; startRecording?: { sessionId: string; finalIntent: string; apiError?: string } }
-  | { type: 'api-key-change' }
+  | { type: 'api-key-change'; returnTo: 'dashboard' | 'setup' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
   | { type: 'permission-denied'; sessionId: string; finalIntent: string }
@@ -21,7 +23,8 @@ type FlowStep =
   | { type: 'report-generating'; sessionId: string; summary: SessionSummary }
   | { type: 'report-ready'; sessionId: string }
   | { type: 'report-failed'; sessionId: string; summary: SessionSummary }
-  | { type: 'report-skipped'; sessionId: string; summary: SessionSummary };
+  | { type: 'report-skipped'; sessionId: string; summary: SessionSummary }
+  | { type: 'view-report'; sessionId: string };
 
 export default function App() {
   const [step, setStep] = useState<FlowStep>({ type: 'loading' });
@@ -43,18 +46,21 @@ export default function App() {
         // If check fails, continue
       }
 
-      let needsApiKey = true;
-      try {
-        const { hasKey } = await window.api.apikeyCheck();
-        needsApiKey = !hasKey;
-      } catch {
-        // If check fails, assume key is needed
-      }
-
-      setStep({ type: 'setup', needsApiKey });
+      setStep({ type: 'dashboard' });
     };
     initialize();
   }, []);
+
+  const handleStartSession = async () => {
+    let needsApiKey = true;
+    try {
+      const { hasKey } = await window.api.apikeyCheck();
+      needsApiKey = !hasKey;
+    } catch {
+      // If check fails, assume key is needed
+    }
+    setStep({ type: 'setup', needsApiKey });
+  };
 
   const handleIntentSubmit = async (name: string, intent: string) => {
     setLoading(true);
@@ -226,8 +232,8 @@ export default function App() {
     setStep({ type: 'report-generating', sessionId, summary });
   };
 
-  const handleStartNewSession = () => {
-    setStep({ type: 'setup', needsApiKey: false });
+  const goToDashboard = () => {
+    setStep({ type: 'dashboard' });
   };
 
   switch (step.type) {
@@ -238,6 +244,15 @@ export default function App() {
         </div>
       );
 
+    case 'dashboard':
+      return (
+        <DashboardScreen
+          onStartSession={handleStartSession}
+          onSettings={() => setStep({ type: 'api-key-change', returnTo: 'dashboard' })}
+          onSessionClick={(sessionId) => setStep({ type: 'view-report', sessionId })}
+        />
+      );
+
     case 'setup':
       return (
         <SetupWizard
@@ -246,7 +261,7 @@ export default function App() {
           onIntentSubmit={handleIntentSubmit}
           onStartRecording={handleStartRecording}
           intentLoading={loading}
-          onSettings={() => setStep({ type: 'api-key-change' })}
+          onSettings={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
         />
       );
 
@@ -254,8 +269,14 @@ export default function App() {
       return (
         <ApiKeySetupScreen
           isChange
-          onComplete={() => setStep({ type: 'setup', needsApiKey: false })}
-          onCancel={() => setStep({ type: 'setup', needsApiKey: false })}
+          onComplete={() => {
+            if (step.returnTo === 'dashboard') setStep({ type: 'dashboard' });
+            else setStep({ type: 'setup', needsApiKey: false });
+          }}
+          onCancel={() => {
+            if (step.returnTo === 'dashboard') setStep({ type: 'dashboard' });
+            else setStep({ type: 'setup', needsApiKey: false });
+          }}
         />
       );
 
@@ -311,7 +332,7 @@ export default function App() {
       return (
         <ReportScreen
           sessionId={step.sessionId}
-          onStartNew={handleStartNewSession}
+          onStartNew={goToDashboard}
         />
       );
 
@@ -335,7 +356,15 @@ export default function App() {
           sessionId={step.sessionId}
           skipped
           summary={step.summary}
-          onStartNew={handleStartNewSession}
+          onStartNew={goToDashboard}
+        />
+      );
+
+    case 'view-report':
+      return (
+        <ReportScreen
+          sessionId={step.sessionId}
+          onStartNew={goToDashboard}
         />
       );
   }
