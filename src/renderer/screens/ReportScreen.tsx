@@ -150,7 +150,7 @@ export default function ReportScreen({
 
         <button
           onClick={onStartNew}
-          className="w-full rounded-md bg-primary-500 px-lg py-[12px] text-body font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700"
+          className="w-full rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
         >
           Start New Session
         </button>

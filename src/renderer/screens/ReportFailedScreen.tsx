@@ -44,7 +44,7 @@ export default function ReportFailedScreen({
           </button>
           <button
             onClick={onRetry}
-            className="flex-1 rounded-md bg-primary-500 px-lg py-[12px] text-body font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700"
+            className="flex-1 rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
           >
             Retry
           </button>
