@@ -188,11 +188,19 @@ export default function FloatingApp() {
   const isPaused = sessionStatus === 'paused';
   const canSubmit = text.trim().length > 0 && !submitting;
 
+  const glassStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, rgba(238,242,255,0.85) 0%, rgba(224,231,255,0.75) 100%)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(199,210,254,0.6)',
+    boxShadow: '0 4px 20px rgba(99,102,241,0.10), inset 0 1px 0 rgba(255,255,255,0.7)',
+  };
+
   const card = (viewState === 'expanded' || viewState === 'confirming') ? (
     viewState === 'expanded' ? (
       <div
         className="rounded-lg"
-        style={{ width: CARD_WIDTH, background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset' }}
+        style={{ ...glassStyle, width: CARD_WIDTH }}
       >
         <div className="p-md">
           <textarea
@@ -201,8 +209,8 @@ export default function FloatingApp() {
             onChange={handleTextChange}
             placeholder="How are you feeling?"
             rows={2}
-            className="w-full resize-none rounded-md border border-white/60 px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
-            style={{ minHeight: 48, maxHeight: 120, background: 'rgba(255,255,255,0.6)' }}
+            className="w-full resize-none rounded-md px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
+            style={{ minHeight: 48, maxHeight: 120, background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.5)' }}
           />
           <div className="flex justify-end mt-sm">
             <button
@@ -218,7 +226,7 @@ export default function FloatingApp() {
     ) : (
       <div
         className="flex items-center justify-center rounded-lg"
-        style={{ width: CARD_WIDTH, height: 56, background: 'rgba(240,253,244,0.82)', border: '1px solid rgba(0,0,0,0.12)', boxShadow: '0 4px 20px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.5) inset' }}
+        style={{ ...glassStyle, width: CARD_WIDTH, height: 56, background: 'linear-gradient(135deg, rgba(240,253,244,0.65) 0%, rgba(220,245,230,0.55) 100%)' }}
       >
         <div className="flex items-center gap-sm">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -237,11 +245,9 @@ export default function FloatingApp() {
       onClick={handleButtonClick}
       className="flex items-center gap-sm rounded-full px-md transition-all duration-[150ms] ease-out"
       style={{
+        ...glassStyle,
         width: IDLE_PILL_WIDTH,
         height: IDLE_PILL_HEIGHT,
-        background: 'rgba(255,255,255,0.78)',
-        border: '1px solid rgba(0,0,0,0.12)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.10), 0 0 0 1px rgba(255,255,255,0.5) inset',
         opacity: isPaused ? 0.5 : 1,
         cursor: 'pointer',
         flexShrink: 0,
