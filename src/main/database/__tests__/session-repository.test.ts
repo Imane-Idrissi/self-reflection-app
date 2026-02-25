@@ -11,6 +11,7 @@ beforeEach(() => {
   db.exec(`
     CREATE TABLE session (
       session_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
       original_intent TEXT NOT NULL,
       final_intent TEXT,
       status TEXT NOT NULL DEFAULT 'created',
@@ -30,9 +31,10 @@ afterEach(() => {
 describe('SessionRepository', () => {
   describe('create', () => {
     it('creates a session with correct fields', () => {
-      const session = repo.create('Write unit tests for the database layer');
+      const session = repo.create('DB Tests', 'Write unit tests for the database layer');
 
       expect(session.session_id).toBeTruthy();
+      expect(session.name).toBe('DB Tests');
       expect(session.original_intent).toBe('Write unit tests for the database layer');
       expect(session.final_intent).toBeNull();
       expect(session.status).toBe('created');
@@ -43,7 +45,7 @@ describe('SessionRepository', () => {
     });
 
     it('persists the session to the database', () => {
-      const session = repo.create('Build the app');
+      const session = repo.create('Build', 'Build the app');
       const found = repo.getById(session.session_id);
 
       expect(found).toBeDefined();
@@ -60,7 +62,7 @@ describe('SessionRepository', () => {
 
   describe('updateFinalIntent', () => {
     it('sets final_intent on an existing session', () => {
-      const session = repo.create('Work on the project');
+      const session = repo.create('Project', 'Work on the project');
       repo.updateFinalIntent(session.session_id, 'Complete the database migration for user table');
 
       const updated = repo.getById(session.session_id);
@@ -70,7 +72,7 @@ describe('SessionRepository', () => {
 
   describe('updateStatus', () => {
     it('updates status to active with started_at', () => {
-      const session = repo.create('Focus on coding');
+      const session = repo.create('Coding', 'Focus on coding');
       const now = new Date().toISOString();
       repo.updateStatus(session.session_id, 'active', now);
 
@@ -80,7 +82,7 @@ describe('SessionRepository', () => {
     });
 
     it('updates status without changing started_at', () => {
-      const session = repo.create('Focus on coding');
+      const session = repo.create('Coding', 'Focus on coding');
       repo.updateStatus(session.session_id, 'ended');
 
       const updated = repo.getById(session.session_id);
@@ -91,9 +93,9 @@ describe('SessionRepository', () => {
 
   describe('deleteByStatus', () => {
     it('deletes all sessions with the given status', () => {
-      repo.create('Abandoned 1');
-      repo.create('Abandoned 2');
-      const kept = repo.create('Will be active');
+      repo.create('A1', 'Abandoned 1');
+      repo.create('A2', 'Abandoned 2');
+      const kept = repo.create('Active', 'Will be active');
       repo.updateStatus(kept.session_id, 'active', new Date().toISOString());
 
       const deleted = repo.deleteByStatus('created');
@@ -112,7 +114,7 @@ describe('SessionRepository', () => {
 
   describe('endSession', () => {
     it('sets status to ended with ended_at and ended_by', () => {
-      const session = repo.create('Test intent');
+      const session = repo.create('Test', 'Test intent');
       repo.updateStatus(session.session_id, 'active', new Date().toISOString());
       repo.endSession(session.session_id, 'user');
 
@@ -123,7 +125,7 @@ describe('SessionRepository', () => {
     });
 
     it('sets ended_by to auto for auto-ended sessions', () => {
-      const session = repo.create('Test intent');
+      const session = repo.create('Test', 'Test intent');
       repo.updateStatus(session.session_id, 'active', new Date().toISOString());
       repo.endSession(session.session_id, 'auto');
 
@@ -134,13 +136,13 @@ describe('SessionRepository', () => {
 
   describe('findByStatuses', () => {
     it('returns sessions matching any of the given statuses', () => {
-      const s1 = repo.create('Intent 1');
+      const s1 = repo.create('S1', 'Intent 1');
       repo.updateStatus(s1.session_id, 'active', new Date().toISOString());
 
-      const s2 = repo.create('Intent 2');
+      const s2 = repo.create('S2', 'Intent 2');
       repo.updateStatus(s2.session_id, 'paused');
 
-      repo.create('Intent 3'); // stays 'created'
+      repo.create('S3', 'Intent 3'); // stays 'created'
 
       const found = repo.findByStatuses(['active', 'paused']);
       expect(found).toHaveLength(2);
@@ -150,16 +152,16 @@ describe('SessionRepository', () => {
     });
 
     it('returns empty array when no sessions match', () => {
-      repo.create('Intent 1');
+      repo.create('S1', 'Intent 1');
       const found = repo.findByStatuses(['active', 'paused']);
       expect(found).toHaveLength(0);
     });
 
     it('returns all matching sessions', () => {
-      const s1 = repo.create('First');
+      const s1 = repo.create('First', 'First');
       repo.updateStatus(s1.session_id, 'active', new Date().toISOString());
 
-      const s2 = repo.create('Second');
+      const s2 = repo.create('Second', 'Second');
       repo.updateStatus(s2.session_id, 'active', new Date().toISOString());
 
       const found = repo.findByStatuses(['active']);

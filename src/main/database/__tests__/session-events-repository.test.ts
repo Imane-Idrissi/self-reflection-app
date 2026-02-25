@@ -13,6 +13,7 @@ beforeEach(() => {
   db.exec(`
     CREATE TABLE session (
       session_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
       original_intent TEXT NOT NULL,
       final_intent TEXT,
       status TEXT NOT NULL DEFAULT 'created',
@@ -42,7 +43,7 @@ afterEach(() => {
 describe('SessionEventsRepository', () => {
   describe('create', () => {
     it('creates a paused event with correct fields', () => {
-      const session = sessionRepo.create('Test intent');
+      const session = sessionRepo.create('Test', 'Test intent');
       const event = eventsRepo.create(session.session_id, 'paused');
 
       expect(event.event_id).toBeTruthy();
@@ -52,7 +53,7 @@ describe('SessionEventsRepository', () => {
     });
 
     it('creates a resumed event', () => {
-      const session = sessionRepo.create('Test intent');
+      const session = sessionRepo.create('Test', 'Test intent');
       const event = eventsRepo.create(session.session_id, 'resumed');
 
       expect(event.event_type).toBe('resumed');
@@ -65,7 +66,7 @@ describe('SessionEventsRepository', () => {
 
   describe('getBySessionId', () => {
     it('returns events in chronological order', () => {
-      const session = sessionRepo.create('Test intent');
+      const session = sessionRepo.create('Test', 'Test intent');
       eventsRepo.create(session.session_id, 'paused');
       eventsRepo.create(session.session_id, 'resumed');
       eventsRepo.create(session.session_id, 'paused');
@@ -78,14 +79,14 @@ describe('SessionEventsRepository', () => {
     });
 
     it('returns empty array for session with no events', () => {
-      const session = sessionRepo.create('Test intent');
+      const session = sessionRepo.create('Test', 'Test intent');
       const events = eventsRepo.getBySessionId(session.session_id);
       expect(events).toHaveLength(0);
     });
 
     it('returns only events for the specified session', () => {
-      const session1 = sessionRepo.create('Intent 1');
-      const session2 = sessionRepo.create('Intent 2');
+      const session1 = sessionRepo.create('S1', 'Intent 1');
+      const session2 = sessionRepo.create('S2', 'Intent 2');
       eventsRepo.create(session1.session_id, 'paused');
       eventsRepo.create(session2.session_id, 'paused');
       eventsRepo.create(session2.session_id, 'resumed');

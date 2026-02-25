@@ -31,6 +31,7 @@ function initSchema(database: Database.Database): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS session (
       session_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
       original_intent TEXT NOT NULL,
       final_intent TEXT,
       status TEXT NOT NULL DEFAULT 'created',
@@ -40,6 +41,8 @@ function initSchema(database: Database.Database): void {
       created_at TEXT NOT NULL
     )
   `);
+
+  migrateSessionName(database);
 
   database.exec(`
     CREATE TABLE IF NOT EXISTS session_events (
@@ -84,6 +87,15 @@ function initSchema(database: Database.Database): void {
       FOREIGN KEY (session_id) REFERENCES session(session_id)
     )
   `);
+}
+
+function migrateSessionName(database: Database.Database): void {
+  const columns = database.pragma('table_info(session)') as { name: string }[];
+  const hasName = columns.some((col) => col.name === 'name');
+  if (hasName) return;
+
+  database.exec("ALTER TABLE session ADD COLUMN name TEXT NOT NULL DEFAULT ''");
+  database.exec("UPDATE session SET name = SUBSTR(original_intent, 1, 40) WHERE name = ''");
 }
 
 export function closeDatabase(): void {

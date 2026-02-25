@@ -9,9 +9,10 @@ export class SessionRepository {
     this.db = db;
   }
 
-  create(originalIntent: string): Session {
+  create(name: string, originalIntent: string): Session {
     const session: Session = {
       session_id: uuidv4(),
+      name,
       original_intent: originalIntent,
       final_intent: null,
       status: 'created',
@@ -22,8 +23,8 @@ export class SessionRepository {
     };
 
     this.db.prepare(`
-      INSERT INTO session (session_id, original_intent, final_intent, status, started_at, ended_at, ended_by, created_at)
-      VALUES (@session_id, @original_intent, @final_intent, @status, @started_at, @ended_at, @ended_by, @created_at)
+      INSERT INTO session (session_id, name, original_intent, final_intent, status, started_at, ended_at, ended_by, created_at)
+      VALUES (@session_id, @name, @original_intent, @final_intent, @status, @started_at, @ended_at, @ended_by, @created_at)
     `).run(session);
 
     return session;

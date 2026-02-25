@@ -39,7 +39,7 @@ export function registerSessionHandlers(
   captureRepo: CaptureRepository,
 ): void {
   ipcMain.handle('session:create', async (_event, req: SessionCreateRequest): Promise<SessionCreateResponse> => {
-    const session = sessionService.createSession(req.intent);
+    const session = sessionService.createSession(req.name, req.intent);
     const aiService = getAiService();
 
     if (!aiService) {

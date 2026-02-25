@@ -34,8 +34,8 @@ export class SessionService {
     this.captureService = captureService;
   }
 
-  createSession(intent: string): Session {
-    return this.repo.create(intent);
+  createSession(name: string, intent: string): Session {
+    return this.repo.create(name, intent);
   }
 
   confirmIntent(sessionId: string, finalIntent: string): void {

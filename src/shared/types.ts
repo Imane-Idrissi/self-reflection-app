@@ -1,5 +1,6 @@
 export interface Session {
   session_id: string;
+  name: string;
   original_intent: string;
   final_intent: string | null;
   status: 'created' | 'active' | 'paused' | 'ended';
@@ -85,6 +86,7 @@ export interface ApiKeySaveResponse {
 // IPC Request/Response types
 
 export interface SessionCreateRequest {
+  name: string;
   intent: string;
 }
 

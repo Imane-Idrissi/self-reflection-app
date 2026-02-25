@@ -19,6 +19,7 @@ beforeEach(() => {
   db.exec(`
     CREATE TABLE session (
       session_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
       original_intent TEXT NOT NULL,
       final_intent TEXT,
       status TEXT NOT NULL DEFAULT 'created',
@@ -75,7 +76,7 @@ afterEach(() => {
 });
 
 function createActiveSession(): string {
-  const session = service.createSession('Test intent');
+  const session = service.createSession('Test', 'Test intent');
   service.startSession(session.session_id);
   return session.session_id;
 }
@@ -83,7 +84,7 @@ function createActiveSession(): string {
 describe('SessionService', () => {
   describe('createSession', () => {
     it('creates a session with original_intent and status created', () => {
-      const session = service.createSession('Build the login page');
+      const session = service.createSession('Login Page', 'Build the login page');
 
       expect(session.original_intent).toBe('Build the login page');
       expect(session.status).toBe('created');
@@ -94,7 +95,7 @@ describe('SessionService', () => {
 
   describe('confirmIntent', () => {
     it('sets the final_intent on an existing session', () => {
-      const session = service.createSession('Work on stuff');
+      const session = service.createSession('Work', 'Work on stuff');
       service.confirmIntent(session.session_id, 'Complete the API integration for user auth');
 
       const updated = service.getSession(session.session_id);
@@ -108,7 +109,7 @@ describe('SessionService', () => {
 
   describe('startSession', () => {
     it('sets status to active and started_at when permission granted', () => {
-      const session = service.createSession('Focus time');
+      const session = service.createSession('Focus', 'Focus time');
       const result = service.startSession(session.session_id);
 
       expect(result.started).toBe(true);
@@ -120,7 +121,7 @@ describe('SessionService', () => {
     });
 
     it('starts the capture service', () => {
-      const session = service.createSession('Focus time');
+      const session = service.createSession('Focus', 'Focus time');
       service.startSession(session.session_id);
 
       expect(captureService.isRunning()).toBe(true);
@@ -129,7 +130,7 @@ describe('SessionService', () => {
     it('returns permissionDenied when accessibility permission is denied', () => {
       mockCheckPermission.mockReturnValue(false);
 
-      const session = service.createSession('Focus time');
+      const session = service.createSession('Focus', 'Focus time');
       const result = service.startSession(session.session_id);
 
       expect(result.started).toBe(false);
@@ -142,7 +143,7 @@ describe('SessionService', () => {
     it('does not start capture when permission denied', () => {
       mockCheckPermission.mockReturnValue(false);
 
-      const session = service.createSession('Focus time');
+      const session = service.createSession('Focus', 'Focus time');
       service.startSession(session.session_id);
 
       expect(captureService.isRunning()).toBe(false);
@@ -153,7 +154,7 @@ describe('SessionService', () => {
     });
 
     it('throws if session is not in created status', () => {
-      const session = service.createSession('Focus time');
+      const session = service.createSession('Focus', 'Focus time');
       service.startSession(session.session_id);
 
       expect(() => service.startSession(session.session_id)).toThrow('Cannot start session in status: active');
@@ -182,7 +183,7 @@ describe('SessionService', () => {
     });
 
     it('throws if session is not active', () => {
-      const session = service.createSession('Test');
+      const session = service.createSession('Test', 'Test');
       expect(() => service.pauseSession(session.session_id)).toThrow('Cannot pause session in status: created');
     });
 
@@ -279,7 +280,7 @@ describe('SessionService', () => {
     });
 
     it('throws if session is not active or paused', () => {
-      const session = service.createSession('Test');
+      const session = service.createSession('Test', 'Test');
       expect(() => service.endSession(session.session_id)).toThrow('Cannot end session in status: created');
     });
 
@@ -296,7 +297,7 @@ describe('SessionService', () => {
 
   describe('getActiveTimeMinutes', () => {
     it('returns 0 for a session that has not started', () => {
-      const session = service.createSession('Test');
+      const session = service.createSession('Test', 'Test');
       expect(service.getActiveTimeMinutes(session.session_id)).toBe(0);
     });
 
@@ -313,7 +314,7 @@ describe('SessionService', () => {
     });
 
     it('returns false when only created sessions exist', () => {
-      service.createSession('Test');
+      service.createSession('Test', 'Test');
       expect(service.hasActiveSession()).toBe(false);
     });
 
@@ -385,7 +386,7 @@ describe('SessionService', () => {
     });
 
     it('ignores created and ended sessions', () => {
-      service.createSession('Created only');
+      service.createSession('Created', 'Created only');
       const id = createActiveSession();
       service.endSession(id);
 
@@ -395,9 +396,9 @@ describe('SessionService', () => {
 
   describe('cleanupAbandoned', () => {
     it('deletes sessions with status created', () => {
-      service.createSession('Abandoned 1');
-      service.createSession('Abandoned 2');
-      const active = service.createSession('Active session');
+      service.createSession('A1', 'Abandoned 1');
+      service.createSession('A2', 'Abandoned 2');
+      const active = service.createSession('Active', 'Active session');
       service.startSession(active.session_id);
 
       const deleted = service.cleanupAbandoned();
@@ -452,7 +453,7 @@ describe('SessionService', () => {
     });
 
     it('throws for created session', () => {
-      const session = service.createSession('Test');
+      const session = service.createSession('Test', 'Test');
       expect(() => service.createFeeling(session.session_id, 'Too early')).toThrow('Cannot log feeling for session in status: created');
     });
 
