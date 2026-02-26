@@ -397,7 +397,11 @@ export default function LandingPage() {
               <UnblurryMark size={14} className="text-text-tertiary" />
               Unblurry
             </span>
-          <span className="text-[13px] text-text-tertiary">&copy; {new Date().getFullYear()} Imane Idrissi. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <a href="./privacy.html" className="text-[13px] text-text-tertiary hover:text-text-secondary">Privacy</a>
+            <a href="./terms.html" className="text-[13px] text-text-tertiary hover:text-text-secondary">Terms</a>
+            <span className="text-[13px] text-text-tertiary">&copy; {new Date().getFullYear()} Imane Idrissi</span>
+          </div>
         </div>
       </footer>
     </div>
