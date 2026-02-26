@@ -88,3 +88,39 @@
   --transition-fast: 150ms ease-out;
   --transition-normal: 200ms ease-out;
 }
+
+/* Dark mode overrides */
+.dark {
+  --color-bg-primary: #1C1917;
+  --color-bg-secondary: #292524;
+  --color-bg-elevated: #292524;
+
+  --color-primary-50: #1a2340;
+  --color-primary-100: #1e2d55;
+  --color-primary-200: #2a4080;
+  --color-primary-400: #6B9FFF;
+  --color-primary-500: #4B8AFF;
+  --color-primary-600: #6B9FFF;
+  --color-primary-700: #8BB4FF;
+
+  --color-text-primary: #FAFAF8;
+  --color-text-secondary: #A8A29E;
+  --color-text-tertiary: #78716C;
+  --color-text-inverse: #1C1917;
+
+  --color-positive: #22C55E;
+  --color-positive-bg: #14291A;
+  --color-caution: #F59E0B;
+  --color-caution-bg: #2A2210;
+  --color-negative: #EF4444;
+  --color-negative-bg: #2A1414;
+  --color-info: #4B8AFF;
+  --color-info-bg: #1a2340;
+
+  --color-border: #44403C;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.4);
+}

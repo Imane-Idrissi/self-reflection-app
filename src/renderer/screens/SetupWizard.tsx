@@ -46,7 +46,7 @@ export default function SetupWizard({
       {onSettings && step === 2 && (
         <button
           onClick={onSettings}
-          className="absolute top-lg right-lg z-10 p-sm rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-secondary transition-colors duration-[150ms]"
+          className="absolute top-lg right-[72px] z-10 p-sm rounded-md text-text-tertiary hover:text-text-secondary hover:bg-bg-secondary transition-colors duration-[150ms]"
           title="Settings"
         >
           <GearIcon />

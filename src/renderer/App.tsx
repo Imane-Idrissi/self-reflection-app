@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from './useTheme';
+import ThemeToggle from './components/ThemeToggle';
 import DashboardScreen from './screens/DashboardScreen';
 import ApiKeySetupScreen from './screens/ApiKeySetupScreen';
 import SetupWizard from './screens/SetupWizard';
@@ -29,6 +31,7 @@ type FlowStep =
 export default function App() {
   const [step, setStep] = useState<FlowStep>({ type: 'loading' });
   const [loading, setLoading] = useState(false);
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     const initialize = async () => {
@@ -236,7 +239,8 @@ export default function App() {
     setStep({ type: 'dashboard' });
   };
 
-  switch (step.type) {
+  const renderScreen = () => {
+    switch (step.type) {
     case 'loading':
       return (
         <div className="flex min-h-screen items-center justify-center bg-bg-primary">
@@ -369,4 +373,16 @@ export default function App() {
         />
       );
   }
+  };
+
+  return (
+    <>
+      {step.type !== 'loading' && (
+        <div className="fixed top-md right-md z-50 no-drag">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
+      )}
+      {renderScreen()}
+    </>
+  );
 }

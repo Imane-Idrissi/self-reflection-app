@@ -36,7 +36,7 @@ export default function DashboardScreen({
       <WaveTopLeft />
       <WaveBottomRight />
 
-      <header className="relative z-10 flex items-center justify-between px-xl py-md">
+      <header className="relative z-10 flex items-center justify-between pl-xl pr-[72px] py-md">
         <h1 className="font-heading text-h3 font-semibold leading-[1.4] text-text-primary">
           Self Reflection
         </h1>
@@ -209,3 +209,4 @@ function KeyIcon() {
     </svg>
   );
 }
+
