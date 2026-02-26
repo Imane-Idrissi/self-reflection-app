@@ -180,7 +180,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24">
+      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24" style={{ overflow: 'clip' }}>
         <WaveTopLeft />
         <WaveBottomRight />
         <div className="relative mx-auto px-6" style={{ maxWidth: 1080 }}>
@@ -342,7 +342,7 @@ export default function LandingPage() {
       </section>
 
       {/* Download CTA */}
-      <section id="download" className="relative overflow-hidden py-16 md:py-24">
+      <section id="download" className="relative py-16 md:py-24" style={{ overflow: 'clip' }}>
         <WaveTopLeft />
         <WaveBottomRight />
         <div className="relative mx-auto px-6 text-center" style={{ maxWidth: 1080 }}>
