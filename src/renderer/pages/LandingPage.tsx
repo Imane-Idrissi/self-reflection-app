@@ -120,7 +120,7 @@ const STEPS = [
   {
     icon: HeartIcon,
     title: 'Log how you feel',
-    description: 'A floating button lets you drop a quick note about your mood or energy — on your terms.',
+    description: 'A floating button lets you drop a quick note about your mood or energy, on your terms.',
   },
   {
     icon: ChartIcon,
@@ -137,7 +137,7 @@ const FEATURES = [
     screenshot: '',
   },
   {
-    title: 'Feeling logs — the "why" behind behavior',
+    title: 'Feeling logs: the "why" behind behavior',
     description:
       'Quick, voluntary check-ins during your session capture what numbers can\'t. Stressed before a meeting? Energized after a breakthrough? These moments add crucial context to your report.',
     screenshot: '',
@@ -145,7 +145,7 @@ const FEATURES = [
   {
     title: 'Behavioral analysis with evidence',
     description:
-      'Not vague summaries — concrete patterns backed by timestamps and your own words. See when you enter deep focus, where you drift, and what triggers context-switching.',
+      'Not vague summaries. Concrete patterns backed by timestamps and your own words. See when you enter deep focus, where you drift, and what triggers context-switching.',
     screenshot: '',
   },
 ];
@@ -194,15 +194,14 @@ export default function LandingPage() {
               className="font-heading font-bold text-text-primary"
               style={{ fontSize: 'clamp(32px, 5vw, 52px)', lineHeight: 1.15, maxWidth: 720 }}
             >
-              Understand not just what you did,&nbsp;but&nbsp;why
+              Did your work match your&nbsp;intent?
             </h1>
 
             <p
               className="mt-5 text-text-secondary"
               style={{ fontSize: 'clamp(16px, 2vw, 19px)', lineHeight: 1.6, maxWidth: 600 }}
             >
-              A private desktop app that silently captures your work sessions, collects your feeling logs,
-              and uses AI to reveal the behavioral patterns behind your productivity.
+              Track your sessions. Log how you feel. Discover why your behavioral patterns happen.
             </p>
 
             {/* CTAs */}
@@ -235,7 +234,7 @@ export default function LandingPage() {
             <div className="mt-14 w-full" style={{ maxWidth: 880 }}>
               <MacWindow
                 src=""
-                alt="Self Reflection app — session dashboard"
+                alt="Self Reflection app session dashboard"
               />
             </div>
           </div>
@@ -319,7 +318,7 @@ export default function LandingPage() {
               Your data never leaves your machine
             </h2>
             <p className="mt-3 text-text-secondary" style={{ fontSize: 17, maxWidth: 520 }}>
-              Privacy isn't a feature — it's the architecture. Everything runs locally.
+              Privacy isn't a feature. It's the architecture. Everything runs locally.
             </p>
 
             <div className="mt-10 grid w-full gap-6 md:grid-cols-3" style={{ maxWidth: 800 }}>
