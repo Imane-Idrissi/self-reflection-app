@@ -39,3 +39,7 @@ release/
 
 # Inspiration screenshots (local reference only)
 **/inspiration/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+*.png
