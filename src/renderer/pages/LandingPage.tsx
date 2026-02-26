@@ -151,6 +151,14 @@ const FEATURES = [
   },
 ];
 
+declare const posthog: { capture: (event: string, properties?: Record<string, string>) => void } | undefined;
+
+function trackDownload(source: string) {
+  if (typeof posthog !== 'undefined') {
+    posthog.capture('download_clicked', { source });
+  }
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-bg-primary">
@@ -171,6 +179,7 @@ export default function LandingPage() {
             </span>
           <a
             href="#download"
+            onClick={() => trackDownload('navbar')}
             className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-4 py-2 text-[13px] font-medium text-text-inverse"
             style={{ transition: 'var(--transition-fast)' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
@@ -213,6 +222,7 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <a
                 href="#download"
+                onClick={() => trackDownload('hero')}
                 className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-[15px] font-semibold text-text-inverse shadow-md"
                 style={{ transition: 'var(--transition-fast)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
@@ -366,6 +376,7 @@ export default function LandingPage() {
           <div className="mt-8">
             <a
               href="#"
+              onClick={() => trackDownload('bottom_cta')}
               className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-7 py-3.5 text-[16px] font-semibold text-text-inverse shadow-md"
               style={{ transition: 'var(--transition-fast)' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
