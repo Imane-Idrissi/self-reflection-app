@@ -92,7 +92,7 @@ export default function PermissionScreen({
           <button
             onClick={handleCheckAgain}
             disabled={loading}
-            className="flex-1 flex items-center justify-center rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700 disabled:bg-primary-200 disabled:text-primary-600 disabled:shadow-none disabled:cursor-not-allowed"
           >
             {loading ? (
               <svg

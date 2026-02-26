@@ -72,7 +72,7 @@ export default function RefinedIntentScreen({
             <button
               onClick={handleEdit}
               disabled={loading}
-              className="flex-1 rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-primary shadow-sm transition-colors duration-[150ms] ease-out hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-primary shadow-sm transition-colors duration-[150ms] ease-out hover:bg-bg-secondary disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Edit
             </button>
@@ -80,7 +80,7 @@ export default function RefinedIntentScreen({
           <button
             onClick={handleConfirm}
             disabled={!canSubmit}
-            className={`${editing ? 'w-full' : 'flex-1'} flex items-center justify-center rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary-500`}
+            className={`${editing ? 'w-full' : 'flex-1'} flex items-center justify-center rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700 disabled:bg-primary-200 disabled:text-primary-600 disabled:shadow-none disabled:cursor-not-allowed`}
           >
             {loading ? (
               <Spinner />

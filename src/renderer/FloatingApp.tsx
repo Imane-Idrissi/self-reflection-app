@@ -216,7 +216,7 @@ export default function FloatingApp() {
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}
-              className="rounded-md bg-primary-500 px-md py-xs text-small font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-md bg-primary-500 px-md py-xs text-small font-medium text-text-inverse shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-600 active:bg-primary-700 disabled:bg-primary-200 disabled:text-primary-600 disabled:shadow-none disabled:cursor-not-allowed"
             >
               {submitting ? 'Saving...' : 'Log feeling'}
             </button>
