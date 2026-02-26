@@ -139,13 +139,13 @@ const FEATURES = [
   {
     title: 'Feeling logs: the "why" behind behavior',
     description:
-      'Quick, voluntary check-ins during your session capture what numbers can\'t. Stressed before a meeting? Energized after a breakthrough? These moments add crucial context to your report.',
+      'Numbers show what you did, but not how you felt doing it. A small floating button lets you drop a quick note whenever you want. No notifications, no interruptions. Your feelings add the context that makes your report actually useful.',
     screenshot: '',
   },
   {
     title: 'Behavioral analysis with evidence',
     description:
-      'Not vague summaries. Concrete patterns backed by timestamps and your own words. See when you enter deep focus, where you drift, and what triggers context-switching.',
+      'Every pattern is backed by real data from your captured session and your feeling logs. No guesswork. You see exactly when you were focused, where you drifted, and what triggered it.',
     screenshot: '',
   },
 ];
@@ -180,7 +180,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24" style={{ overflow: 'clip' }}>
+      <section className="relative pt-28 pb-24 md:pt-40 md:pb-36" style={{ overflow: 'clip' }}>
         <WaveTopLeft />
         <WaveBottomRight />
         <div className="relative mx-auto px-6" style={{ maxWidth: 1080 }}>
@@ -219,10 +219,11 @@ export default function LandingPage() {
               </a>
               <a
                 href="#how-it-works"
-                className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-[15px] font-medium text-text-primary"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-[15px] font-medium text-text-primary shadow-sm"
                 style={{
                   transition: 'var(--transition-fast)',
                   backgroundColor: 'var(--color-bg-elevated)',
+                  borderColor: 'var(--color-border)',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)')}
@@ -231,27 +232,20 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Hero screenshot */}
-            <div className="mt-10 md:mt-14 w-full" style={{ maxWidth: 880 }}>
-              <MacWindow
-                src=""
-                alt="Self Reflection app session dashboard"
-              />
-            </div>
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 md:py-24">
+      <section id="how-it-works" className="py-12 md:py-16" style={{ backgroundColor: '#1C1917' }}>
         <div className="mx-auto px-6" style={{ maxWidth: 1080 }}>
           <h2
-            className="text-center font-heading font-bold text-text-primary"
+            className="text-center font-heading font-bold text-text-inverse"
             style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', lineHeight: 1.2 }}
           >
             How it works
           </h2>
-          <p className="mx-auto mt-3 text-center text-text-secondary" style={{ fontSize: 17, maxWidth: 520 }}>
+          <p className="mx-auto mt-3 text-center" style={{ fontSize: 17, maxWidth: 520, color: 'rgba(250,250,248,0.6)' }}>
             Four simple steps. No complex setup. Just start a session and work.
           </p>
 
@@ -259,17 +253,17 @@ export default function LandingPage() {
             {STEPS.map((step, i) => (
               <div
                 key={i}
-                className="rounded-lg border border-border bg-bg-elevated p-6"
-                style={{ boxShadow: 'var(--shadow-sm)' }}
+                className="rounded-lg p-6"
+                style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(75,138,255,0.3)' }}
               >
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-50 text-primary-500">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(75,138,255,0.15)', color: '#4B8AFF' }}>
                     <step.icon />
                   </div>
-                  <span className="text-[13px] font-semibold text-text-tertiary">Step {i + 1}</span>
+                  <span className="text-[13px] font-semibold" style={{ color: 'rgba(250,250,248,0.5)' }}>Step {i + 1}</span>
                 </div>
-                <h3 className="font-heading text-[18px] font-bold text-text-primary">{step.title}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-text-secondary">{step.description}</p>
+                <h3 className="font-heading text-[18px] font-bold text-text-inverse">{step.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed" style={{ color: 'rgba(250,250,248,0.6)' }}>{step.description}</p>
               </div>
             ))}
           </div>
@@ -279,7 +273,17 @@ export default function LandingPage() {
       {/* Feature Showcase */}
       <section className="py-16 md:py-24">
         <div className="mx-auto px-6" style={{ maxWidth: 1080 }}>
-          <div className="flex flex-col gap-16 md:gap-24">
+          <h2
+            className="text-center font-heading font-bold text-text-primary"
+            style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', lineHeight: 1.2 }}
+          >
+            See it in action
+          </h2>
+          <p className="mx-auto mt-3 text-center text-text-secondary" style={{ fontSize: 17, maxWidth: 520 }}>
+            Every step is designed to be effortless so you can focus on your work.
+          </p>
+
+          <div className="mt-14 flex flex-col gap-16 md:gap-24">
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
@@ -306,19 +310,19 @@ export default function LandingPage() {
       </section>
 
       {/* Privacy Callout */}
-      <section className="bg-bg-secondary py-16 md:py-24">
+      <section className="py-16 md:py-24" style={{ backgroundColor: '#1C1917' }}>
         <div className="mx-auto px-6" style={{ maxWidth: 1080 }}>
           <div className="flex flex-col items-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 text-primary-500">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(75,138,255,0.15)', color: '#4B8AFF' }}>
               <ShieldIcon />
             </div>
             <h2
-              className="mt-5 font-heading font-bold text-text-primary"
+              className="mt-5 font-heading font-bold text-text-inverse"
               style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', lineHeight: 1.2 }}
             >
               Your data never leaves your machine
             </h2>
-            <p className="mt-3 text-text-secondary" style={{ fontSize: 17, maxWidth: 520 }}>
+            <p className="mt-3" style={{ fontSize: 17, maxWidth: 520, color: 'rgba(250,250,248,0.6)' }}>
               Privacy isn't a feature. It's the architecture. Everything runs locally.
             </p>
 
@@ -328,12 +332,12 @@ export default function LandingPage() {
                 { icon: KeyIcon, title: 'Bring your own API key', desc: 'Your Gemini key, your billing. We never see or store it on any server.' },
                 { icon: UserOffIcon, title: 'No account needed', desc: 'No sign-up, no login, no tracking. Download and start using it.' },
               ].map((item, i) => (
-                <div key={i} className="rounded-lg border border-border bg-bg-elevated p-5 text-left" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-500">
+                <div key={i} className="rounded-lg p-5 text-left" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(75,138,255,0.3)' }}>
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(75,138,255,0.15)', color: '#4B8AFF' }}>
                     <item.icon />
                   </div>
-                  <h3 className="font-heading text-[15px] font-bold text-text-primary">{item.title}</h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-text-secondary">{item.desc}</p>
+                  <h3 className="font-heading text-[15px] font-bold text-text-inverse">{item.title}</h3>
+                  <p className="mt-1.5 text-[14px] leading-relaxed" style={{ color: 'rgba(250,250,248,0.6)' }}>{item.desc}</p>
                 </div>
               ))}
             </div>
