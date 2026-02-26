@@ -140,8 +140,11 @@ export default function ReportScreen({
                       <p className="text-body leading-[1.6] text-text-primary mb-sm">
                         {suggestion.text}
                       </p>
-                      <span className="inline-block rounded-sm bg-bg-secondary px-sm py-xs text-caption font-medium text-text-tertiary">
-                        {suggestion.addresses_pattern}
+                      <span className="inline-flex items-center gap-xs text-caption text-text-tertiary">
+                        <span className="font-medium">Related pattern:</span>
+                        <span className="rounded-sm bg-primary-50 px-sm py-xs font-medium text-primary-600">
+                          {suggestion.addresses_pattern}
+                        </span>
                       </span>
                     </div>
                   ))}
@@ -179,12 +182,6 @@ function PatternCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const confidenceStyles = {
-    high: 'bg-positive-bg text-positive',
-    medium: 'bg-caution-bg text-caution',
-    low: 'bg-negative-bg text-negative',
-  };
-
   const typeStyles = {
     positive: { label: 'Positive', className: 'bg-positive-bg text-positive' },
     negative: { label: 'Negative', className: 'bg-negative-bg text-negative' },
@@ -215,17 +212,10 @@ function PatternCard({
         <h3 className="font-heading text-h3 font-semibold text-text-primary">
           {pattern.name}
         </h3>
-        <div className="flex items-center gap-sm shrink-0">
-          <span className={`inline-flex items-center gap-xs rounded-sm px-sm py-xs text-caption font-medium ${typeStyles[pattern.type].className}`}>
-            {typeIcon[pattern.type]}
-            {typeStyles[pattern.type].label}
-          </span>
-          <span
-            className={`inline-block rounded-sm px-sm py-xs text-caption font-medium ${confidenceStyles[pattern.confidence]}`}
-          >
-            {pattern.confidence}
-          </span>
-        </div>
+        <span className={`inline-flex items-center gap-xs rounded-sm px-sm py-xs text-caption font-medium shrink-0 ${typeStyles[pattern.type].className}`}>
+          {typeIcon[pattern.type]}
+          {typeStyles[pattern.type].label}
+        </span>
       </div>
 
       <p className="text-body leading-[1.6] text-text-secondary mb-md">
