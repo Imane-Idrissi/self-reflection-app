@@ -43,3 +43,5 @@ release/
 # Playwright MCP screenshots
 .playwright-mcp/
 *.png
+!src/renderer/og-image.png
+!src/renderer/apple-touch-icon.png
