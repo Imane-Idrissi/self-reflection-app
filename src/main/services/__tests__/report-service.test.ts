@@ -47,6 +47,7 @@ function createTestSchema(database: Database.Database) {
   database.exec(`
     CREATE TABLE session (
       session_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL DEFAULT '',
       original_intent TEXT NOT NULL,
       final_intent TEXT,
       status TEXT NOT NULL DEFAULT 'created',
@@ -102,8 +103,8 @@ function createEndedSession(id: string = 'test-session'): string {
   const startedAt = '2024-01-01T09:00:00.000Z';
   const endedAt = '2024-01-01T10:00:00.000Z';
   db.prepare(`
-    INSERT INTO session (session_id, original_intent, final_intent, status, started_at, ended_at, ended_by, created_at)
-    VALUES (?, 'Build the login page', 'Build the login page with React', 'ended', ?, ?, 'user', ?)
+    INSERT INTO session (session_id, name, original_intent, final_intent, status, started_at, ended_at, ended_by, created_at)
+    VALUES (?, 'Login Page Work', 'Build the login page', 'Build the login page with React', 'ended', ?, ?, 'user', ?)
   `).run(id, startedAt, endedAt, startedAt);
   return id;
 }

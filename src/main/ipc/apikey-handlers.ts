@@ -17,9 +17,10 @@ export function registerApiKeyHandlers(apiKeyService: ApiKeyService): void {
       apiKeyService.saveKey(req.key);
       return { success: true };
     } catch (error) {
+      console.error('API key save failed:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to save API key',
+        error: 'Failed to save API key. Please try again.',
       };
     }
   });

@@ -189,6 +189,7 @@ export interface ReportGetResponse {
   status: 'generating' | 'ready' | 'failed';
   report?: ParsedReport;
   session?: {
+    name: string;
     intent: string;
     total_minutes: number;
     active_minutes: number;

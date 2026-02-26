@@ -62,6 +62,7 @@ export class ReportService {
       status: 'ready',
       report: parsed,
       session: {
+        name: session.name,
         intent: session.final_intent || session.original_intent,
         total_minutes: Math.round(totalMinutes * 10) / 10,
         active_minutes: Math.round(activeMinutes * 10) / 10,
