@@ -206,6 +206,11 @@ export interface ReportRetryResponse {
   error?: string;
 }
 
+export interface ReportDownloadResponse {
+  success: boolean;
+  error?: string;
+}
+
 export interface CaptureGetInRangeRequest {
   session_id: string;
   start_time: string;
@@ -243,6 +248,7 @@ export interface ElectronAPI {
   reportGet: (req: ReportGetRequest) => Promise<ReportGetResponse>;
   reportRetry: (req: ReportRetryRequest) => Promise<ReportRetryResponse>;
   captureGetInRange: (req: CaptureGetInRangeRequest) => Promise<CaptureGetInRangeResponse>;
+  reportDownload: () => Promise<ReportDownloadResponse>;
   dashboardGetSessions: (req: DashboardGetSessionsRequest) => Promise<DashboardSession[]>;
   onAutoEndWarning: (callback: () => void) => void;
   onAutoEndTriggered: (callback: (summary: SessionSummary, sessionId: string) => void) => void;

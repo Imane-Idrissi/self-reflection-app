@@ -50,3 +50,17 @@ body {
 .recording-pulse {
   animation: recording-pulse 2s ease-in-out infinite;
 }
+
+/* Print styles for PDF export */
+@media print {
+  .drag-region,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background-color: white;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

@@ -1,4 +1,5 @@
-import { ipcMain } from 'electron';
+import { ipcMain, dialog, BrowserWindow } from 'electron';
+import fs from 'fs/promises';
 import { SessionService } from '../services/session-service';
 import { AiService, AiServiceError } from '../services/ai-service';
 import { ReportService } from '../services/report-service';
@@ -26,6 +27,7 @@ import type {
   ReportGetResponse,
   ReportRetryRequest,
   ReportRetryResponse,
+  ReportDownloadResponse,
   CaptureGetInRangeRequest,
   CaptureGetInRangeResponse,
   DashboardGetSessionsRequest,
@@ -215,6 +217,34 @@ export function registerSessionHandlers(
       return {
         success: false,
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  });
+
+  ipcMain.handle('report:download', async (event): Promise<ReportDownloadResponse> => {
+    try {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (!win) return { success: false, error: 'No window found' };
+
+      const date = new Date().toISOString().split('T')[0];
+      const { canceled, filePath } = await dialog.showSaveDialog(win, {
+        defaultPath: `session-report-${date}.pdf`,
+        filters: [{ name: 'PDF', extensions: ['pdf'] }],
+      });
+
+      if (canceled || !filePath) return { success: false };
+
+      const pdfBuffer = await win.webContents.printToPDF({
+        printBackground: true,
+        margins: { top: 0.4, bottom: 0.4, left: 0.4, right: 0.4 },
+      });
+
+      await fs.writeFile(filePath, pdfBuffer);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate PDF',
       };
     }
   });

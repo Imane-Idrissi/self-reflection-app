@@ -23,6 +23,7 @@ import type {
   ReportGetResponse,
   ReportRetryRequest,
   ReportRetryResponse,
+  ReportDownloadResponse,
   CaptureGetInRangeRequest,
   CaptureGetInRangeResponse,
   DashboardGetSessionsRequest,
@@ -65,6 +66,9 @@ contextBridge.exposeInMainWorld('api', {
 
   reportRetry: (req: ReportRetryRequest): Promise<ReportRetryResponse> =>
     ipcRenderer.invoke('report:retry', req),
+
+  reportDownload: (): Promise<ReportDownloadResponse> =>
+    ipcRenderer.invoke('report:download'),
 
   captureGetInRange: (req: CaptureGetInRangeRequest): Promise<CaptureGetInRangeResponse> =>
     ipcRenderer.invoke('capture:get-in-range', req),

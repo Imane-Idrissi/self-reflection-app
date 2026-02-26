@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReportGetResponse, ReportPattern, ReportEvidence } from '../../shared/types';
 
 interface ReportScreenProps {
@@ -19,6 +19,17 @@ export default function ReportScreen({
     evidence: ReportEvidence;
     sessionId: string;
   } | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = useCallback(async () => {
+    setDownloading(true);
+    try {
+      const result = await window.api.reportDownload();
+      if (result.error) console.error('PDF download failed:', result.error);
+    } finally {
+      setDownloading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (skipped) return;
@@ -50,10 +61,26 @@ export default function ReportScreen({
         {/* Section 1: Intent + Session Overview */}
         <section className="mb-2xl">
           <div className="mb-xl">
-            <p className="text-small font-medium text-text-tertiary mb-xs">Session Report</p>
-            <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary">
-              {sessionData?.name || 'Untitled Session'}
-            </h1>
+            <div className="flex items-start justify-between gap-md">
+              <div>
+                <p className="text-small font-medium text-text-tertiary mb-xs">Session Report</p>
+                <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary">
+                  {sessionData?.name || 'Untitled Session'}
+                </h1>
+              </div>
+              {!skipped && report && (
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="print:hidden shrink-0 mt-md flex items-center gap-xs rounded-md bg-primary-500 px-md py-sm text-small font-medium text-text-inverse shadow-sm transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-md active:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  {downloading ? 'Generating...' : 'Download PDF'}
+                </button>
+              )}
+            </div>
           </div>
 
           {sessionData?.intent && (
@@ -156,7 +183,7 @@ export default function ReportScreen({
 
         <button
           onClick={onStartNew}
-          className="w-full rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+          className="print:hidden w-full rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
         >
           Start New Session
         </button>

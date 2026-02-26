@@ -63,12 +63,17 @@ import ReportScreen from './screens/ReportScreen';
         ],
       },
       session: {
+        name: 'Thesis Research Session',
         intent: 'Research and write the introduction section of my thesis on machine learning interpretability',
         total_minutes: 105,
         active_minutes: 92,
         paused_minutes: 13,
       },
     }),
+  reportDownload: () => {
+    alert('PDF download only works in the Electron app (uses native printToPDF)');
+    return Promise.resolve({ success: false, error: 'Not available in preview' });
+  },
   captureGetInRange: () =>
     Promise.resolve({
       captures: [
