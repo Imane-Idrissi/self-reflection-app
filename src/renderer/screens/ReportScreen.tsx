@@ -39,7 +39,7 @@ export default function ReportScreen({
   };
 
   const sessionData = skipped
-    ? { intent: '', ...skippedSummary! }
+    ? { name: '', intent: '', ...skippedSummary! }
     : data?.session;
 
   const report = skipped ? null : data?.report;
@@ -49,9 +49,12 @@ export default function ReportScreen({
       <div className="mx-auto max-w-[680px] px-lg py-3xl">
         {/* Section 1: Intent + Session Overview */}
         <section className="mb-2xl">
-          <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary mb-lg">
-            Session Report
-          </h1>
+          <div className="mb-xl">
+            <p className="text-small font-medium text-text-tertiary mb-xs">Session Report</p>
+            <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary">
+              {sessionData?.name || 'Untitled Session'}
+            </h1>
+          </div>
 
           {sessionData?.intent && (
             <div className="rounded-lg border border-border bg-bg-elevated px-lg py-lg shadow-sm mb-lg">
@@ -182,21 +185,40 @@ function PatternCard({
     low: 'bg-negative-bg text-negative',
   };
 
-  const typeLabel = {
-    positive: 'Positive',
-    negative: 'Negative',
-    neutral: 'Neutral',
+  const typeStyles = {
+    positive: { label: 'Positive', className: 'bg-positive-bg text-positive' },
+    negative: { label: 'Negative', className: 'bg-negative-bg text-negative' },
+    neutral: { label: 'Neutral', className: 'bg-bg-secondary text-text-tertiary' },
+  };
+
+  const typeIcon = {
+    positive: (
+      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
+      </svg>
+    ),
+    negative: (
+      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+      </svg>
+    ),
+    neutral: (
+      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+      </svg>
+    ),
   };
 
   return (
-    <div className="rounded-lg border border-border bg-bg-elevated px-lg py-lg shadow-sm">
+    <div className="rounded-lg border border-border bg-bg-elevated px-lg py-xl shadow-sm">
       <div className="flex items-start justify-between gap-md mb-sm">
         <h3 className="font-heading text-h3 font-semibold text-text-primary">
           {pattern.name}
         </h3>
         <div className="flex items-center gap-sm shrink-0">
-          <span className="text-caption font-medium text-text-tertiary">
-            {typeLabel[pattern.type]}
+          <span className={`inline-flex items-center gap-xs rounded-sm px-sm py-xs text-caption font-medium ${typeStyles[pattern.type].className}`}>
+            {typeIcon[pattern.type]}
+            {typeStyles[pattern.type].label}
           </span>
           <span
             className={`inline-block rounded-sm px-sm py-xs text-caption font-medium ${confidenceStyles[pattern.confidence]}`}
@@ -236,12 +258,19 @@ function PatternCard({
                 <button
                   key={i}
                   onClick={() => onEvidenceClick(ev)}
-                  className="w-full text-left rounded-md border border-border px-md py-sm text-small text-text-secondary hover:bg-bg-secondary transition-colors duration-[150ms]"
+                  className="group flex w-full items-center text-left rounded-md border border-border px-md py-sm text-small text-text-secondary hover:bg-bg-secondary hover:border-primary-200 transition-colors duration-[150ms]"
                 >
-                  <span className="inline-block rounded-sm bg-bg-secondary px-xs py-[1px] text-caption font-medium text-text-tertiary mr-sm">
+                  <span className={`inline-block shrink-0 rounded-sm px-xs py-[1px] text-caption font-medium mr-sm ${
+                    ev.type === 'capture'
+                      ? 'bg-info-bg text-info'
+                      : 'bg-caution-bg text-caution'
+                  }`}>
                     {ev.type}
                   </span>
-                  {ev.description}
+                  <span className="flex-1 truncate">{ev.description}</span>
+                  <svg className="ml-sm h-3.5 w-3.5 shrink-0 text-text-tertiary group-hover:text-primary-500 transition-colors duration-[150ms]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               ))}
             </div>

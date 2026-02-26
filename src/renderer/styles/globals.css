@@ -18,10 +18,12 @@ body {
 }
 
 /* Headings default to Jakarta Sans */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  color: var(--color-text-primary);
-  margin: 0;
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
 }
 
 /* Focus ring */
