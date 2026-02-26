@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 type Theme = 'light' | 'dark';
 
-const STORAGE_KEY = 'self-reflection-theme';
+const STORAGE_KEY = 'unblurry-theme';
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY);

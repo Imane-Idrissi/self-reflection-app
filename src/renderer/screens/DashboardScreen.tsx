@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { DashboardSession } from '../../shared/types';
+import { UnblurryLogo } from '../components/UnblurryLogo';
 
 interface DashboardScreenProps {
   onStartSession: () => void;
@@ -37,9 +38,7 @@ export default function DashboardScreen({
       <WaveBottomRight />
 
       <header className="relative z-10 flex items-center justify-between pl-xl pr-[72px] py-md">
-        <h1 className="font-heading text-h3 font-semibold leading-[1.4] text-text-primary">
-          Self Reflection
-        </h1>
+        <UnblurryLogo size={24} />
         <button
           onClick={onSettings}
           className="flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"

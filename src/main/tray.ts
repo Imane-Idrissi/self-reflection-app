@@ -37,12 +37,12 @@ export function showTray(state: 'recording' | 'paused'): void {
 
   if (tray) {
     tray.setImage(icon);
-    tray.setToolTip(state === 'recording' ? 'Self Reflection — Recording' : 'Self Reflection — Paused');
+    tray.setToolTip(state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused');
     return;
   }
 
   tray = new Tray(icon);
-  tray.setToolTip(state === 'recording' ? 'Self Reflection — Recording' : 'Self Reflection — Paused');
+  tray.setToolTip(state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused');
 
   tray.on('click', () => {
     const windows = BrowserWindow.getAllWindows();

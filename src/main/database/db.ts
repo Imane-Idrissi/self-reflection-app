@@ -6,7 +6,7 @@ let db: Database.Database | null = null;
 
 function getDbPath(): string {
   const userDataPath = app.getPath('userData');
-  return path.join(userDataPath, 'self-reflection.db');
+  return path.join(userDataPath, 'unblurry.db');
 }
 
 export function getDatabase(): Database.Database {

@@ -1,7 +1,7 @@
 {
-  "name": "self-reflection-app",
+  "name": "unblurry",
   "version": "0.1.0",
-  "description": "A privacy-focused desktop app for behavioral self-reflection",
+  "description": "A privacy-focused desktop app that helps you see your work habits clearly",
   "main": "dist/main/main/main.js",
   "scripts": {
     "dev:main": "tsc -p tsconfig.main.json",

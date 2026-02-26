@@ -164,7 +164,14 @@ export default function LandingPage() {
         }}
       >
         <div className="mx-auto flex items-center justify-between px-6 py-3" style={{ maxWidth: 1080 }}>
-          <span className="font-heading text-[17px] font-bold text-text-primary">Self Reflection</span>
+          <span className="inline-flex items-center gap-[6px]">
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none" className="text-primary-500">
+                <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+                <circle cx="16" cy="16" r="9" stroke="currentColor" strokeWidth="2" opacity="0.6" />
+                <circle cx="16" cy="16" r="4" fill="currentColor" />
+              </svg>
+              <span className="font-heading text-[17px] font-bold text-text-primary">Unblurry</span>
+            </span>
           <a
             href="#download"
             className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-4 py-2 text-[13px] font-medium text-text-inverse"
@@ -378,7 +385,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-6">
         <div className="mx-auto flex items-center justify-between px-6" style={{ maxWidth: 1080 }}>
-          <span className="text-[13px] text-text-tertiary">Self Reflection</span>
+          <span className="text-[13px] text-text-tertiary">Unblurry</span>
           <span className="text-[13px] text-text-tertiary">&copy; {new Date().getFullYear()}</span>
         </div>
       </footer>

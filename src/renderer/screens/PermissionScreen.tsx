@@ -69,7 +69,7 @@ export default function PermissionScreen({
             </li>
             <li className="flex items-start gap-sm">
               <span className="flex-shrink-0 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-primary-50 text-caption font-medium text-primary-500">3</span>
-              <span>Toggle on <strong className="text-text-primary font-medium">Self Reflection</strong> in the list</span>
+              <span>Toggle on <strong className="text-text-primary font-medium">Unblurry</strong> in the list</span>
             </li>
           </ol>
         </div>
