@@ -83,7 +83,7 @@ function UserOffIcon() {
 function WaveTopLeft() {
   return (
     <svg
-      className="pointer-events-none absolute top-0 left-0 w-[360px] h-[320px] text-primary-200"
+      className="pointer-events-none absolute top-0 left-0 w-[200px] h-[180px] md:w-[360px] md:h-[320px] text-primary-200"
       viewBox="0 0 360 320"
       fill="currentColor"
       preserveAspectRatio="none"
@@ -96,7 +96,7 @@ function WaveTopLeft() {
 function WaveBottomRight() {
   return (
     <svg
-      className="pointer-events-none absolute bottom-0 right-0 w-[360px] h-[320px] text-primary-200"
+      className="pointer-events-none absolute bottom-0 right-0 w-[200px] h-[180px] md:w-[360px] md:h-[320px] text-primary-200"
       viewBox="0 0 360 320"
       fill="currentColor"
       preserveAspectRatio="none"
@@ -152,7 +152,7 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen overflow-x-hidden bg-bg-primary">
       {/* Nav */}
       <nav
         className="fixed top-0 left-0 right-0 z-50"
@@ -173,7 +173,8 @@ export default function LandingPage() {
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-500)')}
           >
             <DownloadIcon />
-            Download for macOS
+            <span className="hidden sm:inline">Download for macOS</span>
+            <span className="sm:hidden">Download</span>
           </a>
         </div>
       </nav>
@@ -231,7 +232,7 @@ export default function LandingPage() {
             </div>
 
             {/* Hero screenshot */}
-            <div className="mt-14 w-full" style={{ maxWidth: 880 }}>
+            <div className="mt-10 md:mt-14 w-full" style={{ maxWidth: 880 }}>
               <MacWindow
                 src=""
                 alt="Self Reflection app session dashboard"
@@ -278,7 +279,7 @@ export default function LandingPage() {
       {/* Feature Showcase */}
       <section className="py-16 md:py-24">
         <div className="mx-auto px-6" style={{ maxWidth: 1080 }}>
-          <div className="flex flex-col gap-24">
+          <div className="flex flex-col gap-16 md:gap-24">
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
