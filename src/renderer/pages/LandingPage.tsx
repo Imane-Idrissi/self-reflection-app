@@ -1,4 +1,5 @@
 import MacWindow from '../components/MacWindow';
+import { UnblurryMark } from '../components/UnblurryLogo';
 
 function AppleIcon() {
   return (
@@ -165,11 +166,7 @@ export default function LandingPage() {
       >
         <div className="mx-auto flex items-center justify-between px-6 py-3" style={{ maxWidth: 1080 }}>
           <span className="inline-flex items-center gap-[6px]">
-              <svg width="22" height="22" viewBox="0 0 32 32" fill="none" className="text-primary-500">
-                <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
-                <circle cx="16" cy="16" r="9" stroke="currentColor" strokeWidth="2" opacity="0.6" />
-                <circle cx="16" cy="16" r="4" fill="currentColor" />
-              </svg>
+              <UnblurryMark size={22} className="text-primary-500" />
               <span className="font-heading text-[17px] font-bold text-text-primary">Unblurry</span>
             </span>
           <a
