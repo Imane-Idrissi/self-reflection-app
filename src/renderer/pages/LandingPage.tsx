@@ -177,14 +177,14 @@ export default function LandingPage() {
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-500)')}
           >
             <DownloadIcon />
-            <span className="hidden sm:inline">Download for macOS</span>
+            <span className="hidden sm:inline">Download free for macOS</span>
             <span className="sm:hidden">Download</span>
           </a>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-32 pb-32 md:pt-48 md:pb-48" style={{ overflow: 'clip', minHeight: '85vh', display: 'flex', alignItems: 'center' }}>
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32" style={{ overflow: 'clip', minHeight: '70vh', display: 'flex', alignItems: 'center' }}>
         <WaveTopLeft />
         <WaveBottomRight />
         <div className="relative mx-auto px-6" style={{ maxWidth: 1080 }}>
@@ -219,7 +219,7 @@ export default function LandingPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-500)')}
               >
                 <DownloadIcon />
-                Download for macOS
+                Download free for macOS
               </a>
               <a
                 href="#how-it-works"
@@ -372,7 +372,7 @@ export default function LandingPage() {
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-500)')}
             >
               <DownloadIcon />
-              Download for macOS
+              Download free for macOS
             </a>
           </div>
           <p className="mt-4 text-[13px] text-text-tertiary">Requires macOS 12 or later</p>
@@ -382,8 +382,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-6">
         <div className="mx-auto flex items-center justify-between px-6" style={{ maxWidth: 1080 }}>
-          <span className="text-[13px] text-text-tertiary">Unblurry</span>
-          <span className="text-[13px] text-text-tertiary">&copy; {new Date().getFullYear()}</span>
+          <span className="inline-flex items-center gap-[6px] text-[13px] text-text-tertiary">
+              <UnblurryMark size={14} className="text-text-tertiary" />
+              Unblurry
+            </span>
+          <span className="text-[13px] text-text-tertiary">&copy; {new Date().getFullYear()} Imane Idrissi. All rights reserved.</span>
         </div>
       </footer>
     </div>
