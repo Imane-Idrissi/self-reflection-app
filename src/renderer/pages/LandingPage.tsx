@@ -184,7 +184,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-28 pb-24 md:pt-40 md:pb-36" style={{ overflow: 'clip' }}>
+      <section className="relative pt-32 pb-32 md:pt-48 md:pb-48" style={{ overflow: 'clip', minHeight: '85vh', display: 'flex', alignItems: 'center' }}>
         <WaveTopLeft />
         <WaveBottomRight />
         <div className="relative mx-auto px-6" style={{ maxWidth: 1080 }}>
@@ -241,7 +241,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-12 md:py-16" style={{ backgroundColor: '#1C1917' }}>
+      <section id="how-it-works" className="pt-8 pb-12 md:pt-10 md:pb-16" style={{ backgroundColor: '#1C1917' }}>
         <div className="mx-auto px-6" style={{ maxWidth: 1080 }}>
           <h2
             className="text-center font-heading font-bold text-text-inverse"
