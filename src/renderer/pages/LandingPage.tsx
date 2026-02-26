@@ -180,10 +180,8 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 pb-16 md:pt-36 md:pb-24">
-        <div className="opacity-30">
-          <WaveTopLeft />
-          <WaveBottomRight />
-        </div>
+        <WaveTopLeft />
+        <WaveBottomRight />
         <div className="relative mx-auto px-6" style={{ maxWidth: 1080 }}>
           <div className="flex flex-col items-center text-center">
             {/* Pill badge */}
@@ -345,10 +343,8 @@ export default function LandingPage() {
 
       {/* Download CTA */}
       <section id="download" className="relative overflow-hidden py-16 md:py-24">
-        <div className="opacity-20">
-          <WaveTopLeft />
-          <WaveBottomRight />
-        </div>
+        <WaveTopLeft />
+        <WaveBottomRight />
         <div className="relative mx-auto px-6 text-center" style={{ maxWidth: 1080 }}>
           <h2
             className="font-heading font-bold text-text-primary"
