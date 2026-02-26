@@ -1,6 +1,8 @@
-import { createElement } from 'react';
+import { createElement, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/globals.css';
+import { useTheme } from './useTheme';
+import ThemeToggle from './components/ThemeToggle';
 import ReportScreen from './screens/ReportScreen';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,9 +88,19 @@ import ReportScreen from './screens/ReportScreen';
     }),
 };
 
+function ReportPreview() {
+  const { theme, toggle } = useTheme();
+  return createElement('div', null,
+    createElement('div', { className: 'fixed top-md right-md z-50' },
+      createElement(ThemeToggle, { theme, onToggle: toggle })
+    ),
+    createElement(ReportScreen, {
+      sessionId: 'preview-session',
+      onStartNew: () => alert('Start New Session clicked'),
+    })
+  );
+}
+
 createRoot(document.getElementById('root')!).render(
-  createElement(ReportScreen, {
-    sessionId: 'preview-session',
-    onStartNew: () => alert('Start New Session clicked'),
-  })
+  createElement(ReportPreview)
 );
