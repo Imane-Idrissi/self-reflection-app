@@ -201,7 +201,7 @@ export default function LandingPage() {
               className="mt-5 text-text-secondary"
               style={{ fontSize: 'clamp(16px, 2vw, 19px)', lineHeight: 1.6, maxWidth: 600 }}
             >
-              Track your sessions. Log how you feel. Discover why your behavioral patterns happen.
+              A private desktop app that shows you what you did, whether it matched your intent, and why you worked the way you did.
             </p>
 
             {/* CTAs */}
