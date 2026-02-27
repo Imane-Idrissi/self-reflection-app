@@ -1,6 +1,7 @@
 import { app, BrowserWindow, systemPreferences } from 'electron';
 import path from 'path';
-import activeWin from 'active-win';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import { getDatabase, closeDatabase } from './database/db';
 import { SessionRepository } from './database/session-repository';
 import { SessionEventsRepository } from './database/session-events-repository';
@@ -34,14 +35,28 @@ function initServices() {
   const captureRepo = new CaptureRepository(db);
   const feelingRepo = new FeelingRepository(db);
 
+  const execFileAsync = promisify(execFile);
+  const helperBin = app.isPackaged
+    ? path.join(process.resourcesPath, 'active-window')
+    : path.join(__dirname, '..', 'src', 'main', 'helpers', 'active-window');
+
   captureService = new CaptureService(
     captureRepo,
     async () => {
-      const result = await activeWin();
-      if (!result) return undefined;
-      return { title: result.title, owner: { name: result.owner.name } };
+      try {
+        const { stdout } = await execFileAsync(helperBin);
+        const result = JSON.parse(stdout.trim());
+        if (!result.title && !result.owner?.name) return undefined;
+        return { title: result.title, owner: { name: result.owner.name } };
+      } catch {
+        return undefined;
+      }
     },
-    () => systemPreferences.isTrustedAccessibilityClient(false),
+    async () => {
+      const trusted = systemPreferences.isTrustedAccessibilityClient(false);
+      console.log('[Permission] Accessibility:', trusted);
+      return trusted;
+    },
   );
 
   captureService.setWarningCallbacks({

@@ -6,7 +6,7 @@ export interface ActiveWindowResult {
 }
 
 export type GetActiveWindowFn = () => Promise<ActiveWindowResult | undefined>;
-export type CheckPermissionFn = () => boolean;
+export type CheckPermissionFn = () => Promise<boolean>;
 
 export interface CaptureWarningCallbacks {
   onWarning: () => void;
@@ -40,7 +40,7 @@ export class CaptureService {
     this.callbacks = callbacks;
   }
 
-  checkPermission(): boolean {
+  async checkPermission(): Promise<boolean> {
     return this.checkPermissionFn();
   }
 

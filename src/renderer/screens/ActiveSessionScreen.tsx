@@ -183,7 +183,7 @@ export default function ActiveSessionScreen({
           </p>
         ) : (
           <p className="text-small leading-[1.5] text-text-tertiary text-center mb-xl">
-            Session paused. Take your time — resume when you're ready.
+            Session paused. Take your time, resume when you're ready.
           </p>
         )}
 

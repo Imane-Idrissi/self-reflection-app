@@ -54,14 +54,14 @@ afterEach(() => {
 
 describe('CaptureService', () => {
   describe('checkPermission', () => {
-    it('returns true when permission is granted', () => {
-      mockCheckPermission.mockReturnValue(true);
-      expect(service.checkPermission()).toBe(true);
+    it('returns true when permission is granted', async () => {
+      mockCheckPermission.mockResolvedValue(true);
+      expect(await service.checkPermission()).toBe(true);
     });
 
-    it('returns false when permission is denied', () => {
-      mockCheckPermission.mockReturnValue(false);
-      expect(service.checkPermission()).toBe(false);
+    it('returns false when permission is denied', async () => {
+      mockCheckPermission.mockResolvedValue(false);
+      expect(await service.checkPermission()).toBe(false);
     });
   });
 

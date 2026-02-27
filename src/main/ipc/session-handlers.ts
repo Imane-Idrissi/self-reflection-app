@@ -125,7 +125,7 @@ export function registerSessionHandlers(
 
   ipcMain.handle('session:start', async (_event, req: SessionStartRequest): Promise<SessionStartResponse> => {
     try {
-      const result = sessionService.startSession(req.session_id);
+      const result = await sessionService.startSession(req.session_id);
       if (result.permissionDenied) {
         return { success: false, error: 'permission_denied' };
       }

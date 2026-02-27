@@ -43,13 +43,13 @@ export class SessionService {
     this.repo.updateFinalIntent(sessionId, finalIntent);
   }
 
-  startSession(sessionId: string): { started: boolean; permissionDenied: boolean } {
+  async startSession(sessionId: string): Promise<{ started: boolean; permissionDenied: boolean }> {
     const session = this.getSessionOrThrow(sessionId);
     if (session.status !== 'created') {
       throw new Error(`Cannot start session in status: ${session.status}`);
     }
 
-    if (!this.captureService.checkPermission()) {
+    if (!(await this.captureService.checkPermission())) {
       return { started: false, permissionDenied: true };
     }
 

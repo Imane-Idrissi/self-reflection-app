@@ -62,7 +62,7 @@ beforeEach(() => {
   const captureRepo = new CaptureRepository(db);
   const feelingRepo = new FeelingRepository(db);
 
-  mockCheckPermission.mockReturnValue(true);
+  mockCheckPermission.mockResolvedValue(true);
   mockGetActiveWindow.mockResolvedValue(undefined);
 
   captureService = new CaptureService(captureRepo, mockGetActiveWindow, mockCheckPermission);
@@ -75,9 +75,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function createActiveSession(): string {
+async function createActiveSession(): Promise<string> {
   const session = service.createSession('Test', 'Test intent');
-  service.startSession(session.session_id);
+  await service.startSession(session.session_id);
   return session.session_id;
 }
 
@@ -108,9 +108,9 @@ describe('SessionService', () => {
   });
 
   describe('startSession', () => {
-    it('sets status to active and started_at when permission granted', () => {
+    it('sets status to active and started_at when permission granted', async () => {
       const session = service.createSession('Focus', 'Focus time');
-      const result = service.startSession(session.session_id);
+      const result = await service.startSession(session.session_id);
 
       expect(result.started).toBe(true);
       expect(result.permissionDenied).toBe(false);
@@ -120,18 +120,18 @@ describe('SessionService', () => {
       expect(updated!.started_at).toBeTruthy();
     });
 
-    it('starts the capture service', () => {
+    it('starts the capture service', async () => {
       const session = service.createSession('Focus', 'Focus time');
-      service.startSession(session.session_id);
+      await service.startSession(session.session_id);
 
       expect(captureService.isRunning()).toBe(true);
     });
 
-    it('returns permissionDenied when accessibility permission is denied', () => {
-      mockCheckPermission.mockReturnValue(false);
+    it('returns permissionDenied when accessibility permission is denied', async () => {
+      mockCheckPermission.mockResolvedValue(false);
 
       const session = service.createSession('Focus', 'Focus time');
-      const result = service.startSession(session.session_id);
+      const result = await service.startSession(session.session_id);
 
       expect(result.started).toBe(false);
       expect(result.permissionDenied).toBe(true);
@@ -140,30 +140,30 @@ describe('SessionService', () => {
       expect(updated!.status).toBe('created');
     });
 
-    it('does not start capture when permission denied', () => {
-      mockCheckPermission.mockReturnValue(false);
+    it('does not start capture when permission denied', async () => {
+      mockCheckPermission.mockResolvedValue(false);
 
       const session = service.createSession('Focus', 'Focus time');
-      service.startSession(session.session_id);
+      await service.startSession(session.session_id);
 
       expect(captureService.isRunning()).toBe(false);
     });
 
-    it('throws for nonexistent session', () => {
-      expect(() => service.startSession('bad-id')).toThrow('Session not found');
+    it('throws for nonexistent session', async () => {
+      await expect(service.startSession('bad-id')).rejects.toThrow('Session not found');
     });
 
-    it('throws if session is not in created status', () => {
+    it('throws if session is not in created status', async () => {
       const session = service.createSession('Focus', 'Focus time');
-      service.startSession(session.session_id);
+      await service.startSession(session.session_id);
 
-      expect(() => service.startSession(session.session_id)).toThrow('Cannot start session in status: active');
+      await expect(service.startSession(session.session_id)).rejects.toThrow('Cannot start session in status: active');
     });
   });
 
   describe('pauseSession', () => {
-    it('transitions active session to paused and stops capture', () => {
-      const id = createActiveSession();
+    it('transitions active session to paused and stops capture', async () => {
+      const id = await createActiveSession();
       expect(captureService.isRunning()).toBe(true);
 
       service.pauseSession(id);
@@ -173,8 +173,8 @@ describe('SessionService', () => {
       expect(captureService.isRunning()).toBe(false);
     });
 
-    it('creates a paused event', () => {
-      const id = createActiveSession();
+    it('creates a paused event', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
 
       const events = db.prepare('SELECT * FROM session_events WHERE session_id = ?').all(id) as any[];
@@ -187,8 +187,8 @@ describe('SessionService', () => {
       expect(() => service.pauseSession(session.session_id)).toThrow('Cannot pause session in status: created');
     });
 
-    it('throws if session is already paused', () => {
-      const id = createActiveSession();
+    it('throws if session is already paused', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       expect(() => service.pauseSession(id)).toThrow('Cannot pause session in status: paused');
     });
@@ -199,8 +199,8 @@ describe('SessionService', () => {
   });
 
   describe('resumeSession', () => {
-    it('transitions paused session to active and restarts capture', () => {
-      const id = createActiveSession();
+    it('transitions paused session to active and restarts capture', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       expect(captureService.isRunning()).toBe(false);
 
@@ -211,8 +211,8 @@ describe('SessionService', () => {
       expect(captureService.isRunning()).toBe(true);
     });
 
-    it('creates a resumed event', () => {
-      const id = createActiveSession();
+    it('creates a resumed event', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       service.resumeSession(id);
 
@@ -222,8 +222,8 @@ describe('SessionService', () => {
       expect(events[1].event_type).toBe('resumed');
     });
 
-    it('throws if session is not paused', () => {
-      const id = createActiveSession();
+    it('throws if session is not paused', async () => {
+      const id = await createActiveSession();
       expect(() => service.resumeSession(id)).toThrow('Cannot resume session in status: active');
     });
 
@@ -233,8 +233,8 @@ describe('SessionService', () => {
   });
 
   describe('endSession', () => {
-    it('ends an active session and stops capture', () => {
-      const id = createActiveSession();
+    it('ends an active session and stops capture', async () => {
+      const id = await createActiveSession();
       expect(captureService.isRunning()).toBe(true);
 
       service.endSession(id, 'user');
@@ -246,8 +246,8 @@ describe('SessionService', () => {
       expect(captureService.isRunning()).toBe(false);
     });
 
-    it('ends a paused session', () => {
-      const id = createActiveSession();
+    it('ends a paused session', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       service.endSession(id, 'user');
 
@@ -255,8 +255,8 @@ describe('SessionService', () => {
       expect(session!.status).toBe('ended');
     });
 
-    it('returns a session summary with real capture and feeling counts', () => {
-      const id = createActiveSession();
+    it('returns a session summary with real capture and feeling counts', async () => {
+      const id = await createActiveSession();
 
       db.prepare(`
         INSERT INTO capture (capture_id, session_id, window_title, app_name, captured_at)
@@ -288,8 +288,8 @@ describe('SessionService', () => {
       expect(() => service.endSession('bad-id')).toThrow('Session not found');
     });
 
-    it('cannot end an already ended session', () => {
-      const id = createActiveSession();
+    it('cannot end an already ended session', async () => {
+      const id = await createActiveSession();
       service.endSession(id);
       expect(() => service.endSession(id)).toThrow('Cannot end session in status: ended');
     });
@@ -301,8 +301,8 @@ describe('SessionService', () => {
       expect(service.getActiveTimeMinutes(session.session_id)).toBe(0);
     });
 
-    it('returns positive time for an active session', () => {
-      const id = createActiveSession();
+    it('returns positive time for an active session', async () => {
+      const id = await createActiveSession();
       const minutes = service.getActiveTimeMinutes(id);
       expect(minutes).toBeGreaterThanOrEqual(0);
     });
@@ -318,19 +318,19 @@ describe('SessionService', () => {
       expect(service.hasActiveSession()).toBe(false);
     });
 
-    it('returns true when an active session exists', () => {
-      createActiveSession();
+    it('returns true when an active session exists', async () => {
+      await createActiveSession();
       expect(service.hasActiveSession()).toBe(true);
     });
 
-    it('returns true when a paused session exists', () => {
-      const id = createActiveSession();
+    it('returns true when a paused session exists', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       expect(service.hasActiveSession()).toBe(true);
     });
 
-    it('returns false when all sessions are ended', () => {
-      const id = createActiveSession();
+    it('returns false when all sessions are ended', async () => {
+      const id = await createActiveSession();
       service.endSession(id);
       expect(service.hasActiveSession()).toBe(false);
     });
@@ -341,8 +341,8 @@ describe('SessionService', () => {
       expect(service.checkStaleOnLaunch()).toBeNull();
     });
 
-    it('auto-ends an active session and stops capture', () => {
-      const id = createActiveSession();
+    it('auto-ends an active session and stops capture', async () => {
+      const id = await createActiveSession();
       expect(captureService.isRunning()).toBe(true);
 
       const result = service.checkStaleOnLaunch();
@@ -357,8 +357,8 @@ describe('SessionService', () => {
       expect(session!.ended_by).toBe('auto');
     });
 
-    it('auto-ends a paused session', () => {
-      const id = createActiveSession();
+    it('auto-ends a paused session', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
       const result = service.checkStaleOnLaunch();
 
@@ -368,12 +368,12 @@ describe('SessionService', () => {
       expect(session!.ended_by).toBe('auto');
     });
 
-    it('auto-ends multiple stale sessions and returns the most recent', () => {
-      const id1 = createActiveSession();
+    it('auto-ends multiple stale sessions and returns the most recent', async () => {
+      const id1 = await createActiveSession();
       service.endSession(id1);
 
-      const id2 = createActiveSession();
-      const id3 = createActiveSession();
+      const id2 = await createActiveSession();
+      const id3 = await createActiveSession();
       service.pauseSession(id3);
 
       const result = service.checkStaleOnLaunch();
@@ -385,9 +385,9 @@ describe('SessionService', () => {
       expect(s3!.status).toBe('ended');
     });
 
-    it('ignores created and ended sessions', () => {
+    it('ignores created and ended sessions', async () => {
       service.createSession('Created', 'Created only');
-      const id = createActiveSession();
+      const id = await createActiveSession();
       service.endSession(id);
 
       expect(service.checkStaleOnLaunch()).toBeNull();
@@ -395,11 +395,11 @@ describe('SessionService', () => {
   });
 
   describe('cleanupAbandoned', () => {
-    it('deletes sessions with status created', () => {
+    it('deletes sessions with status created', async () => {
       service.createSession('A1', 'Abandoned 1');
       service.createSession('A2', 'Abandoned 2');
       const active = service.createSession('Active', 'Active session');
-      service.startSession(active.session_id);
+      await service.startSession(active.session_id);
 
       const deleted = service.cleanupAbandoned();
       expect(deleted).toBe(2);
@@ -411,8 +411,8 @@ describe('SessionService', () => {
   });
 
   describe('createFeeling', () => {
-    it('creates a feeling for an active session', () => {
-      const id = createActiveSession();
+    it('creates a feeling for an active session', async () => {
+      const id = await createActiveSession();
       const feeling = service.createFeeling(id, 'Feeling focused');
 
       expect(feeling.feeling_id).toBeTruthy();
@@ -421,8 +421,8 @@ describe('SessionService', () => {
       expect(feeling.created_at).toBeTruthy();
     });
 
-    it('creates a feeling for a paused session', () => {
-      const id = createActiveSession();
+    it('creates a feeling for a paused session', async () => {
+      const id = await createActiveSession();
       service.pauseSession(id);
 
       const feeling = service.createFeeling(id, 'Taking a break, feeling okay');
@@ -430,24 +430,24 @@ describe('SessionService', () => {
       expect(feeling.text).toBe('Taking a break, feeling okay');
     });
 
-    it('trims whitespace from text', () => {
-      const id = createActiveSession();
+    it('trims whitespace from text', async () => {
+      const id = await createActiveSession();
       const feeling = service.createFeeling(id, '  Feeling good  ');
       expect(feeling.text).toBe('Feeling good');
     });
 
-    it('throws for empty text', () => {
-      const id = createActiveSession();
+    it('throws for empty text', async () => {
+      const id = await createActiveSession();
       expect(() => service.createFeeling(id, '')).toThrow('Feeling text cannot be empty');
     });
 
-    it('throws for whitespace-only text', () => {
-      const id = createActiveSession();
+    it('throws for whitespace-only text', async () => {
+      const id = await createActiveSession();
       expect(() => service.createFeeling(id, '   ')).toThrow('Feeling text cannot be empty');
     });
 
-    it('throws for ended session', () => {
-      const id = createActiveSession();
+    it('throws for ended session', async () => {
+      const id = await createActiveSession();
       service.endSession(id);
       expect(() => service.createFeeling(id, 'Too late')).toThrow('Cannot log feeling for session in status: ended');
     });
@@ -463,8 +463,8 @@ describe('SessionService', () => {
   });
 
   describe('multiple pause/resume cycles', () => {
-    it('supports multiple pause and resume cycles with capture start/stop', () => {
-      const id = createActiveSession();
+    it('supports multiple pause and resume cycles with capture start/stop', async () => {
+      const id = await createActiveSession();
       expect(captureService.isRunning()).toBe(true);
 
       service.pauseSession(id);
