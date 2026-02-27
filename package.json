@@ -13,13 +13,34 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "ELECTRON_RUN_AS_NODE=1 electron ./node_modules/.bin/tsx scripts/seed-test-data.ts",
-    "seed:clear": "ELECTRON_RUN_AS_NODE=1 electron ./node_modules/.bin/tsx scripts/seed-test-data.ts --clear"
+    "seed:clear": "ELECTRON_RUN_AS_NODE=1 electron ./node_modules/.bin/tsx scripts/seed-test-data.ts --clear",
+    "dist": "npm run build && electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.unblurry.app",
+    "productName": "Unblurry",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**",
+      "node_modules/active-win/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg"
+      ]
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Imane-Idrissi/self-reflection-app.git"
   },
-  "author": "",
+  "author": "Imane Idrissi",
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

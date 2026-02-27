@@ -151,6 +151,8 @@ const FEATURES = [
   },
 ];
 
+const DOWNLOAD_URL = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest';
+
 declare const posthog: { capture: (event: string, properties?: Record<string, string>) => void } | undefined;
 
 function trackDownload(source: string) {
@@ -178,7 +180,7 @@ export default function LandingPage() {
               <span className="font-heading text-[17px] font-bold text-text-primary">Unblurry</span>
             </span>
           <a
-            href="#download"
+            href={DOWNLOAD_URL}
             onClick={() => trackDownload('navbar')}
             className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-4 py-2 text-[13px] font-medium text-text-inverse"
             style={{ transition: 'var(--transition-fast)' }}
@@ -221,7 +223,7 @@ export default function LandingPage() {
             {/* CTAs */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <a
-                href="#download"
+                href={DOWNLOAD_URL}
                 onClick={() => trackDownload('hero')}
                 className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-[15px] font-semibold text-text-inverse shadow-md"
                 style={{ transition: 'var(--transition-fast)' }}
@@ -375,7 +377,7 @@ export default function LandingPage() {
           </p>
           <div className="mt-8">
             <a
-              href="#"
+              href={DOWNLOAD_URL}
               onClick={() => trackDownload('bottom_cta')}
               className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-7 py-3.5 text-[16px] font-semibold text-text-inverse shadow-md"
               style={{ transition: 'var(--transition-fast)' }}
