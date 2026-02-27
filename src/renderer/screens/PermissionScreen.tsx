@@ -17,16 +17,20 @@ export default function PermissionScreen({
   const handleCheckAgain = async () => {
     setLoading(true);
     setRetryFailed(false);
-    try {
+
+    for (let attempt = 0; attempt < 5; attempt++) {
       const response = await window.api.sessionStart({ session_id: sessionId });
       if (response.success) {
         onPermissionGranted();
-      } else if (response.error === 'permission_denied') {
-        setRetryFailed(true);
+        return;
       }
-    } finally {
-      setLoading(false);
+      if (attempt < 4) {
+        await new Promise((r) => setTimeout(r, 800));
+      }
     }
+
+    setRetryFailed(true);
+    setLoading(false);
   };
 
   return (
