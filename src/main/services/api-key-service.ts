@@ -28,7 +28,7 @@ export class ApiKeyService {
 
   async validateKey(key: string): Promise<KeyValidationResult> {
     try {
-      const model = new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.5-flash' });
       await model.generateContent('hi');
       return { valid: true };
     } catch (error: unknown) {

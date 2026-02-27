@@ -21,7 +21,7 @@ export class AiService {
   private model: GenerativeModel;
 
   constructor(apiKey: string) {
-    this.model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: 'gemini-2.0-flash' });
+    this.model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: 'gemini-2.5-flash' });
   }
 
   async checkVagueness(intent: string): Promise<VaguenessResult> {
