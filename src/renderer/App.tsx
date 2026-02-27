@@ -265,7 +265,6 @@ export default function App() {
           onIntentSubmit={handleIntentSubmit}
           onStartRecording={handleStartRecording}
           intentLoading={loading}
-          onSettings={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
           onBack={goToDashboard}
         />
       );

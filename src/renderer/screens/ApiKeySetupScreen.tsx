@@ -52,6 +52,18 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
       <WaveTopLeft />
       <WaveBottomRight />
 
+      {isChange && onCancel && (
+        <button
+          onClick={onCancel}
+          className="absolute top-lg left-lg z-20 flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+      )}
+
       <div className="relative z-10 w-full max-w-[520px]">
         {!isChange && <StepIndicator step={1} />}
         <div className="text-center mb-xl">
@@ -109,14 +121,6 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
           {saving ? <Spinner /> : (isChange ? 'Update Key' : 'Connect')}
         </button>
 
-        {isChange && onCancel && (
-          <button
-            onClick={onCancel}
-            className="mt-md w-full flex items-center justify-center rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-secondary transition-colors duration-[150ms] ease-out hover:bg-bg-secondary"
-          >
-            Cancel
-          </button>
-        )}
       </div>
     </div>
   );
