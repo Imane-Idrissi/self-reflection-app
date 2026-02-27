@@ -11,6 +11,7 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const canSubmit = key.trim().length > 0 && !saving;
 
@@ -29,7 +30,9 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
     try {
       const result = await window.api.apikeySave({ key: trimmed });
       if (result.success) {
-        onComplete();
+        setSaved(true);
+        setTimeout(() => onComplete(), 1200);
+        return;
       } else {
         setError(result.error || 'Failed to save API key');
       }
@@ -115,14 +118,22 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
 
         <button
           onClick={handleSubmit}
-          disabled={!canSubmit}
-          className="w-full flex items-center justify-center rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700 disabled:bg-primary-200 disabled:text-primary-600 disabled:shadow-none disabled:cursor-not-allowed"
+          disabled={!canSubmit || saved}
+          className={`w-full flex items-center justify-center rounded-md px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out ${saved ? 'bg-positive' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg active:bg-primary-700'} disabled:shadow-none disabled:cursor-not-allowed ${!saved && 'disabled:bg-primary-200 disabled:text-primary-600'}`}
         >
-          {saving ? <Spinner /> : (isChange ? 'Update Key' : 'Connect')}
+          {saved ? <CheckIcon /> : saving ? <Spinner /> : (isChange ? 'Update Key' : 'Connect')}
         </button>
 
       </div>
     </div>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
   );
 }
 
