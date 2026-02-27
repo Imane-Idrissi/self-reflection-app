@@ -1,9 +1,16 @@
-import { Tray, nativeImage, BrowserWindow, Menu, ipcMain } from 'electron';
+import { Tray, nativeImage, BrowserWindow, Menu } from 'electron';
 import { deflateSync } from 'zlib';
+
+export interface TrayActions {
+  onPause: (sessionId: string) => void;
+  onResume: (sessionId: string) => void;
+  onEnd: (sessionId: string) => void;
+}
 
 let tray: Tray | null = null;
 let currentState: 'recording' | 'paused' = 'recording';
 let currentSessionId: string | null = null;
+let currentActions: TrayActions | null = null;
 
 function buildPng(width: number, height: number, rgba: Buffer): Buffer {
   function crc32(buf: Buffer): number {
@@ -81,16 +88,16 @@ function buildContextMenu(): Menu {
     {
       label: isPaused ? 'Resume' : 'Pause',
       click: () => {
-        if (!currentSessionId) return;
-        const channel = isPaused ? 'session:resume' : 'session:pause';
-        ipcMain.emit('tray-action', channel, currentSessionId);
+        if (!currentSessionId || !currentActions) return;
+        if (isPaused) currentActions.onResume(currentSessionId);
+        else currentActions.onPause(currentSessionId);
       },
     },
     {
       label: 'End Session',
       click: () => {
-        if (!currentSessionId) return;
-        ipcMain.emit('tray-action', 'session:end', currentSessionId);
+        if (!currentSessionId || !currentActions) return;
+        currentActions.onEnd(currentSessionId);
       },
     },
     { type: 'separator' },
@@ -109,9 +116,10 @@ function buildContextMenu(): Menu {
   ]);
 }
 
-export function showTray(state: 'recording' | 'paused', sessionId: string): void {
+export function showTray(state: 'recording' | 'paused', sessionId: string, actions?: TrayActions): void {
   currentState = state;
   currentSessionId = sessionId;
+  if (actions) currentActions = actions;
   const icon = createTrayIcon(state);
   const tooltip = state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused';
 

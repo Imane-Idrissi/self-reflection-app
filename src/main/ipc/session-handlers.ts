@@ -4,7 +4,7 @@ import { SessionService } from '../services/session-service';
 import { AiService, AiServiceError } from '../services/ai-service';
 import { ReportService } from '../services/report-service';
 import { FloatingWindowManager } from '../floating-window';
-import { showTray, hideTray } from '../tray';
+import { showTray, hideTray, TrayActions } from '../tray';
 import type {
   SessionCreateRequest,
   SessionCreateResponse,
@@ -123,13 +123,41 @@ export function registerSessionHandlers(
     }
   });
 
+  const trayActions: TrayActions = {
+    onPause: (sessionId: string) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      if (!win) return;
+      sessionService.pauseSession(sessionId);
+      showTray('paused', sessionId);
+      floatingWindowManager.sendSessionState('paused');
+      win.webContents.send('session:state-changed', { state: 'paused', session_id: sessionId });
+    },
+    onResume: (sessionId: string) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      if (!win) return;
+      sessionService.resumeSession(sessionId);
+      showTray('recording', sessionId);
+      floatingWindowManager.sendSessionState('active');
+      win.webContents.send('session:state-changed', { state: 'active', session_id: sessionId });
+    },
+    onEnd: (sessionId: string) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      if (!win) return;
+      const summary = sessionService.endSession(sessionId, 'user');
+      hideTray();
+      floatingWindowManager.destroy();
+      reportService.startGeneration(sessionId);
+      win.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
+    },
+  };
+
   ipcMain.handle('session:start', async (_event, req: SessionStartRequest): Promise<SessionStartResponse> => {
     try {
       const result = await sessionService.startSession(req.session_id);
       if (result.permissionDenied) {
         return { success: false, error: 'permission_denied' };
       }
-      showTray('recording', req.session_id);
+      showTray('recording', req.session_id, trayActions);
       floatingWindowManager.create(req.session_id, 'active');
       return { success: true };
     } catch (error) {
@@ -284,26 +312,4 @@ export function registerSessionHandlers(
     });
   });
 
-  ipcMain.on('tray-action', (channel: string, sessionId: string) => {
-    const win = BrowserWindow.getAllWindows()[0];
-    if (!win) return;
-
-    if (channel === 'session:pause') {
-      sessionService.pauseSession(sessionId);
-      showTray('paused', sessionId);
-      floatingWindowManager.sendSessionState('paused');
-      win.webContents.send('session:state-changed', { state: 'paused', session_id: sessionId });
-    } else if (channel === 'session:resume') {
-      sessionService.resumeSession(sessionId);
-      showTray('recording', sessionId);
-      floatingWindowManager.sendSessionState('active');
-      win.webContents.send('session:state-changed', { state: 'active', session_id: sessionId });
-    } else if (channel === 'session:end') {
-      const summary = sessionService.endSession(sessionId, 'user');
-      hideTray();
-      floatingWindowManager.destroy();
-      reportService.startGeneration(sessionId);
-      win.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
-    }
-  });
 }
