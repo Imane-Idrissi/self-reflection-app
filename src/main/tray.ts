@@ -31,7 +31,9 @@ function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
     }
   }
 
-  return nativeImage.createFromBuffer(canvas, { width: size, height: size });
+  const image = nativeImage.createFromBuffer(canvas, { width: size, height: size });
+  image.setTemplateImage(false);
+  return image;
 }
 
 function buildContextMenu(): Menu {
