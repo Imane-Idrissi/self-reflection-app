@@ -258,6 +258,7 @@ export interface ElectronAPI {
   onAutoEndTriggered: (callback: (summary: SessionSummary, sessionId: string) => void) => void;
   onCaptureWarning: (callback: () => void) => void;
   onCaptureWarningCleared: (callback: () => void) => void;
+  onSessionStateChanged: (callback: (data: { state: 'active' | 'paused' | 'ended'; session_id: string; summary?: SessionSummary }) => void) => void;
 }
 
 export interface FloatingWindowState {

@@ -91,4 +91,8 @@ contextBridge.exposeInMainWorld('api', {
   onCaptureWarningCleared: (callback: () => void) => {
     ipcRenderer.on('capture:warning-cleared', () => callback());
   },
+
+  onSessionStateChanged: (callback: (data: { state: 'active' | 'paused' | 'ended'; session_id: string; summary?: SessionSummary }) => void) => {
+    ipcRenderer.on('session:state-changed', (_event, data) => callback(data));
+  },
 });

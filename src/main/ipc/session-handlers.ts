@@ -41,6 +41,7 @@ export function registerSessionHandlers(
   floatingWindowManager: FloatingWindowManager,
   reportService: ReportService,
   captureRepo: CaptureRepository,
+  getMainWindow: () => BrowserWindow | null,
 ): void {
   ipcMain.handle('session:create', async (_event, req: SessionCreateRequest): Promise<SessionCreateResponse> => {
     const session = sessionService.createSession(req.name, req.intent);
@@ -125,29 +126,26 @@ export function registerSessionHandlers(
 
   const trayActions: TrayActions = {
     onPause: (sessionId: string) => {
-      const win = BrowserWindow.getAllWindows()[0];
-      if (!win) return;
+      const win = getMainWindow();
       sessionService.pauseSession(sessionId);
       showTray('paused', sessionId);
       floatingWindowManager.sendSessionState('paused');
-      win.webContents.send('session:state-changed', { state: 'paused', session_id: sessionId });
+      win?.webContents.send('session:state-changed', { state: 'paused', session_id: sessionId });
     },
     onResume: (sessionId: string) => {
-      const win = BrowserWindow.getAllWindows()[0];
-      if (!win) return;
+      const win = getMainWindow();
       sessionService.resumeSession(sessionId);
       showTray('recording', sessionId);
       floatingWindowManager.sendSessionState('active');
-      win.webContents.send('session:state-changed', { state: 'active', session_id: sessionId });
+      win?.webContents.send('session:state-changed', { state: 'active', session_id: sessionId });
     },
     onEnd: (sessionId: string) => {
-      const win = BrowserWindow.getAllWindows()[0];
-      if (!win) return;
+      const win = getMainWindow();
       const summary = sessionService.endSession(sessionId, 'user');
       hideTray();
       floatingWindowManager.destroy();
       reportService.startGeneration(sessionId);
-      win.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
+      win?.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
     },
   };
 
@@ -157,7 +155,7 @@ export function registerSessionHandlers(
       if (result.permissionDenied) {
         return { success: false, error: 'permission_denied' };
       }
-      showTray('recording', req.session_id, trayActions);
+      showTray('recording', req.session_id, trayActions, getMainWindow);
       floatingWindowManager.create(req.session_id, 'active');
       return { success: true };
     } catch (error) {

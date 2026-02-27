@@ -76,7 +76,7 @@ function initServices() {
   );
 
   registerApiKeyHandlers(apiKeyService);
-  registerSessionHandlers(sessionService, () => apiKeyService.getAiService(), floatingWindowManager, reportService, captureRepo);
+  registerSessionHandlers(sessionService, () => apiKeyService.getAiService(), floatingWindowManager, reportService, captureRepo, () => mainWindow);
 
   sessionService.cleanupAbandoned();
   reportService.markStaleAsFailedOnLaunch();

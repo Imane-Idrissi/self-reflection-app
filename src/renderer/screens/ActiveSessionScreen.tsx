@@ -72,7 +72,18 @@ export default function ActiveSessionScreen({
     window.api.onCaptureWarningCleared(() => {
       setShowCaptureWarning(false);
     });
-  }, [onAutoEndTriggered]);
+
+    window.api.onSessionStateChanged((data) => {
+      if (data.session_id !== sessionId) return;
+      if (data.state === 'active') {
+        setStatus('active');
+      } else if (data.state === 'paused') {
+        setStatus('paused');
+      } else if (data.state === 'ended' && data.summary) {
+        onEnd(data.summary, data.session_id);
+      }
+    });
+  }, [onAutoEndTriggered, sessionId, onEnd]);
 
   const handlePause = async () => {
     setLoading(true);
@@ -179,7 +190,7 @@ export default function ActiveSessionScreen({
 
         {isActive ? (
           <p className="text-small leading-[1.5] text-text-tertiary text-center mb-xl">
-            Go do your work — capture is running in the background.
+            Go do your work, capture is running in the background.
           </p>
         ) : (
           <p className="text-small leading-[1.5] text-text-tertiary text-center mb-xl">

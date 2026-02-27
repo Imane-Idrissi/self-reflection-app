@@ -11,6 +11,7 @@ let tray: Tray | null = null;
 let currentState: 'recording' | 'paused' = 'recording';
 let currentSessionId: string | null = null;
 let currentActions: TrayActions | null = null;
+let getMainWindow: (() => BrowserWindow | null) | null = null;
 
 function buildPng(width: number, height: number, rgba: Buffer): Buffer {
   function crc32(buf: Buffer): number {
@@ -56,6 +57,8 @@ function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
   const cx = size / 2;
   const cy = size / 2;
   const radius = 7;
+  const borderWidth = 2;
+  const outerRadius = radius + borderWidth;
 
   const r = color === 'recording' ? 99 : 245;
   const g = color === 'recording' ? 102 : 158;
@@ -64,12 +67,21 @@ function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+      const off = (y * size + x) * 4;
+
       if (dist <= radius) {
+        // Inner colored circle
         const alpha = dist > radius - 1 ? Math.round((radius - dist) * 255) : 255;
-        const off = (y * size + x) * 4;
         rgba[off] = r;
         rgba[off + 1] = g;
         rgba[off + 2] = b;
+        rgba[off + 3] = alpha;
+      } else if (dist <= outerRadius) {
+        // White border ring
+        const alpha = dist > outerRadius - 1 ? Math.round((outerRadius - dist) * 255) : 255;
+        rgba[off] = 255;
+        rgba[off + 1] = 255;
+        rgba[off + 2] = 255;
         rgba[off + 3] = alpha;
       }
     }
@@ -104,9 +116,8 @@ function buildContextMenu(): Menu {
     {
       label: 'Show Window',
       click: () => {
-        const windows = BrowserWindow.getAllWindows();
-        if (windows.length > 0) {
-          const win = windows[0];
+        const win = getMainWindow?.();
+        if (win) {
           if (win.isMinimized()) win.restore();
           win.show();
           win.focus();
@@ -116,10 +127,11 @@ function buildContextMenu(): Menu {
   ]);
 }
 
-export function showTray(state: 'recording' | 'paused', sessionId: string, actions?: TrayActions): void {
+export function showTray(state: 'recording' | 'paused', sessionId: string, actions?: TrayActions, mainWindowGetter?: () => BrowserWindow | null): void {
   currentState = state;
   currentSessionId = sessionId;
   if (actions) currentActions = actions;
+  if (mainWindowGetter) getMainWindow = mainWindowGetter;
   const icon = createTrayIcon(state);
   const tooltip = state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused';
 
