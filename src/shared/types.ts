@@ -168,6 +168,10 @@ export interface SessionCheckStaleResponse {
     session_id: string;
     summary: SessionSummary;
   };
+  resumable_session?: {
+    session_id: string;
+    final_intent: string;
+  };
 }
 
 export interface FeelingCreateRequest {

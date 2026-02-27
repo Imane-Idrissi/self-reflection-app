@@ -70,4 +70,17 @@ export class SessionRepository {
     const result = this.db.prepare('DELETE FROM session WHERE status = ?').run(status);
     return result.changes;
   }
+
+  deleteAbandonedCreated(): number {
+    const result = this.db.prepare(
+      'DELETE FROM session WHERE status = ? AND final_intent IS NULL'
+    ).run('created');
+    return result.changes;
+  }
+
+  findResumable(): Session | undefined {
+    return this.db.prepare(
+      'SELECT * FROM session WHERE status = ? AND final_intent IS NOT NULL ORDER BY created_at DESC LIMIT 1'
+    ).get('created') as Session | undefined;
+  }
 }

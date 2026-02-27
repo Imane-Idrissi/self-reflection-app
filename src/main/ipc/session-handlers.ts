@@ -188,9 +188,22 @@ export function registerSessionHandlers(
     const result = sessionService.checkStaleOnLaunch();
     hideTray();
     floatingWindowManager.destroy();
-    if (!result) return {};
-    reportService.startGeneration(result.session_id);
-    return { ended_session: result };
+    if (result) {
+      reportService.startGeneration(result.session_id);
+      return { ended_session: result };
+    }
+
+    const resumable = sessionService.findResumableSession();
+    if (resumable) {
+      return {
+        resumable_session: {
+          session_id: resumable.session_id,
+          final_intent: resumable.final_intent!,
+        },
+      };
+    }
+
+    return {};
   });
 
   ipcMain.handle('feeling:create', async (_event, req: FeelingCreateRequest): Promise<FeelingCreateResponse> => {

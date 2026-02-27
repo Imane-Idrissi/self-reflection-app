@@ -117,7 +117,11 @@ export class SessionService {
   }
 
   cleanupAbandoned(): number {
-    return this.repo.deleteByStatus('created');
+    return this.repo.deleteAbandonedCreated();
+  }
+
+  findResumableSession(): Session | null {
+    return this.repo.findResumable() ?? null;
   }
 
   createFeeling(sessionId: string, text: string): Feeling {

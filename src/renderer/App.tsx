@@ -45,6 +45,17 @@ export default function App() {
           });
           return;
         }
+        if (result.resumable_session) {
+          setStep({
+            type: 'setup',
+            needsApiKey: false,
+            startRecording: {
+              sessionId: result.resumable_session.session_id,
+              finalIntent: result.resumable_session.final_intent,
+            },
+          });
+          return;
+        }
       } catch {
         // If check fails, continue
       }
