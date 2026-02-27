@@ -129,7 +129,7 @@ export function registerSessionHandlers(
       if (result.permissionDenied) {
         return { success: false, error: 'permission_denied' };
       }
-      showTray('recording');
+      showTray('recording', req.session_id);
       floatingWindowManager.create(req.session_id, 'active');
       return { success: true };
     } catch (error) {
@@ -143,7 +143,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:pause', async (_event, req: SessionPauseRequest): Promise<SessionPauseResponse> => {
     try {
       sessionService.pauseSession(req.session_id);
-      showTray('paused');
+      showTray('paused', req.session_id);
       floatingWindowManager.sendSessionState('paused');
       return { success: true };
     } catch (error) {
@@ -157,7 +157,7 @@ export function registerSessionHandlers(
   ipcMain.handle('session:resume', async (_event, req: SessionResumeRequest): Promise<SessionResumeResponse> => {
     try {
       sessionService.resumeSession(req.session_id);
-      showTray('recording');
+      showTray('recording', req.session_id);
       floatingWindowManager.sendSessionState('active');
       return { success: true };
     } catch (error) {
@@ -282,5 +282,28 @@ export function registerSessionHandlers(
         has_report: reportService.hasReport(s.session_id),
       };
     });
+  });
+
+  ipcMain.on('tray-action', (channel: string, sessionId: string) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    if (!win) return;
+
+    if (channel === 'session:pause') {
+      sessionService.pauseSession(sessionId);
+      showTray('paused', sessionId);
+      floatingWindowManager.sendSessionState('paused');
+      win.webContents.send('session:state-changed', { state: 'paused', session_id: sessionId });
+    } else if (channel === 'session:resume') {
+      sessionService.resumeSession(sessionId);
+      showTray('recording', sessionId);
+      floatingWindowManager.sendSessionState('active');
+      win.webContents.send('session:state-changed', { state: 'active', session_id: sessionId });
+    } else if (channel === 'session:end') {
+      const summary = sessionService.endSession(sessionId, 'user');
+      hideTray();
+      floatingWindowManager.destroy();
+      reportService.startGeneration(sessionId);
+      win.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
+    }
   });
 }

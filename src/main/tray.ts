@@ -1,6 +1,8 @@
-import { Tray, nativeImage, BrowserWindow } from 'electron';
+import { Tray, nativeImage, BrowserWindow, Menu, ipcMain } from 'electron';
 
 let tray: Tray | null = null;
+let currentState: 'recording' | 'paused' = 'recording';
+let currentSessionId: string | null = null;
 
 function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
   const size = 22;
@@ -10,9 +12,9 @@ function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
   const cy = size / 2;
   const radius = 5;
 
-  const r = color === 'recording' ? 99 : 168;
-  const g = color === 'recording' ? 102 : 162;
-  const b = color === 'recording' ? 241 : 158;
+  const r = color === 'recording' ? 99 : 245;
+  const g = color === 'recording' ? 102 : 158;
+  const b = color === 'recording' ? 241 : 11;
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -32,27 +34,57 @@ function createTrayIcon(color: 'recording' | 'paused'): Electron.NativeImage {
   return nativeImage.createFromBuffer(canvas, { width: size, height: size });
 }
 
-export function showTray(state: 'recording' | 'paused'): void {
+function buildContextMenu(): Menu {
+  const isPaused = currentState === 'paused';
+
+  return Menu.buildFromTemplate([
+    {
+      label: isPaused ? 'Resume' : 'Pause',
+      click: () => {
+        if (!currentSessionId) return;
+        const channel = isPaused ? 'session:resume' : 'session:pause';
+        ipcMain.emit('tray-action', channel, currentSessionId);
+      },
+    },
+    {
+      label: 'End Session',
+      click: () => {
+        if (!currentSessionId) return;
+        ipcMain.emit('tray-action', 'session:end', currentSessionId);
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Show Window',
+      click: () => {
+        const windows = BrowserWindow.getAllWindows();
+        if (windows.length > 0) {
+          const win = windows[0];
+          if (win.isMinimized()) win.restore();
+          win.show();
+          win.focus();
+        }
+      },
+    },
+  ]);
+}
+
+export function showTray(state: 'recording' | 'paused', sessionId: string): void {
+  currentState = state;
+  currentSessionId = sessionId;
   const icon = createTrayIcon(state);
+  const tooltip = state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused';
 
   if (tray) {
     tray.setImage(icon);
-    tray.setToolTip(state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused');
+    tray.setToolTip(tooltip);
+    tray.setContextMenu(buildContextMenu());
     return;
   }
 
   tray = new Tray(icon);
-  tray.setToolTip(state === 'recording' ? 'Unblurry — Recording' : 'Unblurry — Paused');
-
-  tray.on('click', () => {
-    const windows = BrowserWindow.getAllWindows();
-    if (windows.length > 0) {
-      const win = windows[0];
-      if (win.isMinimized()) win.restore();
-      win.show();
-      win.focus();
-    }
-  });
+  tray.setToolTip(tooltip);
+  tray.setContextMenu(buildContextMenu());
 }
 
 export function hideTray(): void {
@@ -60,4 +92,5 @@ export function hideTray(): void {
     tray.destroy();
     tray = null;
   }
+  currentSessionId = null;
 }
