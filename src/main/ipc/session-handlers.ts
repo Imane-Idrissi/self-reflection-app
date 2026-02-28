@@ -35,6 +35,22 @@ import type {
 } from '../../shared/types';
 import { CaptureRepository } from '../database/capture-repository';
 
+function friendlyAiError(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof AiServiceError && error.cause instanceof Error
+    ? error.cause.message
+    : raw;
+  const lower = cause.toLowerCase();
+
+  if (lower.includes('quota') || lower.includes('resource_exhausted') || lower.includes('429'))
+    return 'Your API key has exceeded its quota. Check your Gemini billing at ai.google.dev.';
+  if (lower.includes('api_key_invalid') || lower.includes('401') || lower.includes('permission'))
+    return 'Your API key is invalid or expired. Please update it in settings.';
+  if (lower.includes('fetch') || lower.includes('network') || lower.includes('enotfound'))
+    return 'Network error — check your internet connection.';
+  return "Couldn't reach the AI service right now";
+}
+
 export function registerSessionHandlers(
   sessionService: SessionService,
   getAiService: () => AiService | null,
@@ -76,14 +92,11 @@ export function registerSessionHandlers(
       };
     } catch (error) {
       sessionService.confirmIntent(session.session_id, req.intent);
-      const message = error instanceof AiServiceError
-        ? error.message
-        : 'An unexpected error occurred';
       return {
         session_id: session.session_id,
         status: 'specific',
         final_intent: req.intent,
-        error: message,
+        error: friendlyAiError(error),
       };
     }
   });

@@ -88,7 +88,7 @@ export default function App() {
           startRecording: {
             sessionId: response.session_id,
             finalIntent: intent,
-            apiError: "We couldn't check your intent right now",
+            apiError: response.error,
           },
         });
         return;
