@@ -68,7 +68,7 @@ export default function FloatingApp() {
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
           const width = CARD_WIDTH + CARD_PADDING * 2;
-          const height = Math.ceil(rect.height) + CARD_PADDING;
+          const height = Math.ceil(rect.height) + CARD_PADDING + 4;
           window.floatingApi.resize(width, height, growDirection);
         }
       });
@@ -224,8 +224,8 @@ export default function FloatingApp() {
             onChange={handleTextChange}
             placeholder="How are you feeling?"
             rows={2}
-            className="w-full resize-none rounded-md px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
-            style={{ minHeight: 48, maxHeight: 120, background: 'transparent', border: 'none' }}
+            className="w-full resize-none rounded-md px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:outline-none"
+            style={{ minHeight: 48, maxHeight: 120, background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(165,180,252,0.4)' }}
           />
           <div className="flex justify-end mt-sm">
             <button
