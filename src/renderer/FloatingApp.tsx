@@ -17,6 +17,7 @@ export default function FloatingApp() {
   const [sessionStatus, setSessionStatus] = useState<'active' | 'paused'>('active');
   const [viewState, setViewState] = useState<ViewState>('idle');
   const [closing, setClosing] = useState(false);
+  const [buttonIsPill, setButtonIsPill] = useState(true);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [cardDirection, setCardDirection] = useState<CardDirection>('above');
@@ -90,19 +91,31 @@ export default function FloatingApp() {
     }
 
     setCardDirection(computeCardDirection());
+    setButtonIsPill(false);
     setViewState('expanded');
     setTimeout(() => textareaRef.current?.focus(), 50);
   }, [viewState, computeCardDirection]);
 
   const dismiss = useCallback(() => {
     setClosing(true);
+    // Phase 1 (200ms): card fades out, X button stays visible
     setTimeout(() => {
+      // Phase 2: update state first (removes card, starts button morph)
+      setButtonIsPill(true);
       setText('');
-      setClosing(false);
-      setViewState('idle');
-      window.floatingApi.dismissed();
+      // Resize window AFTER React re-renders so nothing gets clipped
+      requestAnimationFrame(() => {
+        window.floatingApi.resize(IDLE_PILL_WIDTH + CARD_PADDING, BUTTON_SIZE + CARD_PADDING, growDirection);
+        // Phase 3 (after morph completes): final pill size, switch to idle
+        setTimeout(() => {
+          window.floatingApi.resize(IDLE_PILL_WIDTH + CARD_PADDING, IDLE_PILL_HEIGHT + CARD_PADDING, growDirection);
+          setClosing(false);
+          setViewState('idle');
+          window.floatingApi.dismissed();
+        }, 220);
+      });
     }, 200);
-  }, []);
+  }, [growDirection]);
 
   const handleSubmit = useCallback(async () => {
     const trimmed = text.trim();
@@ -211,7 +224,7 @@ export default function FloatingApp() {
     animation: 'floatingCardIn 200ms ease-out',
   };
 
-  const card = (viewState === 'expanded' || viewState === 'confirming') ? (
+  const card = ((viewState === 'expanded' || viewState === 'confirming') && !(closing && buttonIsPill)) ? (
     viewState === 'expanded' ? (
       <div
         className="rounded-lg"
@@ -254,53 +267,69 @@ export default function FloatingApp() {
     )
   ) : null;
 
-  const button = viewState === 'idle' ? (
+  const button = (
     <button
-      onMouseDown={handleMouseDown}
+      onMouseDown={buttonIsPill ? handleMouseDown : undefined}
       onClick={handleButtonClick}
-      className="flex items-center gap-sm rounded-full px-md transition-all duration-[150ms] ease-out"
+      className="relative flex items-center justify-center rounded-full overflow-hidden"
       style={{
-        ...glassStyle,
-        width: IDLE_PILL_WIDTH,
-        height: IDLE_PILL_HEIGHT,
-        cursor: 'pointer',
+        width: buttonIsPill ? IDLE_PILL_WIDTH : BUTTON_SIZE,
+        height: buttonIsPill ? IDLE_PILL_HEIGHT : BUTTON_SIZE,
+        background: buttonIsPill
+          ? glassStyle.background
+          : '#6366F1',
+        backdropFilter: buttonIsPill ? glassStyle.backdropFilter : undefined,
+        WebkitBackdropFilter: buttonIsPill ? glassStyle.WebkitBackdropFilter : undefined,
+        border: buttonIsPill ? glassStyle.border : 'none',
+        boxShadow: buttonIsPill
+          ? glassStyle.boxShadow
+          : '0 16px 48px rgba(28, 25, 23, 0.10)',
+        cursor: viewState === 'confirming' ? 'default' : 'pointer',
         flexShrink: 0,
+        transition: 'width 200ms ease-out, height 200ms ease-out, background 200ms ease-out, box-shadow 200ms ease-out, border 200ms ease-out',
       }}
     >
+      {/* Pill content */}
       <div
-        className="flex items-center justify-center rounded-full"
-        style={{ width: 28, height: 28, background: '#6366F1', flexShrink: 0 }}
+        className="flex items-center gap-sm px-md"
+        style={{
+          position: 'absolute',
+          opacity: buttonIsPill ? 1 : 0,
+          transition: 'opacity 150ms ease-out',
+          pointerEvents: buttonIsPill ? 'auto' : 'none',
+        }}
       >
-        <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-          <path
-            d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        <div
+          className="flex items-center justify-center rounded-full"
+          style={{ width: 28, height: 28, background: '#6366F1', flexShrink: 0 }}
+        >
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+            <path
+              d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path d="M11 5L13 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </div>
+        <span className="text-small font-medium text-text-primary whitespace-nowrap">How are you feeling?</span>
+      </div>
+
+      {/* X icon content */}
+      <div
+        style={{
+          position: 'absolute',
+          opacity: buttonIsPill ? 0 : 1,
+          transition: 'opacity 150ms ease-out',
+          pointerEvents: buttonIsPill ? 'none' : 'auto',
+        }}
+      >
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
-      <span className="text-small font-medium text-text-primary">How are you feeling?</span>
-    </button>
-  ) : (
-    <button
-      onClick={handleButtonClick}
-      className="flex items-center justify-center rounded-full shadow-xl transition-all duration-[150ms] ease-out"
-      style={{
-        width: BUTTON_SIZE,
-        height: BUTTON_SIZE,
-        background: '#6366F1',
-        cursor: viewState === 'confirming' ? 'default' : 'pointer',
-        border: 'none',
-        flexShrink: 0,
-        animation: 'floatingButtonSwap 180ms ease-out',
-      }}
-    >
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <path d="M5 5L13 13M13 5L5 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
     </button>
   );
 

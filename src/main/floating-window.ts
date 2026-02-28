@@ -95,13 +95,11 @@ export class FloatingWindowManager {
 
       if (growDirection === 'down') {
         const newX = currentX + currentW - width;
-        this.win.setSize(width, height);
-        this.win.setPosition(newX, currentY);
+        this.win.setBounds({ x: newX, y: currentY, width, height });
       } else {
         const currentBottom = currentY + currentH;
         const currentRight = currentX + currentW;
-        this.win.setSize(width, height);
-        this.win.setPosition(currentRight - width, currentBottom - height);
+        this.win.setBounds({ x: currentRight - width, y: currentBottom - height, width, height });
       }
     });
 
