@@ -4,7 +4,7 @@ import type { ApiKeyCheckResponse, ApiKeySaveRequest, ApiKeySaveResponse } from 
 
 export function registerApiKeyHandlers(apiKeyService: ApiKeyService): void {
   ipcMain.handle('apikey:check', async (): Promise<ApiKeyCheckResponse> => {
-    return { hasKey: apiKeyService.hasKey() };
+    return { hasKey: apiKeyService.hasKey(), maskedKey: apiKeyService.getMaskedKey() ?? undefined };
   });
 
   ipcMain.handle('apikey:save', async (_event, req: ApiKeySaveRequest): Promise<ApiKeySaveResponse> => {

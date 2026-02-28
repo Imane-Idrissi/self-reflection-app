@@ -72,6 +72,7 @@ export interface ParsedReport {
 
 export interface ApiKeyCheckResponse {
   hasKey: boolean;
+  maskedKey?: string;
 }
 
 export interface ApiKeySaveRequest {

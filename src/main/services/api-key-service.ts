@@ -22,6 +22,19 @@ export class ApiKeyService {
     return this.aiService !== null;
   }
 
+  getMaskedKey(): string | null {
+    try {
+      if (!fs.existsSync(this.encryptedFilePath)) return null;
+      if (!safeStorage.isEncryptionAvailable()) return null;
+      const encrypted = fs.readFileSync(this.encryptedFilePath);
+      const key = safeStorage.decryptString(encrypted);
+      if (!key || key.length < 8) return null;
+      return key.slice(0, 4) + '••••••••' + key.slice(-4);
+    } catch {
+      return null;
+    }
+  }
+
   getAiService(): AiService | null {
     return this.aiService;
   }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ApiKeySetupScreenProps {
   isChange?: boolean;
@@ -12,6 +12,15 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [maskedKey, setMaskedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isChange) {
+      window.api.apikeyCheck().then((result) => {
+        if (result.maskedKey) setMaskedKey(result.maskedKey);
+      });
+    }
+  }, [isChange]);
 
   const canSubmit = key.trim().length > 0 && !saving;
 
@@ -82,13 +91,19 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
         </div>
 
         <div className="mb-lg">
+          {isChange && maskedKey && (
+            <div className="rounded-md border border-border bg-bg-secondary px-md py-sm mb-sm">
+              <p className="text-small text-text-tertiary">Current key</p>
+              <p className="font-mono text-body text-text-primary">{maskedKey}</p>
+            </div>
+          )}
           <div className="relative">
             <input
               type={showKey ? 'text' : 'password'}
               value={key}
               onChange={(e) => { setKey(e.target.value); setError(''); }}
               onKeyDown={handleKeyDown}
-              placeholder="AIza..."
+              placeholder={isChange ? 'Paste new key...' : 'AIza...'}
               autoFocus
               className="w-full rounded-md border border-border bg-bg-elevated px-md py-[12px] pr-[48px] text-body font-mono leading-[1.6] text-text-primary placeholder:text-text-tertiary transition-colors duration-[150ms] ease-out focus:border-primary-500 focus:outline-none"
             />
