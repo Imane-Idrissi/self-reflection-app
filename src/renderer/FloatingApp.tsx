@@ -68,7 +68,7 @@ export default function FloatingApp() {
         if (containerRef.current) {
           const rect = containerRef.current.getBoundingClientRect();
           const width = CARD_WIDTH + CARD_PADDING * 2;
-          const height = Math.ceil(rect.height) + CARD_PADDING + 4;
+          const height = Math.ceil(rect.height) + CARD_PADDING + 16;
           window.floatingApi.resize(width, height, growDirection);
         }
       });
