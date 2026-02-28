@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { ReportGetResponse, ReportPattern, ReportEvidence } from '../../shared/types';
+import type { ReportGetResponse, ReportPattern, ReportEvidence, Capture } from '../../shared/types';
 
 interface ReportScreenProps {
   sessionId: string;
@@ -21,9 +21,39 @@ export default function ReportScreen({
   } | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [printMode, setPrintMode] = useState(false);
+  const [evidenceCaptures, setEvidenceCaptures] = useState<Record<string, Capture[]>>({});
 
   const handleDownload = useCallback(async () => {
+    if (!data?.report) return;
     setDownloading(true);
+
+    const captureMap: Record<string, Capture[]> = {};
+    const fetches: Promise<void>[] = [];
+
+    data.report.patterns.forEach((pattern, pi) => {
+      pattern.evidence.forEach((ev, ei) => {
+        if (ev.type === 'capture') {
+          const key = `${pi}-${ei}`;
+          fetches.push(
+            window.api
+              .captureGetInRange({
+                session_id: sessionId,
+                start_time: ev.start_time,
+                end_time: ev.end_time || ev.start_time,
+              })
+              .then((res) => {
+                captureMap[key] = res.captures;
+              })
+              .catch(() => {
+                captureMap[key] = [];
+              })
+          );
+        }
+      });
+    });
+
+    await Promise.all(fetches);
+    setEvidenceCaptures(captureMap);
     setPrintMode(true);
     await new Promise((r) => setTimeout(r, 100));
     try {
@@ -33,7 +63,7 @@ export default function ReportScreen({
       setPrintMode(false);
       setDownloading(false);
     }
-  }, []);
+  }, [data, sessionId]);
 
   useEffect(() => {
     if (skipped) return;
@@ -144,8 +174,10 @@ export default function ReportScreen({
                   {report.patterns.map((pattern, i) => (
                     <PatternCard
                       key={i}
+                      patternIndex={i}
                       pattern={pattern}
                       printMode={printMode}
+                      evidenceCaptures={evidenceCaptures}
                       onEvidenceClick={(evidence) =>
                         setProofModal({ evidence, sessionId })
                       }
@@ -206,12 +238,16 @@ export default function ReportScreen({
 }
 
 function PatternCard({
+  patternIndex,
   pattern,
   printMode,
+  evidenceCaptures,
   onEvidenceClick,
 }: {
+  patternIndex: number;
   pattern: ReportPattern;
   printMode?: boolean;
+  evidenceCaptures: Record<string, Capture[]>;
   onEvidenceClick: (evidence: ReportEvidence) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -284,16 +320,47 @@ function PatternCard({
               {pattern.evidence.map((ev, i) => printMode ? (
                 <div
                   key={i}
-                  className="flex w-full items-start text-left rounded-md border border-border px-md py-sm text-small text-text-secondary"
+                  className="rounded-md border border-border px-md py-sm text-small text-text-secondary"
                 >
-                  <span className={`inline-block shrink-0 rounded-sm px-xs py-[1px] text-caption font-medium mr-sm mt-[2px] ${
-                    ev.type === 'capture'
-                      ? 'bg-info-bg text-info'
-                      : 'bg-caution-bg text-caution'
-                  }`}>
-                    {ev.type}
-                  </span>
-                  <span className="flex-1">{ev.description}</span>
+                  <div className="flex w-full items-start text-left">
+                    <span className={`inline-block shrink-0 rounded-sm px-xs py-[1px] text-caption font-medium mr-sm mt-[2px] ${
+                      ev.type === 'capture'
+                        ? 'bg-info-bg text-info'
+                        : 'bg-caution-bg text-caution'
+                    }`}>
+                      {ev.type}
+                    </span>
+                    <span className="flex-1">{ev.description}</span>
+                  </div>
+                  {ev.type === 'feeling' ? (
+                    <div className="mt-xs pl-[44px]">
+                      <span className="font-mono text-caption text-text-tertiary">
+                        {new Date(ev.start_time).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ) : (
+                    (() => {
+                      const captures = evidenceCaptures[`${patternIndex}-${i}`];
+                      if (!captures || captures.length === 0) return null;
+                      return (
+                        <div className="mt-xs ml-[44px] border-l-2 border-border pl-sm space-y-[2px]">
+                          {captures.map((c) => (
+                            <div key={c.capture_id} className="flex items-baseline gap-sm">
+                              <span className="font-mono text-caption text-text-tertiary shrink-0">
+                                {new Date(c.captured_at).toLocaleTimeString()}
+                              </span>
+                              <span className="text-caption font-medium text-text-secondary shrink-0">
+                                {c.app_name}
+                              </span>
+                              <span className="text-caption text-text-primary truncate">
+                                {c.window_title}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()
+                  )}
                 </div>
               ) : (
                 <button
