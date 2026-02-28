@@ -176,7 +176,10 @@ function SessionCard({ session, onClick }: { session: DashboardSession; onClick:
           {date}
         </p>
       </div>
-      <span className="text-small font-medium leading-[1.5] text-text-secondary whitespace-nowrap">
+      <span className="flex items-center gap-[4px] text-small font-medium leading-[1.5] text-text-secondary whitespace-nowrap" title="Session duration">
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
         {duration}
       </span>
       <svg className="h-4 w-4 text-text-tertiary transition-colors duration-[150ms] group-hover:text-primary-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
