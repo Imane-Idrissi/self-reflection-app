@@ -41,7 +41,7 @@ export default function SetupWizard({
         </button>
       )}
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-md overflow-y-auto py-xl">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-md overflow-y-auto pt-[56px] pb-xl">
         <div className="w-full max-w-[520px]">
           <Stepper currentStep={step} />
 
