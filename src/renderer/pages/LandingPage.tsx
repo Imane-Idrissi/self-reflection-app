@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import MacWindow from '../components/MacWindow';
 import { UnblurryMark } from '../components/UnblurryLogo';
 
@@ -162,6 +163,37 @@ function trackDownload(source: string) {
 }
 
 export default function LandingPage() {
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [downloadSource, setDownloadSource] = useState('');
+
+  const handleDownloadClick = useCallback((source: string) => {
+    setDownloadSource(source);
+    setTermsAccepted(false);
+    setShowDownloadModal(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setShowDownloadModal(false);
+    setTermsAccepted(false);
+    setDownloadSource('');
+  }, []);
+
+  const handleConfirmDownload = useCallback(() => {
+    trackDownload(downloadSource);
+    window.open(DOWNLOAD_URL, '_blank');
+    handleCloseModal();
+  }, [downloadSource, handleCloseModal]);
+
+  useEffect(() => {
+    if (!showDownloadModal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleCloseModal();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showDownloadModal, handleCloseModal]);
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-bg-primary">
       {/* Nav */}
@@ -179,9 +211,8 @@ export default function LandingPage() {
               <UnblurryMark size={22} className="text-primary-500" />
               <span className="font-heading text-[17px] font-bold text-text-primary">Unblurry</span>
             </span>
-          <a
-            href={DOWNLOAD_URL}
-            onClick={() => trackDownload('navbar')}
+          <button
+            onClick={() => handleDownloadClick('navbar')}
             className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-4 py-2 text-[13px] font-medium text-text-inverse"
             style={{ transition: 'var(--transition-fast)' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
@@ -190,7 +221,7 @@ export default function LandingPage() {
             <DownloadIcon />
             <span className="hidden sm:inline">Download free for macOS</span>
             <span className="sm:hidden">Download</span>
-          </a>
+          </button>
         </div>
       </nav>
 
@@ -222,9 +253,8 @@ export default function LandingPage() {
 
             {/* CTAs */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href={DOWNLOAD_URL}
-                onClick={() => trackDownload('hero')}
+              <button
+                onClick={() => handleDownloadClick('hero')}
                 className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-[15px] font-semibold text-text-inverse shadow-md"
                 style={{ transition: 'var(--transition-fast)' }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
@@ -232,7 +262,7 @@ export default function LandingPage() {
               >
                 <DownloadIcon />
                 Download free for macOS
-              </a>
+              </button>
               <a
                 href="#how-it-works"
                 className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-[15px] font-medium text-text-primary shadow-sm"
@@ -376,9 +406,8 @@ export default function LandingPage() {
             Free to use. Bring your own Gemini API key. macOS only for now.
           </p>
           <div className="mt-8">
-            <a
-              href={DOWNLOAD_URL}
-              onClick={() => trackDownload('bottom_cta')}
+            <button
+              onClick={() => handleDownloadClick('bottom_cta')}
               className="inline-flex items-center gap-2 rounded-full bg-primary-500 px-7 py-3.5 text-[16px] font-semibold text-text-inverse shadow-md"
               style={{ transition: 'var(--transition-fast)' }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-primary-600)')}
@@ -386,7 +415,7 @@ export default function LandingPage() {
             >
               <DownloadIcon />
               Download free for macOS
-            </a>
+            </button>
           </div>
           <p className="mt-4 text-[13px] text-text-tertiary">Requires macOS 12 or later</p>
         </div>
@@ -406,6 +435,83 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Download Modal */}
+      {showDownloadModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
+        >
+          <div
+            className="w-full rounded-xl shadow-xl"
+            style={{ maxWidth: 440, backgroundColor: 'var(--color-bg-elevated)' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-1">
+              <h3 className="font-heading text-[17px] font-bold text-text-primary">Download Unblurry</h3>
+              <button
+                onClick={handleCloseModal}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-text-tertiary"
+                style={{ transition: 'var(--transition-fast)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 pb-6 pt-3">
+              {/* macOS notice */}
+              <div
+                className="rounded-lg px-4 py-3"
+                style={{ backgroundColor: 'var(--color-caution-bg)', border: '1px solid var(--color-caution)' }}
+              >
+                <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-caution)' }}>
+                  Unblurry is distributed outside the Mac App Store, which may trigger a macOS security prompt. If so, right-click the app, click <strong>Open</strong>, then confirm.
+                </p>
+              </div>
+
+              {/* Terms checkbox */}
+              <label className="mt-5 flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded accent-primary-500"
+                  style={{ accentColor: 'var(--color-primary-500)' }}
+                />
+                <span className="text-[14px] leading-snug text-text-secondary">
+                  I agree to the{' '}
+                  <a
+                    href="./terms.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-primary-500 underline underline-offset-2"
+                  >
+                    Terms of Use
+                  </a>
+                </span>
+              </label>
+
+              {/* Download button */}
+              <button
+                onClick={handleConfirmDownload}
+                disabled={!termsAccepted}
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-[15px] font-semibold text-text-inverse shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ transition: 'var(--transition-fast)' }}
+                onMouseEnter={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-600)'; }}
+                onMouseLeave={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-500)'; }}
+              >
+                <DownloadIcon />
+                Download for macOS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
