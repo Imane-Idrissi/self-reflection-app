@@ -225,7 +225,7 @@ export default function FloatingApp() {
             placeholder="How are you feeling?"
             rows={2}
             className="w-full resize-none rounded-md px-sm py-sm text-body text-text-primary placeholder:text-text-tertiary focus:border-primary-500 focus:outline-none"
-            style={{ minHeight: 48, maxHeight: 120, background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.5)' }}
+            style={{ minHeight: 48, maxHeight: 120, background: 'transparent', border: 'none' }}
           />
           <div className="flex justify-end mt-sm">
             <button
