@@ -58,7 +58,7 @@ export default function ApiKeySetupScreen({ isChange, onComplete, onCancel }: Ap
       {isChange && onCancel && (
         <button
           onClick={onCancel}
-          className="absolute top-lg left-lg z-20 flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
+          className="absolute top-[46px] left-lg z-50 no-drag flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />

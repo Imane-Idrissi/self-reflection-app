@@ -32,7 +32,7 @@ export default function SetupWizard({
       {onBack && (
         <button
           onClick={onBack}
-          className="absolute top-lg left-lg z-20 flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
+          className="absolute top-[46px] left-lg z-50 no-drag flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -41,7 +41,7 @@ export default function SetupWizard({
         </button>
       )}
 
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-md">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-md overflow-y-auto py-xl">
         <div className="w-full max-w-[520px]">
           <Stepper currentStep={step} />
 
@@ -343,7 +343,7 @@ function StartRecordingStep({
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-bg-secondary px-lg py-lg mb-xl">
+      <div className="rounded-lg border border-border bg-bg-secondary px-lg py-lg mb-lg">
         <p className="text-small font-medium text-text-primary mb-sm">What gets captured</p>
         <ul className="space-y-xs text-small leading-[1.5] text-text-secondary">
           <li className="flex items-start gap-sm">
@@ -366,6 +366,15 @@ function StartRecordingStep({
             File contents or notifications
           </li>
         </ul>
+      </div>
+
+      <div className="flex items-start gap-sm rounded-lg border border-primary-200 bg-primary-50 px-lg py-md mb-xl">
+        <span className="mt-[2px] text-primary-500 flex-shrink-0">
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M12.5 3.5L14.5 5.5L6 14H4V12L12.5 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M11 5L13 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+        </span>
+        <p className="text-small leading-[1.5] text-text-secondary">
+          A floating <span className="font-medium text-primary-500">"How are you feeling?"</span> button will appear on screen. Use it to log your mood anytime. You can drag it to reposition.
+        </p>
       </div>
 
       <button

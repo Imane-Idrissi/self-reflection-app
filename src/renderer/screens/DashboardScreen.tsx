@@ -37,7 +37,7 @@ export default function DashboardScreen({
       <WaveTopLeft />
       <WaveBottomRight />
 
-      <header className="relative z-10 flex items-center justify-between pl-xl pr-[72px] py-md">
+      <header className="relative z-50 no-drag flex items-center justify-between pl-xl pr-[72px] pt-[46px] pb-md">
         <UnblurryLogo size={24} />
         <button
           onClick={onSettings}

@@ -125,8 +125,11 @@ function createWindow() {
       contextIsolation: true,
     },
     titleBarStyle: 'hiddenInset',
+    trafficLightPosition: { x: 14, y: 10 },
     show: false,
   });
+
+  mainWindow.setFullScreenable(false);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow!.show();
