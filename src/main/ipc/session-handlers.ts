@@ -118,10 +118,7 @@ export function registerSessionHandlers(
 
       return { refined_intent: result.refined_intent };
     } catch (error) {
-      const message = error instanceof AiServiceError
-        ? error.message
-        : 'An unexpected error occurred';
-      return { refined_intent: '', error: message };
+      return { refined_intent: '', error: friendlyAiError(error) };
     }
   });
 

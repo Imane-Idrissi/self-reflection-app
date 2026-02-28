@@ -141,7 +141,7 @@ export default function App() {
           startRecording: {
             sessionId: step.sessionId,
             finalIntent: '',
-            apiError: "We couldn't refine your intent right now",
+            apiError: response.error,
           },
         });
         return;
@@ -159,7 +159,7 @@ export default function App() {
         startRecording: {
           sessionId: step.sessionId,
           finalIntent: '',
-          apiError: "We couldn't refine your intent right now",
+          apiError: "Couldn't reach the AI service right now",
         },
       });
     } finally {
