@@ -43,7 +43,7 @@ function friendlyAiError(error: unknown): string {
   const lower = cause.toLowerCase();
 
   if (lower.includes('quota') || lower.includes('resource_exhausted') || lower.includes('429'))
-    return 'Your API key has exceeded its quota. Check your Gemini billing at ai.google.dev.';
+    return 'Your API key has exceeded its quota. Check your billing at aistudio.google.com/apikey';
   if (lower.includes('api_key_invalid') || lower.includes('401') || lower.includes('permission'))
     return 'Your API key is invalid or expired. Please update it in settings.';
   if (lower.includes('fetch') || lower.includes('network') || lower.includes('enotfound'))
