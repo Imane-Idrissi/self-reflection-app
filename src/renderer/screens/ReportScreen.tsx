@@ -20,13 +20,17 @@ export default function ReportScreen({
     sessionId: string;
   } | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [printMode, setPrintMode] = useState(false);
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);
+    setPrintMode(true);
+    await new Promise((r) => setTimeout(r, 100));
     try {
       const result = await window.api.reportDownload();
       if (result.error) console.error('PDF download failed:', result.error);
     } finally {
+      setPrintMode(false);
       setDownloading(false);
     }
   }, []);
@@ -141,6 +145,7 @@ export default function ReportScreen({
                     <PatternCard
                       key={i}
                       pattern={pattern}
+                      printMode={printMode}
                       onEvidenceClick={(evidence) =>
                         setProofModal({ evidence, sessionId })
                       }
@@ -202,12 +207,15 @@ export default function ReportScreen({
 
 function PatternCard({
   pattern,
+  printMode,
   onEvidenceClick,
 }: {
   pattern: ReportPattern;
+  printMode?: boolean;
   onEvidenceClick: (evidence: ReportEvidence) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const isExpanded = expanded || printMode;
 
   const typeStyles = {
     positive: { label: 'Positive', className: 'bg-positive-bg text-positive' },
@@ -251,27 +259,43 @@ function PatternCard({
 
       {pattern.evidence.length > 0 && (
         <div>
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-xs text-small font-medium text-primary-500 hover:text-primary-600 transition-colors duration-[150ms]"
-          >
-            <svg
-              className={`h-3 w-3 transition-transform duration-[150ms] ${expanded ? 'rotate-90' : ''}`}
-              fill="currentColor"
-              viewBox="0 0 20 20"
+          {!printMode && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-xs text-small font-medium text-primary-500 hover:text-primary-600 transition-colors duration-[150ms]"
             >
-              <path
-                fillRule="evenodd"
-                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {pattern.evidence.length} evidence {pattern.evidence.length === 1 ? 'item' : 'items'}
-          </button>
+              <svg
+                className={`h-3 w-3 transition-transform duration-[150ms] ${isExpanded ? 'rotate-90' : ''}`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {pattern.evidence.length} evidence {pattern.evidence.length === 1 ? 'item' : 'items'}
+            </button>
+          )}
 
-          {expanded && (
-            <div className="mt-sm space-y-xs">
-              {pattern.evidence.map((ev, i) => (
+          {isExpanded && (
+            <div className={`${printMode ? '' : 'mt-sm'} space-y-xs`}>
+              {pattern.evidence.map((ev, i) => printMode ? (
+                <div
+                  key={i}
+                  className="flex w-full items-start text-left rounded-md border border-border px-md py-sm text-small text-text-secondary"
+                >
+                  <span className={`inline-block shrink-0 rounded-sm px-xs py-[1px] text-caption font-medium mr-sm mt-[2px] ${
+                    ev.type === 'capture'
+                      ? 'bg-info-bg text-info'
+                      : 'bg-caution-bg text-caution'
+                  }`}>
+                    {ev.type}
+                  </span>
+                  <span className="flex-1">{ev.description}</span>
+                </div>
+              ) : (
                 <button
                   key={i}
                   onClick={() => onEvidenceClick(ev)}
