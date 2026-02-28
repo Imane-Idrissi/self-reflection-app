@@ -60,10 +60,10 @@ export class SessionRepository {
     ).all(...statuses) as Session[];
   }
 
-  findCompleted(limit: number): Session[] {
+  findCompleted(limit: number, offset: number = 0): Session[] {
     return this.db.prepare(
-      'SELECT * FROM session WHERE status = ? ORDER BY ended_at DESC LIMIT ?'
-    ).all('ended', limit) as Session[];
+      'SELECT * FROM session WHERE status = ? ORDER BY ended_at DESC LIMIT ? OFFSET ?'
+    ).all('ended', limit, offset) as Session[];
   }
 
   deleteByStatus(status: Session['status']): number {

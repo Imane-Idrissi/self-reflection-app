@@ -142,8 +142,8 @@ export class SessionService {
     return this.repo.getById(sessionId);
   }
 
-  getCompletedSessions(limit: number): Session[] {
-    return this.repo.findCompleted(limit);
+  getCompletedSessions(limit: number, offset: number = 0): Session[] {
+    return this.repo.findCompleted(limit, offset);
   }
 
   private getSessionOrThrow(sessionId: string): Session {

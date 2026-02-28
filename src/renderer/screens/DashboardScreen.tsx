@@ -18,15 +18,19 @@ export default function DashboardScreen({
   theme,
   onToggleTheme,
 }: DashboardScreenProps) {
+  const PAGE_SIZE = 20;
   const [sessions, setSessions] = useState<DashboardSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
-        const result = await window.api.dashboardGetSessions({ limit: 50 });
+        const result = await window.api.dashboardGetSessions({ limit: PAGE_SIZE, offset: 0 });
         setSessions(result);
+        setHasMore(result.length === PAGE_SIZE);
       } catch {
         // Silently fail, show empty state
       } finally {
@@ -35,6 +39,19 @@ export default function DashboardScreen({
     };
     load();
   }, []);
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const result = await window.api.dashboardGetSessions({ limit: PAGE_SIZE, offset: sessions.length });
+      setSessions((prev) => [...prev, ...result]);
+      setHasMore(result.length === PAGE_SIZE);
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const filteredSessions = sessions.filter((s) =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -150,6 +167,16 @@ export default function DashboardScreen({
                   />
                 ))}
               </div>
+            )}
+
+            {!loading && hasMore && !searchQuery && (
+              <button
+                onClick={loadMore}
+                disabled={loadingMore}
+                className="mt-md w-full rounded-md border border-border bg-bg-elevated py-sm text-small font-medium text-text-secondary transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600 disabled:opacity-50"
+              >
+                {loadingMore ? 'Loading...' : 'Load more sessions'}
+              </button>
             )}
           </section>
         </div>
