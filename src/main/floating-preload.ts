@@ -27,4 +27,8 @@ contextBridge.exposeInMainWorld('floatingApi', {
   dismissed: () => {
     ipcRenderer.send('floating:dismissed');
   },
+
+  setIgnoreMouse: (ignore: boolean) => {
+    ipcRenderer.send('floating:set-ignore-mouse', ignore);
+  },
 });

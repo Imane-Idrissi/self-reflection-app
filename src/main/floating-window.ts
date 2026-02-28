@@ -6,8 +6,8 @@ export interface FloatingState {
   status: 'active' | 'paused';
 }
 
-const INITIAL_WIDTH = 270;
-const INITIAL_HEIGHT = 64;
+const INITIAL_WIDTH = 250;
+const INITIAL_HEIGHT = 44;
 const MARGIN = 24;
 
 export class FloatingWindowManager {
@@ -37,6 +37,8 @@ export class FloatingWindowManager {
       skipTaskbar: true,
       hasShadow: false,
       resizable: false,
+      movable: true,
+      show: false,
       webPreferences: {
         preload: path.join(__dirname, 'floating-preload.js'),
         nodeIntegration: false,
@@ -44,11 +46,19 @@ export class FloatingWindowManager {
       },
     });
 
+    this.win.setAlwaysOnTop(true, 'screen-saver');
+    this.win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    this.win.setFullScreenable(false);
+
     if (!app.isPackaged) {
       this.win.loadURL('http://localhost:5173/floating.html');
     } else {
       this.win.loadFile(path.join(__dirname, '../renderer/floating.html'));
     }
+
+    this.win.once('ready-to-show', () => {
+      this.win?.showInactive();
+    });
 
     this.win.on('closed', () => {
       this.win = null;
@@ -100,7 +110,7 @@ export class FloatingWindowManager {
 
       const [x, y] = this.win.getPosition();
       const primaryDisplay = screen.getPrimaryDisplay();
-      const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+      const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
       const [winWidth, winHeight] = this.win.getSize();
 
       const newX = Math.max(0, Math.min(x + deltaX, screenWidth - winWidth));
@@ -112,6 +122,15 @@ export class FloatingWindowManager {
     ipcMain.on('floating:dismissed', () => {
       if (this.win) {
         this.win.blur();
+      }
+    });
+
+    ipcMain.on('floating:set-ignore-mouse', (_event, ignore: boolean) => {
+      if (!this.win) return;
+      if (ignore) {
+        this.win.setIgnoreMouseEvents(true, { forward: true });
+      } else {
+        this.win.setIgnoreMouseEvents(false);
       }
     });
   }

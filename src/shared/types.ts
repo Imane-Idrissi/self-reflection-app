@@ -273,6 +273,7 @@ export interface FloatingAPI {
   resize: (width: number, height: number, growDirection?: 'up' | 'down') => void;
   move: (deltaX: number, deltaY: number) => void;
   dismissed: () => void;
+  setIgnoreMouse: (ignore: boolean) => void;
 }
 
 declare global {

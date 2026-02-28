@@ -7,7 +7,7 @@ const BUTTON_SIZE = 48;
 const IDLE_PILL_WIDTH = 250;
 const IDLE_PILL_HEIGHT = 44;
 const CARD_WIDTH = 320;
-const CARD_PADDING = 20;
+const CARD_PADDING = 0;
 const CONFIRMATION_DURATION = 1500;
 const DRAG_THRESHOLD = 5;
 const CARD_HEIGHT_ESTIMATE = 200;
@@ -16,6 +16,7 @@ export default function FloatingApp() {
   const [sessionId, setSessionId] = useState('');
   const [sessionStatus, setSessionStatus] = useState<'active' | 'paused'>('active');
   const [viewState, setViewState] = useState<ViewState>('idle');
+  const [closing, setClosing] = useState(false);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [cardDirection, setCardDirection] = useState<CardDirection>('above');
@@ -94,9 +95,13 @@ export default function FloatingApp() {
   }, [viewState, computeCardDirection]);
 
   const dismiss = useCallback(() => {
-    setText('');
-    setViewState('idle');
-    window.floatingApi.dismissed();
+    setClosing(true);
+    setTimeout(() => {
+      setText('');
+      setClosing(false);
+      setViewState('idle');
+      window.floatingApi.dismissed();
+    }, 200);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -189,18 +194,28 @@ export default function FloatingApp() {
   const canSubmit = text.trim().length > 0 && !submitting;
 
   const glassStyle: React.CSSProperties = {
-    background: 'linear-gradient(135deg, rgba(238,242,255,0.85) 0%, rgba(224,231,255,0.75) 100%)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(199,210,254,0.6)',
-    boxShadow: '0 4px 20px rgba(99,102,241,0.10), inset 0 1px 0 rgba(255,255,255,0.7)',
+    background: 'linear-gradient(135deg, rgba(238,242,255,0.92) 0%, rgba(224,231,255,0.88) 100%)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    border: '1px solid rgba(165,180,252,0.7)',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+  };
+
+  const cardTransition: React.CSSProperties = {
+    transition: 'opacity 180ms ease-out, transform 180ms ease-out',
+    opacity: closing ? 0 : 1,
+    transform: closing ? 'scale(0.92) translateY(4px)' : 'scale(1) translateY(0)',
+  };
+
+  const cardEntranceStyle: React.CSSProperties = {
+    animation: 'floatingCardIn 200ms ease-out',
   };
 
   const card = (viewState === 'expanded' || viewState === 'confirming') ? (
     viewState === 'expanded' ? (
       <div
         className="rounded-lg"
-        style={{ ...glassStyle, width: CARD_WIDTH }}
+        style={{ ...glassStyle, ...cardTransition, ...(!closing ? cardEntranceStyle : {}), width: CARD_WIDTH }}
       >
         <div className="p-md">
           <textarea
@@ -226,14 +241,14 @@ export default function FloatingApp() {
     ) : (
       <div
         className="flex items-center justify-center rounded-lg"
-        style={{ ...glassStyle, width: CARD_WIDTH, height: 56, background: 'linear-gradient(135deg, rgba(240,253,244,0.65) 0%, rgba(220,245,230,0.55) 100%)' }}
+        style={{ width: CARD_WIDTH, height: 56, background: '#16A34A', boxShadow: '0 4px 24px rgba(0,0,0,0.15), 0 1px 6px rgba(0,0,0,0.08)', animation: 'floatingCardIn 200ms ease-out' }}
       >
         <div className="flex items-center gap-sm">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="9" cy="9" r="9" fill="#16A34A" />
-            <path d="M5.5 9L8 11.5L12.5 6.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="9" cy="9" r="9" fill="white" />
+            <path d="M5.5 9L8 11.5L12.5 6.5" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-small font-medium text-text-secondary">Feeling logged</span>
+          <span className="text-small font-medium" style={{ color: 'white' }}>Feeling logged</span>
         </div>
       </div>
     )
@@ -248,14 +263,13 @@ export default function FloatingApp() {
         ...glassStyle,
         width: IDLE_PILL_WIDTH,
         height: IDLE_PILL_HEIGHT,
-        opacity: isPaused ? 0.5 : 1,
         cursor: 'pointer',
         flexShrink: 0,
       }}
     >
       <div
         className="flex items-center justify-center rounded-full"
-        style={{ width: 28, height: 28, background: isPaused ? '#A8A29E' : '#6366F1', flexShrink: 0 }}
+        style={{ width: 28, height: 28, background: '#6366F1', flexShrink: 0 }}
       >
         <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
           <path
@@ -277,11 +291,11 @@ export default function FloatingApp() {
       style={{
         width: BUTTON_SIZE,
         height: BUTTON_SIZE,
-        background: isPaused ? '#A8A29E' : '#6366F1',
-        opacity: isPaused ? 0.5 : 1,
+        background: '#6366F1',
         cursor: viewState === 'confirming' ? 'default' : 'pointer',
         border: 'none',
         flexShrink: 0,
+        animation: 'floatingButtonSwap 180ms ease-out',
       }}
     >
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">

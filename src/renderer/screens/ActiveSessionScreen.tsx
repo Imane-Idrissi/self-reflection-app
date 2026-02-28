@@ -189,9 +189,14 @@ export default function ActiveSessionScreen({
         </div>
 
         {isActive ? (
-          <p className="text-small leading-[1.5] text-text-tertiary text-center mb-xl">
-            Go do your work, capture is running in the background.
-          </p>
+          <div className="text-center mb-xl">
+            <p className="text-small leading-[1.5] text-text-tertiary">
+              Go do your work, capture is running in the background.
+            </p>
+            <p className="text-small leading-[1.5] text-text-tertiary mt-xs">
+              Use the floating <span className="font-medium text-text-secondary">"How are you feeling?"</span> button to log your mood anytime.
+            </p>
+          </div>
         ) : (
           <p className="text-small leading-[1.5] text-text-tertiary text-center mb-xl">
             Session paused. Take your time, resume when you're ready.
