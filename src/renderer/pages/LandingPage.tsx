@@ -135,19 +135,19 @@ const FEATURES = [
     title: 'Smart intent setting',
     description:
       'Don\'t just write "be productive." The AI asks clarifying questions to help you define a specific, measurable goal for your session. Better intent means better analysis.',
-    screenshot: '',
+    screenshot: './screenshots/intent-setting.png',
   },
   {
     title: 'Feeling logs: the "why" behind behavior',
     description:
       'Numbers show what you did, but not how you felt doing it. A small floating button lets you drop a quick note whenever you want. No notifications, no interruptions. Your feelings add the context that makes your report actually useful.',
-    screenshot: '',
+    screenshot: './screenshots/feeling-log.png',
   },
   {
     title: 'Behavioral analysis with evidence',
     description:
       'Every pattern is backed by real data from your captured session and your feeling logs. No guesswork. You see exactly when you were focused, where you drifted, and what triggered it.',
-    screenshot: '',
+    screenshot: './screenshots/report.png',
   },
 ];
 

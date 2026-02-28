@@ -48,3 +48,4 @@ src/main/helpers/active-window
 *.png
 !src/renderer/og-image.png
 !src/renderer/apple-touch-icon.png
+!src/renderer/public/screenshots/*.png
