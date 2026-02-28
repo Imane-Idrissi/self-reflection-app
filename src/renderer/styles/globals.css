@@ -51,6 +51,16 @@ body {
   animation: recording-pulse 2s ease-in-out infinite;
 }
 
+/* Indeterminate progress bar */
+@keyframes progressSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+.report-progress {
+  animation: progressSlide 1.5s ease-in-out infinite;
+}
+
 /* Screen transition */
 @keyframes screenFadeIn {
   from { opacity: 0; transform: translateY(6px); }
