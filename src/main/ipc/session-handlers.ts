@@ -145,6 +145,11 @@ export function registerSessionHandlers(
       hideTray();
       floatingWindowManager.destroy();
       reportService.startGeneration(sessionId);
+      if (win) {
+        if (win.isMinimized()) win.restore();
+        win.show();
+        win.focus();
+      }
       win?.webContents.send('session:state-changed', { state: 'ended', session_id: sessionId, summary });
     },
   };
