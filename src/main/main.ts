@@ -38,7 +38,7 @@ function initServices() {
   const execFileAsync = promisify(execFile);
   const helperBin = app.isPackaged
     ? path.join(process.resourcesPath, 'active-window')
-    : path.join(__dirname, '..', 'src', 'main', 'helpers', 'active-window');
+    : path.join(__dirname, '..', '..', '..', 'src', 'main', 'helpers', 'active-window');
 
   captureService = new CaptureService(
     captureRepo,
