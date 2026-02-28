@@ -6,6 +6,7 @@ interface ReportScreenProps {
   skipped?: boolean;
   summary?: { total_minutes: number; active_minutes: number; paused_minutes: number };
   onStartNew: () => void;
+  onBack?: () => void;
 }
 
 export default function ReportScreen({
@@ -13,6 +14,7 @@ export default function ReportScreen({
   skipped,
   summary: skippedSummary,
   onStartNew,
+  onBack,
 }: ReportScreenProps) {
   const [data, setData] = useState<ReportGetResponse | null>(null);
   const [proofModal, setProofModal] = useState<{
@@ -91,6 +93,17 @@ export default function ReportScreen({
 
   return (
     <div className="min-h-screen bg-bg-primary">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="print:hidden fixed top-[46px] left-lg z-50 no-drag flex items-center gap-sm rounded-md border border-border bg-bg-elevated px-md py-sm text-small font-medium text-text-secondary shadow-sm transition-colors duration-[150ms] hover:border-primary-400 hover:text-primary-600"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Dashboard
+        </button>
+      )}
       <div className="mx-auto max-w-[680px] px-lg py-3xl">
         {/* Section 1: Intent + Session Overview */}
         <section className="mb-2xl">

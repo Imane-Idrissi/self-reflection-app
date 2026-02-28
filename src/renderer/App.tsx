@@ -382,6 +382,7 @@ export default function App() {
         <ReportScreen
           sessionId={step.sessionId}
           onStartNew={goToDashboard}
+          onBack={goToDashboard}
         />
       );
   }
