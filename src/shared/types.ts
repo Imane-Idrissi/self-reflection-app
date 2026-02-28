@@ -238,6 +238,7 @@ export interface DashboardSession {
 export interface DashboardGetSessionsRequest {
   limit?: number;
   offset?: number;
+  search?: string;
 }
 
 export interface ElectronAPI {

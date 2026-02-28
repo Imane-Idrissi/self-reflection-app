@@ -146,6 +146,10 @@ export class SessionService {
     return this.repo.findCompleted(limit, offset);
   }
 
+  searchCompletedSessions(query: string, limit: number = 50): Session[] {
+    return this.repo.searchCompleted(query, limit);
+  }
+
   private getSessionOrThrow(sessionId: string): Session {
     const session = this.repo.getById(sessionId);
     if (!session) {

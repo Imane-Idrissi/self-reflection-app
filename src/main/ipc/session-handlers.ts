@@ -314,7 +314,9 @@ export function registerSessionHandlers(
   ipcMain.handle('dashboard:get-sessions', async (_event, req: DashboardGetSessionsRequest): Promise<DashboardSession[]> => {
     const limit = req.limit ?? 10;
     const offset = req.offset ?? 0;
-    const sessions = sessionService.getCompletedSessions(limit, offset);
+    const sessions = req.search
+      ? sessionService.searchCompletedSessions(req.search, limit)
+      : sessionService.getCompletedSessions(limit, offset);
     return sessions.map((s) => {
       const startMs = s.started_at ? new Date(s.started_at).getTime() : new Date(s.created_at).getTime();
       const endMs = s.ended_at ? new Date(s.ended_at).getTime() : startMs;

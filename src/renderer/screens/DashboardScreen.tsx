@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { DashboardSession } from '../../shared/types';
 import { UnblurryLogo } from '../components/UnblurryLogo';
 import ThemeToggle from '../components/ThemeToggle';
@@ -20,10 +20,12 @@ export default function DashboardScreen({
 }: DashboardScreenProps) {
   const PAGE_SIZE = 20;
   const [sessions, setSessions] = useState<DashboardSession[]>([]);
+  const [searchResults, setSearchResults] = useState<DashboardSession[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +42,27 @@ export default function DashboardScreen({
     load();
   }, []);
 
+  const searchServer = useCallback((query: string) => {
+    clearTimeout(debounceRef.current);
+    if (!query.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const result = await window.api.dashboardGetSessions({ search: query, limit: 50 });
+        setSearchResults(result);
+      } catch {
+        setSearchResults([]);
+      }
+    }, 300);
+  }, []);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    searchServer(value);
+  };
+
   const loadMore = async () => {
     setLoadingMore(true);
     try {
@@ -53,9 +76,8 @@ export default function DashboardScreen({
     }
   };
 
-  const filteredSessions = sessions.filter((s) =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const displayedSessions = searchResults !== null ? searchResults : sessions;
+  const isSearching = searchQuery.trim().length > 0;
   const isNewUser = !loading && sessions.length === 0;
 
   return (
@@ -123,7 +145,7 @@ export default function DashboardScreen({
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   placeholder="Search sessions..."
                   className="w-full rounded-md border border-border bg-bg-elevated py-sm pl-[36px] pr-md text-body text-text-primary placeholder:text-text-tertiary transition-colors duration-[150ms] focus:border-primary-500 focus:outline-none"
                 />
@@ -149,7 +171,7 @@ export default function DashboardScreen({
               </div>
             )}
 
-            {!loading && sessions.length > 0 && filteredSessions.length === 0 && (
+            {!loading && sessions.length > 0 && displayedSessions.length === 0 && (
               <div className="rounded-lg border border-dashed border-border bg-bg-elevated px-lg py-xl text-center">
                 <p className="text-body leading-[1.6] text-text-secondary">
                   No matching sessions
@@ -157,9 +179,9 @@ export default function DashboardScreen({
               </div>
             )}
 
-            {!loading && filteredSessions.length > 0 && (
+            {!loading && displayedSessions.length > 0 && (
               <div className="space-y-sm">
-                {filteredSessions.map((session) => (
+                {displayedSessions.map((session) => (
                   <SessionCard
                     key={session.session_id}
                     session={session}
@@ -169,7 +191,7 @@ export default function DashboardScreen({
               </div>
             )}
 
-            {!loading && hasMore && !searchQuery && (
+            {!loading && hasMore && !isSearching && (
               <button
                 onClick={loadMore}
                 disabled={loadingMore}
