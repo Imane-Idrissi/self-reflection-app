@@ -20,11 +20,12 @@ export default function DashboardScreen({
 }: DashboardScreenProps) {
   const [sessions, setSessions] = useState<DashboardSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
-        const result = await window.api.dashboardGetSessions({ limit: 10 });
+        const result = await window.api.dashboardGetSessions({ limit: 50 });
         setSessions(result);
       } catch {
         // Silently fail, show empty state
@@ -35,6 +36,9 @@ export default function DashboardScreen({
     load();
   }, []);
 
+  const filteredSessions = sessions.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const isNewUser = !loading && sessions.length === 0;
 
   return (
@@ -94,6 +98,21 @@ export default function DashboardScreen({
               </h2>
             </div>
 
+            {!loading && sessions.length > 0 && (
+              <div className="relative mb-md">
+                <svg className="pointer-events-none absolute left-[12px] top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search sessions..."
+                  className="w-full rounded-md border border-border bg-bg-elevated py-sm pl-[36px] pr-md text-body text-text-primary placeholder:text-text-tertiary transition-colors duration-[150ms] focus:border-primary-500 focus:outline-none"
+                />
+              </div>
+            )}
+
             {loading && (
               <div className="flex justify-center py-2xl">
                 <div className="h-4 w-4 rounded-full bg-primary-500 animate-pulse" />
@@ -113,9 +132,17 @@ export default function DashboardScreen({
               </div>
             )}
 
-            {!loading && sessions.length > 0 && (
+            {!loading && sessions.length > 0 && filteredSessions.length === 0 && (
+              <div className="rounded-lg border border-dashed border-border bg-bg-elevated px-lg py-xl text-center">
+                <p className="text-body leading-[1.6] text-text-secondary">
+                  No matching sessions
+                </p>
+              </div>
+            )}
+
+            {!loading && filteredSessions.length > 0 && (
               <div className="space-y-sm">
-                {sessions.map((session) => (
+                {filteredSessions.map((session) => (
                   <SessionCard
                     key={session.session_id}
                     session={session}
