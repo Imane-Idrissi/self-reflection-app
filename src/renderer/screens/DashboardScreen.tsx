@@ -236,6 +236,21 @@ export default function DashboardScreen({
                 ? 'This session has a report. Download it before deleting if you want to keep it. This action is permanent.'
                 : 'All data for this session will be permanently deleted.'}
             </p>
+            {deleteTarget.has_report && (
+              <button
+                onClick={() => {
+                  const id = deleteTarget.session_id;
+                  setDeleteTarget(null);
+                  onSessionClick(id);
+                }}
+                className="mb-md w-full flex items-center justify-center gap-sm rounded-md border border-primary-300 bg-bg-elevated px-lg py-[12px] text-body font-medium text-primary-600 shadow-sm transition-colors duration-[150ms] ease-out hover:bg-primary-50"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                View & Download Report
+              </button>
+            )}
             <div className="flex gap-sm">
               <button
                 onClick={() => setDeleteTarget(null)}
@@ -286,7 +301,7 @@ function SessionCard({ session, onClick, onDelete }: { session: DashboardSession
       </span>
       <button
         onClick={onDelete}
-        className="rounded-md p-[6px] text-text-tertiary opacity-0 transition-all duration-[150ms] hover:bg-negative-bg hover:text-negative group-hover:opacity-100"
+        className="rounded-md p-[6px] text-text-tertiary transition-all duration-[150ms] hover:bg-negative-bg hover:text-negative"
         title="Delete session"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

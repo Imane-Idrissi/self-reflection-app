@@ -350,6 +350,7 @@ export default function App() {
         <ReportScreen
           sessionId={step.sessionId}
           onStartNew={goToDashboard}
+          onBack={goToDashboard}
         />
       );
 
@@ -374,6 +375,7 @@ export default function App() {
           skipped
           summary={step.summary}
           onStartNew={goToDashboard}
+          onBack={goToDashboard}
         />
       );
 
