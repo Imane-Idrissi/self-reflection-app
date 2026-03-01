@@ -6,7 +6,7 @@ import { UnblurryMark } from '../components/UnblurryLogo';
 const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 if (POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
-    api_host: 'https://us.i.posthog.com',
+    api_host: 'https://eu.i.posthog.com',
     persistence: 'memory',
   });
 }
