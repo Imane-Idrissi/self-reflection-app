@@ -170,16 +170,28 @@ function trackDownload(source: string, arch: string) {
   }
 }
 
+function getIsMacOS() {
+  const ua = navigator.userAgent;
+  return /Macintosh|Mac OS X/.test(ua) && !/iPhone|iPad|iPod/.test(ua);
+}
+
 export default function LandingPage() {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [downloadSource, setDownloadSource] = useState('');
+  const [showOsTooltip, setShowOsTooltip] = useState(false);
+  const isMacOS = getIsMacOS();
 
   const handleDownloadClick = useCallback((source: string) => {
+    if (!isMacOS) {
+      setShowOsTooltip(true);
+      setTimeout(() => setShowOsTooltip(false), 3000);
+      return;
+    }
     setDownloadSource(source);
     setTermsAccepted(false);
     setShowDownloadModal(true);
-  }, []);
+  }, [isMacOS]);
 
   const handleCloseModal = useCallback(() => {
     setShowDownloadModal(false);
@@ -542,6 +554,20 @@ export default function LandingPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* OS tooltip for non-macOS users */}
+      {showOsTooltip && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-fade-in">
+          <div
+            className="rounded-xl px-5 py-3 shadow-lg"
+            style={{ backgroundColor: 'var(--color-bg-elevated)', border: '1px solid var(--color-border)' }}
+          >
+            <p className="text-[14px] font-medium text-text-primary">
+              Unblurry is only available for macOS
+            </p>
           </div>
         </div>
       )}
