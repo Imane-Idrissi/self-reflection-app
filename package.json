@@ -32,8 +32,12 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
+      "x64ArchFiles": "Contents/Resources/app.asar.unpacked/**",
       "target": [
-        "dmg"
+        {
+          "target": "dmg",
+          "arch": ["universal"]
+        }
       ]
     }
   },
