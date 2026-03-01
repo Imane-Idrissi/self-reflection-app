@@ -214,7 +214,7 @@ export default function App() {
       setStep({ type: 'preparing', sessionId, finalIntent });
       setTimeout(() => {
         setStep({ type: 'active-session', sessionId, finalIntent });
-      }, 1500);
+      }, 2000);
     }
   };
 

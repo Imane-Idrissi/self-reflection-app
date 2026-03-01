@@ -173,7 +173,7 @@ export function registerSessionHandlers(
         return { success: false, error: 'permission_denied' };
       }
       showTray('recording', req.session_id, trayActions, getMainWindow);
-      setTimeout(() => floatingWindowManager.create(req.session_id, 'active'), 1500);
+      setTimeout(() => floatingWindowManager.create(req.session_id, 'active'), 2000);
       return { success: true };
     } catch (error) {
       return {
