@@ -21,6 +21,7 @@ type FlowStep =
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
   | { type: 'permission-denied'; sessionId: string; finalIntent: string }
+  | { type: 'preparing'; sessionId: string; finalIntent: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
   | { type: 'report-generating'; sessionId: string; summary: SessionSummary }
   | { type: 'report-ready'; sessionId: string }
@@ -209,21 +210,21 @@ export default function App() {
 
     if (response.success) {
       const sr = step.type === 'setup' ? step.startRecording : undefined;
-      setStep({
-        type: 'active-session',
-        sessionId,
-        finalIntent: sr?.finalIntent || '',
-      });
+      const finalIntent = sr?.finalIntent || '';
+      setStep({ type: 'preparing', sessionId, finalIntent });
+      setTimeout(() => {
+        setStep({ type: 'active-session', sessionId, finalIntent });
+      }, 1500);
     }
   };
 
   const handlePermissionGranted = () => {
     if (step.type !== 'permission-denied') return;
-    setStep({
-      type: 'active-session',
-      sessionId: step.sessionId,
-      finalIntent: step.finalIntent,
-    });
+    const { sessionId, finalIntent } = step;
+    setStep({ type: 'preparing', sessionId, finalIntent });
+    setTimeout(() => {
+      setStep({ type: 'active-session', sessionId, finalIntent });
+    }, 1500);
   };
 
   const handlePermissionBack = () => {
@@ -323,6 +324,26 @@ export default function App() {
           onPermissionGranted={handlePermissionGranted}
           onBack={handlePermissionBack}
         />
+      );
+
+    case 'preparing':
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
+          <div className="text-center">
+            <div className="mx-auto mb-lg flex h-16 w-16 items-center justify-center">
+              <svg
+                className="h-10 w-10 animate-spin text-primary-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            </div>
+            <p className="text-body font-medium text-text-primary">Preparing to record...</p>
+          </div>
+        </div>
       );
 
     case 'active-session':
