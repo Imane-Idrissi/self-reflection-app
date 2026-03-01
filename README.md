@@ -24,4 +24,4 @@ A privacy-focused desktop app that captures your window activity, collects volun
 
 ## macOS Permissions
 
-On first launch, macOS will ask for **Screen Recording** permission. This is required for the app to read active window titles. The app does **not** record your screen, it only reads the window name and app name.
+On first launch, macOS will ask for **Accessibility** permission. This is required for the app to read active window titles. The app does **not** record your screen, it only reads the window name and app name.
