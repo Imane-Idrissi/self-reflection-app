@@ -53,7 +53,7 @@ export class FloatingWindowManager {
     if (!app.isPackaged) {
       this.win.loadURL('http://localhost:5173/floating.html');
     } else {
-      this.win.loadFile(path.join(__dirname, '../renderer/floating.html'));
+      this.win.loadFile(path.join(__dirname, '..', '..', 'renderer', 'floating.html'));
     }
 
     this.win.once('ready-to-show', () => {
