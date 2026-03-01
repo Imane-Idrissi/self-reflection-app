@@ -496,7 +496,9 @@ export default function LandingPage() {
                 style={{ backgroundColor: 'var(--color-caution-bg)', border: '1px solid var(--color-caution)' }}
               >
                 <p className="text-[13px] leading-relaxed" style={{ color: 'var(--color-caution)' }}>
-                  Unblurry is distributed outside the Mac App Store, which may trigger a macOS security prompt. If so, right-click the app, click <strong>Open</strong>, then confirm.
+                  macOS may block Unblurry on first launch because it is not from the App Store.
+                  To open it: go to <strong>System Settings → Privacy & Security</strong>, scroll down,
+                  and click <strong>Open Anyway</strong> next to the Unblurry message.
                 </p>
               </div>
 
