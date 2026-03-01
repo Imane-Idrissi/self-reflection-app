@@ -235,6 +235,15 @@ export interface DashboardSession {
   has_report: boolean;
 }
 
+export interface SessionDeleteRequest {
+  session_id: string;
+}
+
+export interface SessionDeleteResponse {
+  success: boolean;
+  error?: string;
+}
+
 export interface DashboardGetSessionsRequest {
   limit?: number;
   offset?: number;
@@ -256,6 +265,7 @@ export interface ElectronAPI {
   reportRetry: (req: ReportRetryRequest) => Promise<ReportRetryResponse>;
   captureGetInRange: (req: CaptureGetInRangeRequest) => Promise<CaptureGetInRangeResponse>;
   reportDownload: () => Promise<ReportDownloadResponse>;
+  sessionDelete: (req: SessionDeleteRequest) => Promise<SessionDeleteResponse>;
   dashboardGetSessions: (req: DashboardGetSessionsRequest) => Promise<DashboardSession[]>;
   onAutoEndWarning: (callback: () => void) => void;
   onAutoEndTriggered: (callback: (summary: SessionSummary, sessionId: string) => void) => void;

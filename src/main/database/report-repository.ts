@@ -65,4 +65,8 @@ export class ReportRepository {
     ).run();
     return result.changes;
   }
+
+  deleteBySessionId(sessionId: string): number {
+    return this.db.prepare('DELETE FROM reports WHERE session_id = ?').run(sessionId).changes;
+  }
 }

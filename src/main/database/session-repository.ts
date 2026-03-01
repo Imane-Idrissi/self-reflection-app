@@ -89,4 +89,8 @@ export class SessionRepository {
       'SELECT * FROM session WHERE status = ? AND final_intent IS NOT NULL ORDER BY created_at DESC LIMIT 1'
     ).get('created') as Session | undefined;
   }
+
+  deleteById(sessionId: string): number {
+    return this.db.prepare('DELETE FROM session WHERE session_id = ?').run(sessionId).changes;
+  }
 }

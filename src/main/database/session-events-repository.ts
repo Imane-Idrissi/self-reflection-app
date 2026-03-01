@@ -30,4 +30,8 @@ export class SessionEventsRepository {
       'SELECT * FROM session_events WHERE session_id = ? ORDER BY created_at ASC'
     ).all(sessionId) as SessionEvent[];
   }
+
+  deleteBySessionId(sessionId: string): number {
+    return this.db.prepare('DELETE FROM session_events WHERE session_id = ?').run(sessionId).changes;
+  }
 }

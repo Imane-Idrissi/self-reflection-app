@@ -17,6 +17,8 @@ import type {
   SessionResumeResponse,
   SessionEndRequest,
   SessionEndResponse,
+  SessionDeleteRequest,
+  SessionDeleteResponse,
   SessionCheckStaleResponse,
   SessionSummary,
   ReportGetRequest,
@@ -57,6 +59,9 @@ contextBridge.exposeInMainWorld('api', {
 
   sessionEnd: (req: SessionEndRequest): Promise<SessionEndResponse> =>
     ipcRenderer.invoke('session:end', req),
+
+  sessionDelete: (req: SessionDeleteRequest): Promise<SessionDeleteResponse> =>
+    ipcRenderer.invoke('session:delete', req),
 
   sessionCheckStale: (): Promise<SessionCheckStaleResponse> =>
     ipcRenderer.invoke('session:check-stale'),

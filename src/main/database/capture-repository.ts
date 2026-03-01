@@ -44,4 +44,8 @@ export class CaptureRepository {
       'SELECT * FROM capture WHERE session_id = ? AND captured_at >= ? AND captured_at <= ? ORDER BY captured_at ASC'
     ).all(sessionId, startTime, endTime) as Capture[];
   }
+
+  deleteBySessionId(sessionId: string): number {
+    return this.db.prepare('DELETE FROM capture WHERE session_id = ?').run(sessionId).changes;
+  }
 }

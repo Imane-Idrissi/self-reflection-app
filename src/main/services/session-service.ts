@@ -142,6 +142,18 @@ export class SessionService {
     return this.repo.getById(sessionId);
   }
 
+  deleteSession(sessionId: string): void {
+    const session = this.getSessionOrThrow(sessionId);
+    if (session.status !== 'ended') {
+      throw new Error('Can only delete ended sessions');
+    }
+
+    this.captureRepo.deleteBySessionId(sessionId);
+    this.feelingRepo.deleteBySessionId(sessionId);
+    this.eventsRepo.deleteBySessionId(sessionId);
+    this.repo.deleteById(sessionId);
+  }
+
   getCompletedSessions(limit: number, offset: number = 0): Session[] {
     return this.repo.findCompleted(limit, offset);
   }

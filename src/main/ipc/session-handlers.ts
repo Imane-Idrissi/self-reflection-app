@@ -21,6 +21,8 @@ import type {
   SessionEndRequest,
   SessionEndResponse,
   SessionCheckStaleResponse,
+  SessionDeleteRequest,
+  SessionDeleteResponse,
   FeelingCreateRequest,
   FeelingCreateResponse,
   ReportGetRequest,
@@ -245,6 +247,19 @@ export function registerSessionHandlers(
     }
 
     return {};
+  });
+
+  ipcMain.handle('session:delete', async (_event, req: SessionDeleteRequest): Promise<SessionDeleteResponse> => {
+    try {
+      reportService.deleteBySessionId(req.session_id);
+      sessionService.deleteSession(req.session_id);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
   });
 
   ipcMain.handle('feeling:create', async (_event, req: FeelingCreateRequest): Promise<FeelingCreateResponse> => {

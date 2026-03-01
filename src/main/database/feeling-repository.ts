@@ -37,4 +37,8 @@ export class FeelingRepository {
     ).get(sessionId) as { count: number };
     return row.count;
   }
+
+  deleteBySessionId(sessionId: string): number {
+    return this.db.prepare('DELETE FROM feeling WHERE session_id = ?').run(sessionId).changes;
+  }
 }
