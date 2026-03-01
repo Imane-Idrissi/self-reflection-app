@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
+import posthog from 'posthog-js';
 import MacWindow from '../components/MacWindow';
 import { UnblurryMark } from '../components/UnblurryLogo';
+
+const POSTHOG_KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
+if (POSTHOG_KEY) {
+  posthog.init(POSTHOG_KEY, {
+    api_host: 'https://us.i.posthog.com',
+    persistence: 'memory',
+  });
+}
 
 function AppleIcon() {
   return (
@@ -154,10 +163,8 @@ const FEATURES = [
 
 const DOWNLOAD_URL = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest/download/Unblurry-0.1.0-arm64.dmg';
 
-declare const posthog: { capture: (event: string, properties?: Record<string, string>) => void } | undefined;
-
 function trackDownload(source: string) {
-  if (typeof posthog !== 'undefined') {
+  if (POSTHOG_KEY) {
     posthog.capture('download_clicked', { source });
   }
 }
