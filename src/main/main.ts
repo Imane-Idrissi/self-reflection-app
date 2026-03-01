@@ -54,7 +54,6 @@ function initServices() {
     },
     async () => {
       const trusted = systemPreferences.isTrustedAccessibilityClient(false);
-      console.log('[Permission] Accessibility:', trusted);
       return trusted;
     },
   );

@@ -116,8 +116,6 @@ export class ReportService {
         const feelings = this.feelingRepo.getBySessionId(sessionId);
         const events = this.eventsRepo.getBySessionId(sessionId);
 
-        console.log(`[ReportService] Session ${sessionId}: ${captures.length} captures, ${feelings.length} feelings, ${events.length} events`);
-
         const totalMinutes = session.started_at
           ? (new Date(session.ended_at || new Date().toISOString()).getTime() - new Date(session.started_at).getTime()) / 60000
           : 0;
@@ -125,7 +123,6 @@ export class ReportService {
         const pausedMinutes = Math.max(0, totalMinutes - activeMinutes);
 
         const collapsed = collapseCaptures(captures);
-        console.log(`[ReportService] Collapsed to ${collapsed.length} spans:`, collapsed.map(c => `${c.app_name} | ${c.window_title.substring(0, 40)} (${c.duration_minutes.toFixed(1)}min)`));
 
         const prompt = buildReportPrompt({
           intent: session.final_intent || session.original_intent,
