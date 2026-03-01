@@ -40,20 +40,18 @@ export default function PrivacyPolicy() {
               SQLite database:
             </p>
             <ul className="mt-3 list-disc pl-6 flex flex-col gap-2">
-              <li><strong>Window titles</strong> — the names of the windows you have open. No screenshots, no keystrokes, no screen recordings.</li>
-              <li><strong>Feeling logs</strong> — voluntary notes you choose to write about your mood or energy during a session.</li>
-              <li><strong>Session intents</strong> — the goals you set at the start of each session.</li>
-              <li><strong>AI-generated reports</strong> — behavioral analysis generated from your session data.</li>
+              <li><strong>Window titles</strong>: the names of the windows you have open. No screenshots, no keystrokes, no screen recordings.</li>
+              <li><strong>Feeling logs</strong>: voluntary notes you choose to write about your mood or energy during a session.</li>
+              <li><strong>Session intents</strong>: the goals you set at the start of each session.</li>
+              <li><strong>AI-generated reports</strong>: behavioral analysis generated from your session data.</li>
             </ul>
             <p className="mt-3">
               None of this data is sent to us. We have no access to it. It exists only on your computer.
             </p>
             <h3 className="mt-6 font-heading text-[17px] font-semibold text-text-primary">Private / incognito browsing</h3>
             <p className="mt-2">
-              Unblurry captures the active window title regardless of whether a browser is in private or
-              incognito mode. There is no reliable way for a desktop app to detect when a browser is in
-              private mode, as this information is not exposed by the operating system. If you are browsing
-              privately and do not want those window titles captured, we recommend pausing your session first.
+              Unblurry does not track whether you are in incognito or private browsing mode. Window titles
+              will be captured regardless. If you do not want this, we encourage you to pause the recording.
             </p>
           </section>
 
@@ -64,7 +62,7 @@ export default function PrivacyPolicy() {
             <p className="mt-2">
               When you generate a report, Unblurry sends your session data (window titles, feeling logs, and
               intent) to Google's Gemini API to produce the behavioral analysis. This happens using <strong>your
-              own API key</strong> — we never see or store your key on any server.
+              own API key</strong>:we never see or store your key on any server.
             </p>
             <p className="mt-2">
               This means Google processes your session data according to their own privacy policy. We encourage
@@ -77,7 +75,7 @@ export default function PrivacyPolicy() {
               >
                 Google's Gemini API terms
               </a>
-              . Under their API terms, data sent via API keys is not used to train their models.
+              .
             </p>
 
             <h3 className="mt-6 font-heading text-[17px] font-semibold text-text-primary">PostHog (landing page only)</h3>
@@ -91,7 +89,7 @@ export default function PrivacyPolicy() {
               <li>We track page views, scroll depth, and download button clicks to understand how visitors use the landing page.</li>
             </ul>
             <p className="mt-2">
-              This analytics tracking does <strong>not</strong> exist inside the desktop app — only on the website.
+              This analytics tracking does <strong>not</strong> exist inside the desktop app:only on the website.
             </p>
           </section>
 
@@ -107,8 +105,8 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="font-heading text-[20px] font-bold text-text-primary">Age requirement</h2>
             <p className="mt-3">
-              Unblurry is not directed at anyone under 18. Use of the app requires a Google Gemini API key,
-              which is subject to Google's age requirements.
+              Unblurry requires a Google Gemini API key to generate reports. Google requires users to be
+              at least 18 years old to use the Gemini API.
             </p>
           </section>
 

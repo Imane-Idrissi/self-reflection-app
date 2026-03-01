@@ -78,7 +78,7 @@ export default function TermsOfUse() {
           <section>
             <h2 className="font-heading text-[20px] font-bold text-text-primary">Responsibility</h2>
             <p className="mt-3">
-              We are not responsible for any damages that may result from using Unblurry — including but
+              We are not responsible for any damages that may result from using Unblurry, including but
               not limited to data loss, lost work, or interruptions. Since all data is stored locally on
               your device, we recommend keeping your own backups of anything important.
             </p>
