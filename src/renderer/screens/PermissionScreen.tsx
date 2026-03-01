@@ -81,7 +81,7 @@ export default function PermissionScreen({
         {retryFailed && (
           <div className="rounded-lg border border-caution/30 bg-caution-bg px-lg py-md mb-lg">
             <p className="text-small leading-[1.5] text-text-secondary">
-              Permission still not detected. Quit the app (<strong className="text-text-primary font-medium">Cmd + Q</strong>) and reopen it. If it still doesn't work, remove Unblurry from the Accessibility list, re-add it, and reopen.
+              Permission still not detected. Quit the app (<strong className="text-text-primary font-medium">Cmd + Q</strong>), remove Unblurry from the Accessibility list, re-add it, then reopen the app.
             </p>
           </div>
         )}
