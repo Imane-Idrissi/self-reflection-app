@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 
 interface SetupWizardProps {
   needsApiKey: boolean;
-  startRecordingData?: { sessionId: string; finalIntent: string; apiError?: string };
+  startRecordingData?: { sessionId: string; finalIntent: string };
   onIntentSubmit: (name: string, intent: string) => Promise<void>;
   onStartRecording: (sessionId: string) => Promise<void>;
   intentLoading: boolean;
@@ -54,7 +54,6 @@ export default function SetupWizard({
           {step === 3 && startRecordingData && (
             <StartRecordingStep
               finalIntent={startRecordingData.finalIntent}
-              apiError={startRecordingData.apiError}
               onStart={() => onStartRecording(startRecordingData.sessionId)}
             />
           )}
@@ -297,11 +296,9 @@ function IntentStep({ onSubmit, loading }: { onSubmit: (name: string, intent: st
 
 function StartRecordingStep({
   finalIntent,
-  apiError,
   onStart,
 }: {
   finalIntent: string;
-  apiError?: string;
   onStart: () => void;
 }) {
   const [loading, setLoading] = useState(false);
@@ -332,14 +329,6 @@ function StartRecordingStep({
         <div className="rounded-lg border border-border bg-bg-elevated px-lg py-lg shadow-sm mb-lg">
           <p className="text-small font-medium text-text-tertiary mb-xs">Your intent</p>
           <p className="text-body leading-[1.6] text-text-primary">{finalIntent}</p>
-        </div>
-      )}
-
-      {apiError && (
-        <div className="rounded-lg border border-caution/30 bg-caution-bg px-lg py-md mb-lg">
-          <p className="text-small leading-[1.5] text-text-secondary">
-            {apiError}, your intent was accepted as written.
-          </p>
         </div>
       )}
 

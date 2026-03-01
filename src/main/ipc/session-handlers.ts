@@ -37,7 +37,7 @@ import type {
 } from '../../shared/types';
 import { CaptureRepository } from '../database/capture-repository';
 
-function friendlyAiError(error: unknown): string {
+function classifyAiError(error: unknown): { message: string; type: 'key' | 'network' } {
   const raw = error instanceof Error ? error.message : String(error);
   const cause = error instanceof AiServiceError && error.cause instanceof Error
     ? error.cause.message
@@ -45,12 +45,12 @@ function friendlyAiError(error: unknown): string {
   const lower = cause.toLowerCase();
 
   if (lower.includes('quota') || lower.includes('resource_exhausted') || lower.includes('429'))
-    return 'Your API key has exceeded its quota. Check your billing at aistudio.google.com/apikey';
+    return { message: "Your API key isn't working right now. This could be due to an expired key or exceeded usage limits. Check your key and billing at Google AI Studio.", type: 'key' };
   if (lower.includes('api_key_invalid') || lower.includes('401') || lower.includes('permission'))
-    return 'Your API key is invalid or expired. Please update it in settings.';
+    return { message: "Your API key isn't working right now. This could be due to an expired key or exceeded usage limits. Check your key and billing at Google AI Studio.", type: 'key' };
   if (lower.includes('fetch') || lower.includes('network') || lower.includes('enotfound'))
-    return 'Network error — check your internet connection.';
-  return "Couldn't reach the AI service right now";
+    return { message: "Couldn't connect to the AI service right now. Please check your internet connection and try again.", type: 'network' };
+  return { message: "Couldn't connect to the AI service right now. Please check your internet connection and try again.", type: 'network' };
 }
 
 export function registerSessionHandlers(
@@ -93,12 +93,14 @@ export function registerSessionHandlers(
         clarifying_questions: result.clarifying_questions,
       };
     } catch (error) {
+      const classified = classifyAiError(error);
       sessionService.confirmIntent(session.session_id, req.intent);
       return {
         session_id: session.session_id,
         status: 'specific',
         final_intent: req.intent,
-        error: friendlyAiError(error),
+        error: classified.message,
+        errorType: classified.type,
       };
     }
   });
@@ -120,7 +122,8 @@ export function registerSessionHandlers(
 
       return { refined_intent: result.refined_intent };
     } catch (error) {
-      return { refined_intent: '', error: friendlyAiError(error) };
+      const classified = classifyAiError(error);
+      return { refined_intent: '', error: classified.message, errorType: classified.type };
     }
   });
 

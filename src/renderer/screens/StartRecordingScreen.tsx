@@ -3,13 +3,11 @@ import { useState } from 'react';
 interface StartRecordingScreenProps {
   finalIntent: string;
   onStartRecording: () => Promise<void>;
-  apiError?: string;
 }
 
 export default function StartRecordingScreen({
   finalIntent,
   onStartRecording,
-  apiError,
 }: StartRecordingScreenProps) {
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
@@ -50,14 +48,6 @@ export default function StartRecordingScreen({
               <p className="text-small font-medium text-text-tertiary mb-xs">Your intent</p>
               <p className="text-body leading-[1.6] text-text-primary">{finalIntent}</p>
             </div>
-
-            {apiError && (
-              <div className="rounded-lg border border-caution/30 bg-caution-bg px-lg py-md mb-lg">
-                <p className="text-small leading-[1.5] text-text-secondary">
-                  {apiError} — your intent was accepted as written.
-                </p>
-              </div>
-            )}
 
             <div className="rounded-lg border border-border bg-bg-secondary px-lg py-lg mb-xl">
               <p className="text-small font-medium text-text-primary mb-sm">What gets captured</p>

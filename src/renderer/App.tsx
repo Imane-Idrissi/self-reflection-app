@@ -16,10 +16,11 @@ import type { SessionSummary } from '../shared/types';
 type FlowStep =
   | { type: 'loading' }
   | { type: 'dashboard' }
-  | { type: 'setup'; needsApiKey: boolean; startRecording?: { sessionId: string; finalIntent: string; apiError?: string } }
+  | { type: 'setup'; needsApiKey: boolean; startRecording?: { sessionId: string; finalIntent: string } }
   | { type: 'api-key-change'; returnTo: 'dashboard' | 'setup' }
   | { type: 'clarification'; sessionId: string; questions: string[] }
   | { type: 'refined'; sessionId: string; refinedIntent: string }
+  | { type: 'ai-error'; errorType: 'key' | 'network'; message: string; sessionId: string; intent: string }
   | { type: 'permission-denied'; sessionId: string; finalIntent: string }
   | { type: 'preparing'; sessionId: string; finalIntent: string }
   | { type: 'active-session'; sessionId: string; finalIntent: string }
@@ -84,13 +85,11 @@ export default function App() {
 
       if (response.error) {
         setStep({
-          type: 'setup',
-          needsApiKey: false,
-          startRecording: {
-            sessionId: response.session_id,
-            finalIntent: intent,
-            apiError: response.error,
-          },
+          type: 'ai-error',
+          errorType: response.errorType || 'network',
+          message: response.error,
+          sessionId: response.session_id,
+          intent,
         });
         return;
       }
@@ -113,13 +112,11 @@ export default function App() {
       }
     } catch {
       setStep({
-        type: 'setup',
-        needsApiKey: false,
-        startRecording: {
-          sessionId: '',
-          finalIntent: intent,
-          apiError: "We couldn't check your intent right now",
-        },
+        type: 'ai-error',
+        errorType: 'network',
+        message: "Couldn't connect to the AI service right now. Please check your internet connection and try again.",
+        sessionId: '',
+        intent,
       });
     } finally {
       setLoading(false);
@@ -137,13 +134,11 @@ export default function App() {
 
       if (response.error) {
         setStep({
-          type: 'setup',
-          needsApiKey: false,
-          startRecording: {
-            sessionId: step.sessionId,
-            finalIntent: '',
-            apiError: response.error,
-          },
+          type: 'ai-error',
+          errorType: response.errorType || 'network',
+          message: response.error,
+          sessionId: step.sessionId,
+          intent: '',
         });
         return;
       }
@@ -155,13 +150,11 @@ export default function App() {
       });
     } catch {
       setStep({
-        type: 'setup',
-        needsApiKey: false,
-        startRecording: {
-          sessionId: step.sessionId,
-          finalIntent: '',
-          apiError: "Couldn't reach the AI service right now",
-        },
+        type: 'ai-error',
+        errorType: 'network',
+        message: "Couldn't connect to the AI service right now. Please check your internet connection and try again.",
+        sessionId: step.sessionId,
+        intent: '',
       });
     } finally {
       setLoading(false);
@@ -315,6 +308,59 @@ export default function App() {
           onConfirm={handleConfirmIntent}
           loading={loading}
         />
+      );
+
+    case 'ai-error':
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-bg-primary px-md">
+          <div className="w-full max-w-[520px]">
+            <div className="text-center mb-lg">
+              <div className="mx-auto mb-lg flex h-16 w-16 items-center justify-center rounded-full bg-negative-bg">
+                <svg className="h-8 w-8 text-negative" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" />
+                </svg>
+              </div>
+              <h1 className="font-heading text-h1 font-bold leading-[1.3] text-text-primary mb-sm">
+                {step.errorType === 'key' ? "API key issue" : "Connection issue"}
+              </h1>
+              <p className="text-body leading-[1.6] text-text-secondary">
+                {step.message}
+              </p>
+            </div>
+
+            <div className="flex gap-sm">
+              <button
+                onClick={() => setStep({ type: 'setup', needsApiKey: false })}
+                className="flex-1 rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-primary shadow-sm transition-colors duration-[150ms] ease-out hover:bg-bg-secondary"
+              >
+                Back
+              </button>
+              {step.errorType === 'key' ? (
+                <>
+                  <button
+                    onClick={() => window.open('https://aistudio.google.com/apikey')}
+                    className="flex-1 rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-primary shadow-sm transition-colors duration-[150ms] ease-out hover:bg-bg-secondary"
+                  >
+                    Check AI Studio
+                  </button>
+                  <button
+                    onClick={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
+                    className="flex-1 rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+                  >
+                    Update Key
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setStep({ type: 'setup', needsApiKey: false })}
+                  className="flex-1 rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+                >
+                  Try Again
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       );
 
     case 'permission-denied':

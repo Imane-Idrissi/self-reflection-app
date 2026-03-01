@@ -97,6 +97,7 @@ export interface SessionCreateResponse {
   clarifying_questions?: string[];
   final_intent?: string;
   error?: string;
+  errorType?: 'key' | 'network';
 }
 
 export interface SessionClarifyRequest {
@@ -107,6 +108,7 @@ export interface SessionClarifyRequest {
 export interface SessionClarifyResponse {
   refined_intent: string;
   error?: string;
+  errorType?: 'key' | 'network';
 }
 
 export interface SessionConfirmIntentRequest {
