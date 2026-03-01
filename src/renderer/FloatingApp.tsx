@@ -130,6 +130,7 @@ export default function FloatingApp() {
 
       if (response.success) {
         setText('');
+        setButtonIsPill(true);
         setViewState('confirming');
 
         confirmTimerRef.current = setTimeout(() => {
