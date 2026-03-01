@@ -161,11 +161,12 @@ const FEATURES = [
   },
 ];
 
-const DOWNLOAD_URL = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest/download/Unblurry-0.1.0-universal.dmg';
+const DOWNLOAD_URL_ARM64 = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest/download/Unblurry-0.1.0-arm64.dmg';
+const DOWNLOAD_URL_X64 = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest/download/Unblurry-0.1.0-x64.dmg';
 
-function trackDownload(source: string) {
+function trackDownload(source: string, arch: string) {
   if (POSTHOG_KEY) {
-    posthog.capture('download_clicked', { source });
+    posthog.capture('download_clicked', { source, arch });
   }
 }
 
@@ -186,10 +187,11 @@ export default function LandingPage() {
     setDownloadSource('');
   }, []);
 
-  const handleConfirmDownload = useCallback(() => {
-    trackDownload(downloadSource);
+  const handleConfirmDownload = useCallback((arch: 'arm64' | 'x64') => {
+    trackDownload(downloadSource, arch);
+    const url = arch === 'arm64' ? DOWNLOAD_URL_ARM64 : DOWNLOAD_URL_X64;
     const a = document.createElement('a');
-    a.href = DOWNLOAD_URL;
+    a.href = url;
     a.download = '';
     document.body.appendChild(a);
     a.click();
@@ -508,18 +510,37 @@ export default function LandingPage() {
                 </span>
               </label>
 
-              {/* Download button */}
-              <button
-                onClick={handleConfirmDownload}
-                disabled={!termsAccepted}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-500 px-6 py-3 text-[15px] font-semibold text-text-inverse shadow-md disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ transition: 'var(--transition-fast)' }}
-                onMouseEnter={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-600)'; }}
-                onMouseLeave={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-500)'; }}
-              >
-                <DownloadIcon />
-                Download for macOS
-              </button>
+              {/* Download buttons */}
+              <div className="mt-5 flex gap-3">
+                <button
+                  onClick={() => handleConfirmDownload('arm64')}
+                  disabled={!termsAccepted}
+                  className="inline-flex flex-1 flex-col items-center justify-center gap-1 rounded-xl bg-primary-500 px-4 py-3 text-text-inverse shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ transition: 'var(--transition-fast)' }}
+                  onMouseEnter={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-600)'; }}
+                  onMouseLeave={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-primary-500)'; }}
+                >
+                  <span className="flex items-center gap-2 text-[14px] font-semibold">
+                    <DownloadIcon />
+                    Apple Silicon
+                  </span>
+                  <span className="text-[12px] opacity-80">M1, M2, M3, M4</span>
+                </button>
+                <button
+                  onClick={() => handleConfirmDownload('x64')}
+                  disabled={!termsAccepted}
+                  className="inline-flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-4 py-3 text-text-primary shadow-md disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ transition: 'var(--transition-fast)', backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}
+                  onMouseEnter={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'; }}
+                  onMouseLeave={(e) => { if (termsAccepted) e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'; }}
+                >
+                  <span className="flex items-center gap-2 text-[14px] font-semibold">
+                    <DownloadIcon />
+                    Intel
+                  </span>
+                  <span className="text-[12px] text-text-tertiary">2020 and earlier</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
