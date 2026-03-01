@@ -152,7 +152,7 @@ const FEATURES = [
   },
 ];
 
-const DOWNLOAD_URL = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest';
+const DOWNLOAD_URL = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest/download/Unblurry-0.1.0-arm64.dmg';
 
 declare const posthog: { capture: (event: string, properties?: Record<string, string>) => void } | undefined;
 
