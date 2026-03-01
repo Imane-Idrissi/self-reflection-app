@@ -328,6 +328,12 @@ export default function App() {
               </p>
             </div>
 
+            {step.errorType === 'key' && (
+              <div className="rounded-lg border border-border bg-bg-elevated px-lg py-md mb-lg">
+                <p className="text-small text-text-secondary select-all font-mono">aistudio.google.com/apikey</p>
+              </div>
+            )}
+
             <div className="flex gap-sm">
               <button
                 onClick={() => setStep({ type: 'setup', needsApiKey: false })}
@@ -336,20 +342,12 @@ export default function App() {
                 Back
               </button>
               {step.errorType === 'key' ? (
-                <>
-                  <button
-                    onClick={() => window.open('https://aistudio.google.com/apikey')}
-                    className="flex-1 rounded-md border border-border bg-bg-elevated px-lg py-[12px] text-body font-medium text-text-primary shadow-sm transition-colors duration-[150ms] ease-out hover:bg-bg-secondary"
-                  >
-                    Check AI Studio
-                  </button>
-                  <button
-                    onClick={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
-                    className="flex-1 rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
-                  >
-                    Update Key
-                  </button>
-                </>
+                <button
+                  onClick={() => setStep({ type: 'api-key-change', returnTo: 'setup' })}
+                  className="flex-1 rounded-md bg-primary-500 px-lg py-[14px] text-body font-medium text-text-inverse shadow-md transition-all duration-[150ms] ease-out hover:bg-primary-600 hover:shadow-lg active:bg-primary-700"
+                >
+                  Update Key
+                </button>
               ) : (
                 <button
                   onClick={() => setStep({ type: 'setup', needsApiKey: false })}
