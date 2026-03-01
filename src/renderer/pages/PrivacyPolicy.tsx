@@ -1,6 +1,6 @@
 import { UnblurryMark } from '../components/UnblurryLogo';
 
-const LAST_UPDATED = 'February 26, 2026';
+const LAST_UPDATED = 'March 1, 2026';
 
 export default function PrivacyPolicy() {
   return (
@@ -47,6 +47,13 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mt-3">
               None of this data is sent to us. We have no access to it. It exists only on your computer.
+            </p>
+            <h3 className="mt-6 font-heading text-[17px] font-semibold text-text-primary">Private / incognito browsing</h3>
+            <p className="mt-2">
+              Unblurry captures the active window title regardless of whether a browser is in private or
+              incognito mode. There is no reliable way for a desktop app to detect when a browser is in
+              private mode, as this information is not exposed by the operating system. If you are browsing
+              privately and do not want those window titles captured, we recommend pausing your session first.
             </p>
           </section>
 

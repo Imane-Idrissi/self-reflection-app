@@ -248,18 +248,20 @@ ${timeline || 'No activity data recorded.'}
 
 ## Analysis Instructions
 
-1. **Identify behavioral patterns** — look for recurring behaviors, context switches, procrastination signals, focus periods, and correlations between feelings and actions.
+1. **Identify behavioral patterns** — look for recurring behaviors, context switches, procrastination signals, focus periods, and correlations between feelings and actions. You MUST reference the specific apps and windows from the timeline in your patterns and evidence. Every app/window the user spent time in should be accounted for in at least one pattern. Never produce a generic analysis that ignores the captured window data.
 
 2. **Assign confidence levels** based on evidence strength:
    - **high**: Multiple evidence points from different sources (captures + feelings), clear correlation with the intent.
    - **medium**: Observable pattern in captures, but limited or no feeling data to confirm the user's internal state.
    - **low**: Single observation or ambiguous evidence, possible but not certain.
 
-3. **Classify each pattern** as positive, negative, or neutral relative to the stated intent.
+3. **Brief visits (<1 min)** — Timeline entries showing "<1 min" are very brief visits, likely accidental tab switches. If the visit is unrelated to the user's intent, ignore it entirely — do NOT flag it as a distraction. If the visit is related to the intent, you may note it as a brief visit but do not give it significant weight.
 
-4. **Generate suggestions** only for negative or neutral patterns. Suggestions should be specific enough to be actionable but general enough to apply beyond this single session. Do not suggest generic advice like "stay focused" — be specific about what behavior to change and how.
+4. **Classify each pattern** as positive, negative, or neutral relative to the stated intent.
 
-5. **Tone**: Be honest but supportive. Acknowledge positive patterns, not just negative ones. Frame suggestions as helpful, not judgmental. The user is doing something vulnerable by reflecting on their behavior.
+5. **Generate suggestions** only for negative or neutral patterns. Suggestions should be specific enough to be actionable but general enough to apply beyond this single session. Do not suggest generic advice like "stay focused" — be specific about what behavior to change and how.
+
+6. **Tone**: Be honest but supportive. Acknowledge positive patterns, not just negative ones. Frame suggestions as helpful, not judgmental. The user is doing something vulnerable by reflecting on their behavior.
 
 ## Output Format
 
