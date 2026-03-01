@@ -188,7 +188,12 @@ export default function LandingPage() {
 
   const handleConfirmDownload = useCallback(() => {
     trackDownload(downloadSource);
-    window.open(DOWNLOAD_URL, '_blank');
+    const a = document.createElement('a');
+    a.href = DOWNLOAD_URL;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     handleCloseModal();
   }, [downloadSource, handleCloseModal]);
 
