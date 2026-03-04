@@ -1,4 +1,4 @@
-import { app, BrowserWindow, systemPreferences } from 'electron';
+import { app, BrowserWindow, ipcMain, systemPreferences } from 'electron';
 import path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -16,6 +16,7 @@ import { FloatingWindowManager } from './floating-window';
 import { registerSessionHandlers } from './ipc/session-handlers';
 import { registerApiKeyHandlers } from './ipc/apikey-handlers';
 import { hideTray } from './tray';
+import { initAutoUpdater, quitAndInstall } from './updater';
 
 let sessionService: SessionService;
 let captureService: CaptureService;
@@ -153,6 +154,8 @@ app.whenReady().then(() => {
   initServices();
   createWindow();
   startAutoEndTimer();
+  initAutoUpdater(() => mainWindow);
+  ipcMain.on('updater:install', () => quitAndInstall());
 });
 
 app.on('window-all-closed', () => {

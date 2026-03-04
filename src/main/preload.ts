@@ -100,4 +100,12 @@ contextBridge.exposeInMainWorld('api', {
   onSessionStateChanged: (callback: (data: { state: 'active' | 'paused' | 'ended'; session_id: string; summary?: SessionSummary }) => void) => {
     ipcRenderer.on('session:state-changed', (_event, data) => callback(data));
   },
+
+  onUpdateReady: (callback: (version: string) => void) => {
+    ipcRenderer.on('updater:update-ready', (_event, version: string) => callback(version));
+  },
+
+  installUpdate: () => {
+    ipcRenderer.send('updater:install');
+  },
 });

@@ -1,6 +1,6 @@
 {
   "name": "unblurry",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A privacy-focused desktop app that helps you see your work habits clearly",
   "main": "dist/main/main/main.js",
   "scripts": {
@@ -34,6 +34,11 @@
         "to": "active-window"
       }
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "Imane-Idrissi",
+      "repo": "self-reflection-app"
+    },
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
@@ -41,7 +46,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ]
     }
@@ -56,6 +71,7 @@
     "@google/generative-ai": "^0.24.1",
     "active-win": "^8.2.1",
     "better-sqlite3": "^12.6.2",
+    "electron-updater": "^6.8.3",
     "posthog-js": "^1.356.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

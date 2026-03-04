@@ -37,8 +37,6 @@ release/
 # Compiled Swift helper (binary)
 src/main/helpers/active-window
 
-# Claude Code
-.claude/
 
 # Inspiration screenshots (local reference only)
 **/inspiration/

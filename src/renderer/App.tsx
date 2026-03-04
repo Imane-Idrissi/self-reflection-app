@@ -33,6 +33,7 @@ type FlowStep =
 export default function App() {
   const [step, setStep] = useState<FlowStep>({ type: 'loading' });
   const [loading, setLoading] = useState(false);
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
   const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -65,6 +66,10 @@ export default function App() {
       setStep({ type: 'dashboard' });
     };
     initialize();
+  }, []);
+
+  useEffect(() => {
+    window.api.onUpdateReady((version) => setUpdateVersion(version));
   }, []);
 
   const handleStartSession = async () => {
@@ -470,6 +475,20 @@ export default function App() {
       >
         {renderScreen()}
       </div>
+      {updateVersion && (
+        <button
+          onClick={() => window.api.installUpdate()}
+          className="fixed bottom-md left-1/2 -translate-x-1/2 z-50 flex items-center gap-sm rounded-full border border-border bg-bg-elevated px-md py-sm shadow-lg transition-colors hover:bg-bg-secondary"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-positive opacity-75" />
+            <span className="inline-flex h-2 w-2 rounded-full bg-positive" />
+          </span>
+          <span className="text-small font-medium text-text-primary">
+            Update v{updateVersion} ready — click to restart
+          </span>
+        </button>
+      )}
     </>
   );
 }
