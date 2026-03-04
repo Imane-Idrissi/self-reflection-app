@@ -20,6 +20,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Compile active-window helper
+        run: swiftc -O -o src/main/helpers/active-window src/main/helpers/active-window.swift -framework Cocoa
+
       - name: Build and publish
         run: npm run build && npx electron-builder --mac --publish always
         env:
