@@ -2,7 +2,7 @@ import { app, safeStorage } from 'electron';
 import fs from 'fs';
 import path from 'path';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AiService } from './ai-service';
+import { AiService, MODEL_FALLBACKS } from './ai-service';
 
 export interface KeyValidationResult {
   valid: boolean;
@@ -41,7 +41,8 @@ export class ApiKeyService {
 
   async validateKey(key: string): Promise<KeyValidationResult> {
     try {
-      const model = new GoogleGenerativeAI(key).getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const genai = new GoogleGenerativeAI(key);
+      const model = genai.getGenerativeModel({ model: MODEL_FALLBACKS[0] });
       await model.generateContent('hi');
       return { valid: true };
     } catch (error: unknown) {

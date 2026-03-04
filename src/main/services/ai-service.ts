@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI, type GenerativeModel } from '@google/generative-ai';
 import type { Capture, Feeling, SessionEvent, ParsedReport } from '../../shared/types';
 
+export const MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+
 export interface VaguenessResult {
   status: 'specific' | 'vague';
   clarifying_questions?: string[];
@@ -17,11 +19,39 @@ export class AiServiceError extends Error {
   }
 }
 
+function isModelNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const msg = error.message.toLowerCase();
+  return msg.includes('404') || msg.includes('not_found') || msg.includes('is not found');
+}
+
 export class AiService {
   private model: GenerativeModel;
+  private genai: GoogleGenerativeAI;
 
   constructor(apiKey: string) {
-    this.model = new GoogleGenerativeAI(apiKey).getGenerativeModel({ model: 'gemini-2.5-flash' });
+    this.genai = new GoogleGenerativeAI(apiKey);
+    this.model = this.genai.getGenerativeModel({ model: MODEL_FALLBACKS[0] });
+  }
+
+  private async generateWithFallback(prompt: string): Promise<string> {
+    for (let i = 0; i < MODEL_FALLBACKS.length; i++) {
+      const model = i === 0 ? this.model : this.genai.getGenerativeModel({ model: MODEL_FALLBACKS[i] });
+      try {
+        const result = await model.generateContent(prompt);
+        if (i > 0) {
+          this.model = model;
+        }
+        return result.response.text();
+      } catch (error) {
+        if (isModelNotFoundError(error) && i < MODEL_FALLBACKS.length - 1) {
+          console.warn(`Model ${MODEL_FALLBACKS[i]} not available, trying ${MODEL_FALLBACKS[i + 1]}`);
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw new AiServiceError('All models unavailable');
   }
 
   async checkVagueness(intent: string): Promise<VaguenessResult> {
@@ -29,8 +59,7 @@ export class AiService {
 
     let text: string;
     try {
-      const result = await this.model.generateContent(prompt);
-      text = result.response.text();
+      text = await this.generateWithFallback(prompt);
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to check intent vagueness', error);
@@ -41,8 +70,7 @@ export class AiService {
 
   async generateReport(prompt: string): Promise<string> {
     try {
-      const result = await this.model.generateContent(prompt);
-      return result.response.text();
+      return await this.generateWithFallback(prompt);
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to generate report', error);
@@ -54,8 +82,7 @@ export class AiService {
 
     let text: string;
     try {
-      const result = await this.model.generateContent(prompt);
-      text = result.response.text();
+      text = await this.generateWithFallback(prompt);
     } catch (error) {
       if (error instanceof AiServiceError) throw error;
       throw new AiServiceError('Failed to refine intent', error);
