@@ -161,8 +161,8 @@ const FEATURES = [
   },
 ];
 
-const RELEASES_API = 'https://api.github.com/repos/Imane-Idrissi/self-reflection-app/releases/latest';
-const RELEASES_FALLBACK = 'https://github.com/Imane-Idrissi/self-reflection-app/releases/latest';
+const RELEASES_API = 'https://api.github.com/repos/Imane-Idrissi/Unblurry/releases/latest';
+const RELEASES_FALLBACK = 'https://github.com/Imane-Idrissi/Unblurry/releases/latest';
 
 function trackDownload(source: string, arch: string) {
   if (POSTHOG_KEY) {

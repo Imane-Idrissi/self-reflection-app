@@ -123,7 +123,7 @@ export default function PrivacyPolicy() {
             <p className="mt-3">
               If you have questions about this policy, you can{' '}
               <a
-                href="https://github.com/Imane-Idrissi/self-reflection-app/issues"
+                href="https://github.com/Imane-Idrissi/Unblurry/issues"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary-500 underline"

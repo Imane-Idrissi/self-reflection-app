@@ -37,7 +37,7 @@
     "publish": {
       "provider": "github",
       "owner": "Imane-Idrissi",
-      "repo": "self-reflection-app"
+      "repo": "Unblurry"
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -63,7 +63,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Imane-Idrissi/self-reflection-app.git"
+    "url": "git+https://github.com/Imane-Idrissi/Unblurry.git"
   },
   "author": "Imane Idrissi",
   "license": "ISC",
