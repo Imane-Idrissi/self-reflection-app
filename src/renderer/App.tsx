@@ -477,7 +477,7 @@ export default function App() {
       </div>
       {updateVersion && (
         <button
-          onClick={() => window.api.installUpdate()}
+          onClick={() => window.api.openDownloadPage()}
           className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-sm rounded-full border border-border bg-bg-elevated px-md py-sm shadow-xl transition-colors hover:bg-bg-secondary"
         >
           <span className="relative flex h-2 w-2">
@@ -485,7 +485,7 @@ export default function App() {
             <span className="inline-flex h-2 w-2 rounded-full bg-positive" />
           </span>
           <span className="text-small font-medium text-text-primary">
-            Update v{updateVersion} ready — click to restart
+            Update v{updateVersion} available — download now
           </span>
         </button>
       )}

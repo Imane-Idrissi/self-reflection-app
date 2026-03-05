@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, systemPreferences } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, systemPreferences } from 'electron';
 import path from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
@@ -16,7 +16,7 @@ import { FloatingWindowManager } from './floating-window';
 import { registerSessionHandlers } from './ipc/session-handlers';
 import { registerApiKeyHandlers } from './ipc/apikey-handlers';
 import { hideTray } from './tray';
-import { initAutoUpdater, quitAndInstall } from './updater';
+import { initAutoUpdater } from './updater';
 
 let sessionService: SessionService;
 let captureService: CaptureService;
@@ -155,7 +155,9 @@ app.whenReady().then(() => {
   createWindow();
   startAutoEndTimer();
   initAutoUpdater(() => mainWindow);
-  ipcMain.on('updater:install', () => quitAndInstall());
+  ipcMain.on('updater:open-download', () => {
+    shell.openExternal('https://www.unblurry.app');
+  });
 });
 
 app.on('window-all-closed', () => {

@@ -105,7 +105,7 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('updater:update-ready', (_event, version: string) => callback(version));
   },
 
-  installUpdate: () => {
-    ipcRenderer.send('updater:install');
+  openDownloadPage: () => {
+    ipcRenderer.send('updater:open-download');
   },
 });

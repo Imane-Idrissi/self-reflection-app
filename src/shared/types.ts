@@ -275,7 +275,7 @@ export interface ElectronAPI {
   onCaptureWarningCleared: (callback: () => void) => void;
   onSessionStateChanged: (callback: (data: { state: 'active' | 'paused' | 'ended'; session_id: string; summary?: SessionSummary }) => void) => void;
   onUpdateReady: (callback: (version: string) => void) => void;
-  installUpdate: () => void;
+  openDownloadPage: () => void;
 }
 
 export interface FloatingWindowState {
